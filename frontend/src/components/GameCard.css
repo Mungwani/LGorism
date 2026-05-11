@@ -1,0 +1,147 @@
+/* ── 경기 카드 ─────────────────────────────────────────────── */
+.game-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 경기 있는 카드 - 왼쪽 빨간 보더 */
+.game-card.open,
+.game-card.closed {
+  border-left: 5px solid var(--red);
+}
+
+.game-card.closed {
+  border-left-color: var(--gray-400);
+  opacity: 0.85;
+}
+
+/* 빈 카드 */
+.game-card.empty-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  border: 2px dashed var(--gray-300);
+  box-shadow: none;
+  gap: 6px;
+}
+
+.empty-text {
+  font-size: 0.95rem;
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+.empty-sub {
+  font-size: 0.8rem;
+  color: var(--gray-400);
+}
+
+.no-game-icon {
+  font-size: 2rem;
+}
+
+/* ── 마감 배너 ─────────────────────────────────────────────── */
+.closed-banner {
+  position: absolute;
+  top: 12px;
+  right: -20px;
+  background: var(--gray-500);
+  color: var(--white);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 28px;
+  transform: rotate(30deg);
+  letter-spacing: 0.05em;
+}
+
+/* ── 배지 ─────────────────────────────────────────────────── */
+.game-badges {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.badge.home {
+  background: #fff3f5;
+  color: var(--red);
+  border: 1px solid #ffc0cb;
+}
+
+.badge.away {
+  background: #f0f4ff;
+  color: #1565C0;
+  border: 1px solid #b3c5f5;
+}
+
+.badge.recruiting {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+/* ── 매치업 ───────────────────────────────────────────────── */
+.matchup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  justify-content: center;
+}
+
+.team {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.team.lg {
+  color: var(--red);
+}
+
+.team.opponent {
+  color: var(--black-soft);
+}
+
+.vs {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gray-500);
+  background: var(--gray-100);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+/* ── 경기 메타 정보 ───────────────────────────────────────── */
+.game-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--gray-700);
+}
+
+.meta-icon {
+  font-size: 0.9rem;
+  width: 20px;
+  text-align: center;
+}

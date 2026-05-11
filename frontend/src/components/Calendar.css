@@ -1,0 +1,195 @@
+/* ── 달력 컨테이너 ─────────────────────────────────────────── */
+.calendar {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 16px;
+  user-select: none;
+}
+
+/* ── 헤더 ─────────────────────────────────────────────────── */
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.calendar-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--black);
+  letter-spacing: -0.02em;
+}
+
+.nav-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--gray-100);
+  color: var(--black);
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s;
+  line-height: 1;
+}
+
+.nav-btn:hover {
+  background: var(--red);
+  color: var(--white);
+}
+
+.nav-btn:active {
+  transform: scale(0.92);
+}
+
+/* ── 그리드 ───────────────────────────────────────────────── */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+/* 요일 헤더 */
+.day-label {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  padding: 4px 0 8px;
+}
+.day-label.sunday { color: var(--red); }
+.day-label.saturday { color: #1565C0; }
+
+/* ── 날짜 셀 ──────────────────────────────────────────────── */
+.day-cell {
+  position: relative;
+  min-height: 52px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 6px;
+  gap: 3px;
+  transition: background 0.15s;
+}
+
+.day-cell.empty {
+  pointer-events: none;
+}
+
+/* 경기 있는 날 */
+.day-cell.has-game {
+  cursor: pointer;
+  background: #fff5f7;
+}
+
+.day-cell.has-game:hover {
+  background: #ffe0e6;
+}
+
+.day-cell.has-game:active {
+  transform: scale(0.95);
+}
+
+/* 오늘 */
+.day-cell.today .day-number {
+  background: var(--black);
+  color: var(--white);
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 선택된 날짜 */
+.day-cell.selected {
+  background: var(--red) !important;
+}
+
+.day-cell.selected .day-number {
+  color: var(--white) !important;
+  background: transparent !important;
+}
+
+.day-cell.selected .game-dot {
+  background: rgba(255,255,255,0.8) !important;
+}
+
+/* 날짜 숫자 */
+.day-number {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--black);
+  line-height: 1;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-cell.sunday .day-number { color: var(--red); }
+.day-cell.saturday .day-number { color: #1565C0; }
+.day-cell.selected .day-number,
+.day-cell.selected.sunday .day-number,
+.day-cell.selected.saturday .day-number {
+  color: var(--white) !important;
+}
+
+/* 경기 점 */
+.game-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  flex-shrink: 0;
+}
+
+/* 신청 인원 뱃지 */
+.count-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--white);
+  background: var(--red);
+  border-radius: 20px;
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+
+.day-cell.selected .count-badge {
+  background: rgba(255,255,255,0.3);
+  color: var(--white);
+}
+
+/* ── 범례 ─────────────────────────────────────────────────── */
+.calendar-legend {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--gray-200);
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  color: var(--gray-600);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-dot.game { background: var(--red); }
+.legend-dot.today-mark { background: var(--black); }
+.legend-dot.count-mark { background: var(--red); width: 20px; border-radius: 4px; }

@@ -1,0 +1,340 @@
+/* ── 목록 카드 ─────────────────────────────────────────────── */
+.list-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 20px;
+  position: relative;
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.list-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.total-badge {
+  font-size: 0.82rem;
+  color: var(--white);
+  background: var(--red);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-weight: 600;
+}
+
+.total-badge strong {
+  font-size: 1rem;
+}
+
+/* ── 빈 상태 ───────────────────────────────────────────────── */
+.list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 0;
+  gap: 6px;
+}
+
+.list-empty span {
+  font-size: 2.2rem;
+}
+
+.list-empty p {
+  font-size: 0.9rem;
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+.list-empty-sub {
+  font-size: 0.78rem !important;
+  color: var(--gray-400) !important;
+}
+
+/* ── 신청 아이템 ───────────────────────────────────────────── */
+.application-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.application-item {
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: box-shadow 0.15s;
+}
+
+.application-item:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+/* 아이템 헤더: 이름 + 버튼 */
+.item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.item-number {
+  width: 24px;
+  height: 24px;
+  background: var(--red);
+  color: var(--white);
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.item-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--black);
+  margin-right: 6px;
+}
+
+.item-count {
+  font-size: 0.8rem;
+  color: var(--red);
+  font-weight: 700;
+  background: #fff0f3;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* 수정/삭제 버튼 */
+.item-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.action-btn {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 8px;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.action-btn:active {
+  transform: scale(0.93);
+}
+
+.action-btn.edit {
+  background: #e8f4ff;
+  color: #1565C0;
+  border: 1px solid #90caf9;
+}
+
+.action-btn.edit:hover {
+  background: #1565C0;
+  color: var(--white);
+}
+
+.action-btn.delete {
+  background: #fff0f0;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+
+.action-btn.delete:hover {
+  background: #c62828;
+  color: var(--white);
+}
+
+/* 상세 칩 */
+.item-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.detail-chip {
+  font-size: 0.75rem;
+  padding: 3px 9px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.detail-chip.kakao {
+  background: #fff9e6;
+  color: #f57f17;
+  border: 1px solid #ffe082;
+}
+
+.detail-chip.seat {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+/* 메모 / 응원 / 요청 */
+.item-memo {
+  font-size: 0.8rem;
+  color: var(--gray-600);
+}
+
+.item-cheer {
+  font-size: 0.82rem;
+  color: var(--red-dark);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.item-request {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+  background: var(--gray-100);
+  border-radius: 6px;
+  padding: 5px 8px;
+}
+
+.item-time {
+  font-size: 0.7rem;
+  color: var(--gray-400);
+  text-align: right;
+}
+
+/* ── 삭제 확인 모달 ────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+.modal {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0 }
+  to { transform: translateY(0); opacity: 1 }
+}
+
+.modal-icon {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+
+.modal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 10px;
+}
+
+.modal-desc {
+  font-size: 0.85rem;
+  color: var(--gray-600);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.modal-desc strong {
+  color: var(--black);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.modal-btn:active {
+  transform: scale(0.96);
+}
+
+.modal-btn.cancel {
+  background: var(--gray-200);
+  color: var(--gray-700);
+}
+
+.modal-btn.cancel:hover {
+  background: var(--gray-300);
+}
+
+.modal-btn.confirm {
+  background: #c62828;
+  color: var(--white);
+  box-shadow: 0 4px 12px rgba(198,40,40,0.3);
+}
+
+.modal-btn.confirm:hover { background: #b71c1c; }
+
+.modal-btn.confirm.blue {
+  background: #1565C0;
+  box-shadow: 0 4px 12px rgba(21,101,192,0.3);
+}
+
+.modal-btn.confirm.blue:hover { background: #0d47a1; }
+
+/* 비밀번호 입력 */
+.pw-input {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 4px;
+  transition: border-color 0.15s;
+}
+
+.pw-input:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(200,16,46,0.12);
+}
+
+.pw-error {
+  font-size: 0.78rem;
+  color: #e53935;
+  font-weight: 500;
+  margin-bottom: 12px;
+  text-align: left;
+}

@@ -1,0 +1,200 @@
+/* ── 폼 카드 ───────────────────────────────────────────────── */
+.form-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 22px 20px 24px;
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.form-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.cancel-edit-btn {
+  font-size: 0.8rem;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: var(--gray-200);
+  color: var(--gray-700);
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.cancel-edit-btn:hover {
+  background: var(--gray-300);
+}
+
+/* ── 섹션 라벨 ─────────────────────────────────────────────── */
+.section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 10px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid var(--red);
+}
+
+.section-label.optional {
+  color: var(--gray-500);
+  border-bottom-color: var(--gray-300);
+  margin-top: 24px;
+}
+
+/* ── 필드 ─────────────────────────────────────────────────── */
+.field {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.label-hint {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--gray-400);
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  color: var(--black);
+  background: var(--white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(200,16,46,0.12);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 64px;
+}
+
+.field.error input,
+.field.error textarea,
+.field.error select {
+  border-color: #e53935;
+  box-shadow: 0 0 0 3px rgba(229,57,53,0.1);
+}
+
+.error-msg {
+  font-size: 0.75rem;
+  color: #e53935;
+  font-weight: 500;
+}
+
+/* ── 인원 수 입력 ───────────────────────────────────────────── */
+.count-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.count-input-wrap input {
+  border: none;
+  border-radius: 0;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+  width: 60px;
+  flex: 1;
+}
+
+.count-input-wrap input:focus {
+  box-shadow: none;
+}
+
+.count-btn {
+  width: 44px;
+  height: 44px;
+  background: var(--gray-100);
+  color: var(--black);
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.count-btn:hover {
+  background: var(--red);
+  color: var(--white);
+}
+
+.count-btn:active {
+  transform: scale(0.92);
+}
+
+/* ── 제출 버튼 ─────────────────────────────────────────────── */
+.submit-btn {
+  width: 100%;
+  padding: 15px;
+  background: var(--red);
+  color: var(--white);
+  font-size: 1rem;
+  font-weight: 800;
+  border-radius: var(--radius-md);
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 14px rgba(200,16,46,0.35);
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  margin-top: 20px;
+}
+
+.submit-btn:hover {
+  background: var(--red-dark);
+  box-shadow: 0 6px 18px rgba(200,16,46,0.4);
+}
+
+.submit-btn:active {
+  transform: scale(0.97);
+}
+
+/* ── 마감 안내 ─────────────────────────────────────────────── */
+.closed-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fafafa;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  font-size: 0.9rem;
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+.closed-notice span {
+  font-size: 1.4rem;
+}
