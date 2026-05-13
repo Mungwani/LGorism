@@ -86,7 +86,7 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
           <input
             id="jk-section"
             type="text"
-            placeholder="예) 1루 응원석, 외야 A, 내야 3루"
+            placeholder="예) 1루 응원석, 1루 레드석"
             value={section}
             onChange={(e) => setSection(e.target.value)}
             maxLength={30}

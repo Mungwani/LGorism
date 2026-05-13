@@ -590,6 +590,50 @@
   margin-top: 4px;
 }
 
+/* ── 단관 열기 버튼 ─────────────────────────────────────────── */
+.dangwan-open-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 16px;
+  background: var(--white);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gray-700);
+  transition: all 0.15s;
+  box-shadow: var(--shadow-sm);
+}
+
+.dangwan-open-btn:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: #fff5f7;
+}
+
+.dangwan-open-btn.open {
+  border-color: var(--red);
+  background: var(--red);
+  color: var(--white);
+  box-shadow: 0 4px 12px rgba(200,16,46,0.25);
+}
+
+.dangwan-chevron {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+/* ── 단관 인라인 패널 ────────────────────────────────────────── */
+.dangwan-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeSlideIn 0.2s ease;
+}
+
 /* ── 직관 탭 활성 색 ────────────────────────────────────────── */
 .tab-btn.jikgwan-tab.active {
   background: #FF6B35;
