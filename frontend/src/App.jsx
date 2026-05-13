@@ -3,6 +3,8 @@ import Calendar from "./components/Calendar";
 import GameCard from "./components/GameCard";
 import ApplicationForm from "./components/ApplicationForm";
 import ApplicationList from "./components/ApplicationList";
+import JikgwanPanel from "./components/JikgwanPanel";
+import JungmoPanel from "./components/JungmoPanel";
 import { getGameByDate } from "./data/games";
 import {
   getApplications,
@@ -11,21 +13,62 @@ import {
   deleteApplication,
   getTotalCount,
   getApplicationSummary,
+  getJikgwanList,
+  addJikgwan,
+  deleteJikgwan,
+  getJikgwanSummary,
+  getJungmoList,
+  createJungmo,
+  deleteJungmo,
+  getJungmoSummary,
 } from "./utils/storage";
 import "./App.css";
 
+const DANGWAN_PASSWORD = "admin60";
+
 export default function App() {
   const [selectedDate, setSelectedDate] = useState(null);
+
+  // 탭: 'dangwan' | 'jikgwan' | 'jungmo'
+  const [activeTab, setActiveTab] = useState("dangwan");
+
+  // 단관 관련
+  const [isDangwanUnlocked, setIsDangwanUnlocked] = useState(false);
+  const [dangwanSubTab, setDangwanSubTab] = useState("form"); // 'form' | 'list'
   const [applications, setApplications] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editingItem, setEditingItem] = useState(null);
-  const [summary, setSummary] = useState({});
-  const [toast, setToast] = useState(null);
-  const [showOnlyGames, setShowOnlyGames] = useState(false);
-  const [activeTab, setActiveTab] = useState("form");
-  const [loading, setLoading] = useState(false);
+  const [pwInput, setPwInput] = useState("");
+  const [pwError, setPwError] = useState("");
 
-  // 날짜 선택 시 해당 날짜 신청 목록 불러오기
+  // 직관 관련
+  const [jikgwanList, setJikgwanList] = useState([]);
+
+  // 정모 관련
+  const [jungmoList, setJungmoList] = useState([]);
+
+  // 달력 요약 (뱃지)
+  const [dangwanSummary, setDangwanSummary] = useState({});
+  const [jikgwanSummary, setJikgwanSummary] = useState({});
+  const [jungmoSummary, setJungmoSummary] = useState({});
+
+  const [showOnlyGames, setShowOnlyGames] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  // ── 날짜 선택 ────────────────────────────────────────────────
+
+  function handleSelectDate(dateStr) {
+    setSelectedDate(dateStr);
+    setActiveTab("dangwan");
+    setIsDangwanUnlocked(false);
+    setPwInput("");
+    setPwError("");
+    setDangwanSubTab("form");
+    setEditingItem(null);
+  }
+
+  // 날짜 변경 시 데이터 로드
   useEffect(() => {
     if (!selectedDate) return;
     let cancelled = false;
@@ -33,14 +76,18 @@ export default function App() {
     async function loadData() {
       setLoading(true);
       try {
-        const apps = await getApplications(selectedDate);
+        const [apps, jikgwan, jungmo] = await Promise.all([
+          getApplications(selectedDate),
+          getJikgwanList(selectedDate),
+          getJungmoList(selectedDate),
+        ]);
         if (!cancelled) {
           setApplications(apps);
           setTotalCount(getTotalCount(apps));
-          setEditingItem(null);
-          setActiveTab("form");
+          setJikgwanList(jikgwan);
+          setJungmoList(jungmo);
         }
-      } catch (e) {
+      } catch {
         if (!cancelled) showToast("❌ 데이터를 불러오지 못했어요.");
       } finally {
         if (!cancelled) setLoading(false);
@@ -51,11 +98,17 @@ export default function App() {
     return () => { cancelled = true; };
   }, [selectedDate]);
 
-  // 달력 뱃지 요약 (전체 날짜)
+  // 달력 뱃지 전체 요약
   const refreshSummary = useCallback(async () => {
     try {
-      const s = await getApplicationSummary();
-      setSummary(s);
+      const [dangwan, jikgwan, jungmo] = await Promise.all([
+        getApplicationSummary(),
+        getJikgwanSummary(),
+        getJungmoSummary(),
+      ]);
+      setDangwanSummary(dangwan);
+      setJikgwanSummary(jikgwan);
+      setJungmoSummary(jungmo);
     } catch (_) {}
   }, []);
 
@@ -63,9 +116,23 @@ export default function App() {
     refreshSummary();
   }, [refreshSummary]);
 
-  // ── 신청 핸들러 ──────────────────────────────────────────────
+  // ── 단관 비밀번호 ─────────────────────────────────────────────
 
-  async function handleSubmit(formData) {
+  function handleDangwanUnlock(e) {
+    e.preventDefault();
+    if (pwInput === DANGWAN_PASSWORD) {
+      setIsDangwanUnlocked(true);
+      setPwInput("");
+      setPwError("");
+      setDangwanSubTab("form");
+    } else {
+      setPwError("비밀번호가 틀렸어요.");
+    }
+  }
+
+  // ── 단관 신청 핸들러 ─────────────────────────────────────────
+
+  async function handleDangwanSubmit(formData) {
     try {
       if (editingItem) {
         await updateApplication(selectedDate, editingItem.id, formData);
@@ -79,15 +146,15 @@ export default function App() {
       setApplications(apps);
       setTotalCount(getTotalCount(apps));
       await refreshSummary();
-      setActiveTab("list");
-    } catch (e) {
+      setDangwanSubTab("list");
+    } catch {
       showToast("❌ 저장에 실패했어요. 다시 시도해주세요.");
     }
   }
 
   function handleEdit(item) {
     setEditingItem(item);
-    setActiveTab("form");
+    setDangwanSubTab("form");
     setTimeout(() => {
       document.querySelector(".form-card")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
@@ -101,8 +168,60 @@ export default function App() {
       setTotalCount(getTotalCount(apps));
       await refreshSummary();
       showToast("🗑️ 신청이 삭제됐어요.");
-    } catch (e) {
+    } catch {
       showToast("❌ 삭제에 실패했어요. 다시 시도해주세요.");
+    }
+  }
+
+  // ── 직관 핸들러 ──────────────────────────────────────────────
+
+  async function handleJikgwanAdd(data) {
+    try {
+      await addJikgwan(selectedDate, data);
+      const updated = await getJikgwanList(selectedDate);
+      setJikgwanList(updated);
+      await refreshSummary();
+      showToast("🏟 직관 등록 완료! 오늘도 엘지 화이팅!");
+    } catch {
+      showToast("❌ 등록에 실패했어요. 다시 시도해주세요.");
+    }
+  }
+
+  async function handleJikgwanDelete(id) {
+    try {
+      await deleteJikgwan(id);
+      const updated = await getJikgwanList(selectedDate);
+      setJikgwanList(updated);
+      await refreshSummary();
+      showToast("🗑️ 직관 등록이 삭제됐어요.");
+    } catch {
+      showToast("❌ 삭제에 실패했어요.");
+    }
+  }
+
+  // ── 정모 핸들러 ──────────────────────────────────────────────
+
+  async function handleCreateJungmo(data) {
+    try {
+      await createJungmo(selectedDate, data);
+      const updated = await getJungmoList(selectedDate);
+      setJungmoList(updated);
+      await refreshSummary();
+      showToast("🎮 정모가 열렸어요!");
+    } catch {
+      showToast("❌ 정모 생성에 실패했어요.");
+    }
+  }
+
+  async function handleDeleteJungmo(id) {
+    try {
+      await deleteJungmo(id);
+      const updated = await getJungmoList(selectedDate);
+      setJungmoList(updated);
+      await refreshSummary();
+      showToast("🗑️ 정모가 삭제됐어요.");
+    } catch {
+      showToast("❌ 삭제에 실패했어요.");
     }
   }
 
@@ -129,7 +248,7 @@ export default function App() {
               <span className="header-brand-ko">엘고리즘</span>
               <span className="header-brand-en">LGorism</span>
             </div>
-            <p className="header-sub">단관 신청 ⚾</p>
+            <p className="header-sub">단관 · 직관 · 정모 ⚾</p>
           </div>
         </div>
       </header>
@@ -148,36 +267,52 @@ export default function App() {
           </div>
           <Calendar
             selectedDate={selectedDate}
-            onSelectDate={setSelectedDate}
-            summary={summary}
+            onSelectDate={handleSelectDate}
+            dangwanSummary={dangwanSummary}
+            jikgwanSummary={jikgwanSummary}
+            jungmoSummary={jungmoSummary}
             showOnlyGames={showOnlyGames}
           />
         </section>
 
         {/* ── 경기 정보 카드 ────────────────────────────────── */}
-        <section className="section">
-          <h2 className="section-heading">⚾ 경기 정보</h2>
-          <GameCard game={selectedGame} date={selectedDate} />
-        </section>
+        {selectedGame && (
+          <section className="section">
+            <h2 className="section-heading">⚾ 경기 정보</h2>
+            <GameCard game={selectedGame} date={selectedDate} />
+          </section>
+        )}
 
         {/* ── 날짜 선택 후 ──────────────────────────────────── */}
         {selectedDate && (
           <>
+            {/* 3탭 네비게이션 */}
             <div className="tab-nav">
               <button
-                className={`tab-btn ${activeTab === "form" ? "active" : ""}`}
-                onClick={() => setActiveTab("form")}
+                className={`tab-btn ${activeTab === "dangwan" ? "active" : ""}`}
+                onClick={() => setActiveTab("dangwan")}
               >
-                📝 신청하기
-                {editingItem && <span className="tab-dot" />}
-              </button>
-              <button
-                className={`tab-btn ${activeTab === "list" ? "active" : ""}`}
-                onClick={() => setActiveTab("list")}
-              >
-                👥 신청 목록
+                📝 단관신청
                 {totalCount > 0 && (
                   <span className="tab-badge">{totalCount}</span>
+                )}
+              </button>
+              <button
+                className={`tab-btn ${activeTab === "jikgwan" ? "active" : ""} jikgwan-tab`}
+                onClick={() => setActiveTab("jikgwan")}
+              >
+                🏟 직관
+                {jikgwanList.length > 0 && (
+                  <span className="tab-badge">{jikgwanList.length}</span>
+                )}
+              </button>
+              <button
+                className={`tab-btn ${activeTab === "jungmo" ? "active" : ""} jungmo-tab`}
+                onClick={() => setActiveTab("jungmo")}
+              >
+                🎮 정모
+                {jungmoList.length > 0 && (
+                  <span className="tab-badge">{jungmoList.length}</span>
                 )}
               </button>
             </div>
@@ -190,25 +325,104 @@ export default function App() {
                 </div>
               ) : (
                 <>
-                  {activeTab === "form" && (
-                    <ApplicationForm
+                  {/* ── 단관신청 탭 ────────────────────────── */}
+                  {activeTab === "dangwan" && (
+                    <>
+                      {!isDangwanUnlocked ? (
+                        <div className="dangwan-gate">
+                          <div className="gate-icon">🔐</div>
+                          <h3 className="gate-title">단관 신청 페이지</h3>
+                          <p className="gate-desc">
+                            단관 신청은 관리자 비밀번호가 필요해요
+                          </p>
+                          <form
+                            className="gate-form"
+                            onSubmit={handleDangwanUnlock}
+                          >
+                            <input
+                              className={`gate-input ${pwError ? "error" : ""}`}
+                              type="password"
+                              placeholder="비밀번호 입력"
+                              value={pwInput}
+                              onChange={(e) => {
+                                setPwInput(e.target.value);
+                                setPwError("");
+                              }}
+                              autoFocus
+                            />
+                            {pwError && (
+                              <p className="gate-error">{pwError}</p>
+                            )}
+                            <button type="submit" className="gate-btn">
+                              입장하기
+                            </button>
+                          </form>
+                        </div>
+                      ) : (
+                        <>
+                          {/* 단관 서브탭 */}
+                          <div className="sub-tab-nav">
+                            <button
+                              className={`sub-tab-btn ${dangwanSubTab === "form" ? "active" : ""}`}
+                              onClick={() => setDangwanSubTab("form")}
+                            >
+                              📝 신청하기
+                              {editingItem && <span className="tab-dot" />}
+                            </button>
+                            <button
+                              className={`sub-tab-btn ${dangwanSubTab === "list" ? "active" : ""}`}
+                              onClick={() => setDangwanSubTab("list")}
+                            >
+                              👥 신청 목록
+                              {totalCount > 0 && (
+                                <span className="tab-badge">{totalCount}</span>
+                              )}
+                            </button>
+                          </div>
+
+                          {dangwanSubTab === "form" && (
+                            <ApplicationForm
+                              selectedDate={selectedDate}
+                              editingItem={editingItem}
+                              onSubmit={handleDangwanSubmit}
+                              onCancelEdit={() => {
+                                setEditingItem(null);
+                                setDangwanSubTab("list");
+                              }}
+                              isClosed={selectedGame?.isClosed || false}
+                            />
+                          )}
+                          {dangwanSubTab === "list" && (
+                            <ApplicationList
+                              applications={applications}
+                              totalCount={totalCount}
+                              onEdit={handleEdit}
+                              onDelete={handleDelete}
+                              selectedDate={selectedDate}
+                            />
+                          )}
+                        </>
+                      )}
+                    </>
+                  )}
+
+                  {/* ── 직관 탭 ──────────────────────────── */}
+                  {activeTab === "jikgwan" && (
+                    <JikgwanPanel
                       selectedDate={selectedDate}
-                      editingItem={editingItem}
-                      onSubmit={handleSubmit}
-                      onCancelEdit={() => {
-                        setEditingItem(null);
-                        setActiveTab("list");
-                      }}
-                      isClosed={selectedGame?.isClosed || false}
+                      jikgwanList={jikgwanList}
+                      onAdd={handleJikgwanAdd}
+                      onDelete={handleJikgwanDelete}
                     />
                   )}
-                  {activeTab === "list" && (
-                    <ApplicationList
-                      applications={applications}
-                      totalCount={totalCount}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
+
+                  {/* ── 정모 탭 ──────────────────────────── */}
+                  {activeTab === "jungmo" && (
+                    <JungmoPanel
                       selectedDate={selectedDate}
+                      jungmoList={jungmoList}
+                      onCreateJungmo={handleCreateJungmo}
+                      onDeleteJungmo={handleDeleteJungmo}
                     />
                   )}
                 </>
@@ -220,14 +434,14 @@ export default function App() {
         {!selectedDate && (
           <div className="guide-card">
             <span className="guide-icon">☝️</span>
-            <p className="guide-text">달력에서 경기 날짜를 눌러보세요!</p>
-            <p className="guide-sub">빨간 점이 있는 날에 경기가 있어요</p>
+            <p className="guide-text">날짜를 눌러보세요!</p>
+            <p className="guide-sub">경기 관람, 직관 인증, 정모까지 한 곳에서!</p>
           </div>
         )}
       </main>
 
       <footer className="app-footer">
-        <p>LG 트윈스 팬 단관 신청 · 오늘도 엘지 화이팅! 🔴⚾</p>
+        <p>LG 트윈스 팬 모임 · 엘고리즘 · 오늘도 엘지 화이팅! 🔴⚾</p>
       </footer>
 
       {toast && (

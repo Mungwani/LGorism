@@ -94,7 +94,10 @@ export function getGameByDate(dateStr) {
   return games.find((g) => g.date === dateStr) || null;
 }
 
-/** 홈 경기 날짜 Set (달력 표시용 — 홈 경기만 신청 가능) */
+/** 홈 경기 날짜 Set */
 export const gameDateSet = new Set(
   games.filter((g) => g.isHome).map((g) => g.date)
 );
+
+/** 전체 경기 날짜 Set (홈+원정) */
+export const allGameDateSet = new Set(games.map((g) => g.date));

@@ -72,7 +72,7 @@
   flex-direction: column;
   align-items: center;
   padding-top: 6px;
-  gap: 3px;
+  gap: 2px;
   transition: background 0.15s;
 }
 
@@ -80,18 +80,35 @@
   pointer-events: none;
 }
 
-/* 경기 있는 날 */
-.day-cell.has-game {
+/* 모든 날짜 클릭 가능 */
+.day-cell.clickable {
   cursor: pointer;
+}
+
+.day-cell.clickable:hover {
+  background: var(--gray-100);
+}
+
+.day-cell.clickable:active {
+  transform: scale(0.95);
+}
+
+/* 홈 경기 있는 날 */
+.day-cell.has-home-game {
   background: #fff5f7;
 }
 
-.day-cell.has-game:hover {
+.day-cell.has-home-game:hover {
   background: #ffe0e6;
 }
 
-.day-cell.has-game:active {
-  transform: scale(0.95);
+/* 원정 경기만 있는 날 */
+.day-cell.has-away-game {
+  background: #f0f5ff;
+}
+
+.day-cell.has-away-game:hover {
+  background: #dce8ff;
 }
 
 /* 오늘 */
@@ -116,10 +133,6 @@
   background: transparent !important;
 }
 
-.day-cell.selected .game-dot {
-  background: rgba(255,255,255,0.8) !important;
-}
-
 /* 날짜 숫자 */
 .day-number {
   font-size: 0.82rem;
@@ -141,23 +154,50 @@
   color: var(--white) !important;
 }
 
-/* 경기 점 */
-.game-dot {
-  width: 6px;
-  height: 6px;
+/* ── 컬러 점 행 ────────────────────────────────────────────── */
+.day-dots {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  justify-content: center;
+  height: 8px;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: var(--red);
   flex-shrink: 0;
 }
 
-/* 신청 인원 뱃지 */
+/* 홈 경기 점 — 빨강 */
+.game-dot {
+  background: var(--red);
+}
+
+/* 직관 점 — 주황 */
+.jikgwan-dot {
+  background: #FF6B35;
+}
+
+/* 정모 점 — 파랑 */
+.jungmo-dot {
+  background: #1565C0;
+}
+
+/* 선택된 날 점들 */
+.day-cell.selected .dot {
+  background: rgba(255,255,255,0.75) !important;
+}
+
+/* 단관 신청 인원 뱃지 */
 .count-badge {
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-weight: 700;
   color: var(--white);
   background: var(--red);
   border-radius: 20px;
-  padding: 1px 5px;
+  padding: 1px 4px;
   white-space: nowrap;
 }
 
@@ -169,7 +209,7 @@
 /* ── 범례 ─────────────────────────────────────────────────── */
 .calendar-legend {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   margin-top: 12px;
   padding-top: 10px;
   border-top: 1px solid var(--gray-200);
@@ -180,7 +220,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--gray-600);
 }
 
@@ -190,6 +230,7 @@
   border-radius: 50%;
 }
 
-.legend-dot.game { background: var(--red); }
+.legend-dot.game       { background: var(--red); }
+.legend-dot.jikgwan    { background: #FF6B35; }
+.legend-dot.jungmo     { background: #1565C0; }
 .legend-dot.today-mark { background: var(--black); }
-.legend-dot.count-mark { background: var(--red); width: 20px; border-radius: 4px; }

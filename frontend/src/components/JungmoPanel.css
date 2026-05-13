@@ -1,0 +1,492 @@
+/* ── JungmoPanel ────────────────────────────────────────────── */
+.jungmo-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.jungmo-panel-header {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 16px;
+}
+
+.jungmo-panel-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--black);
+  margin-bottom: 3px;
+}
+
+.jungmo-panel-sub {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+}
+
+/* 정모 목록 */
+.jungmo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jungmo-item {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.jungmo-item.expanded {
+  border-color: #1565C0;
+}
+
+.jungmo-item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.jungmo-item-left {
+  flex: 1;
+}
+
+.jungmo-item-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--black);
+  display: block;
+  margin-bottom: 3px;
+}
+
+.jungmo-item-desc {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+  white-space: pre-wrap;
+  line-height: 1.4;
+}
+
+.expand-chevron {
+  font-size: 0.7rem;
+  color: var(--gray-400);
+  padding-top: 3px;
+  flex-shrink: 0;
+}
+
+/* 펼쳐진 내용 */
+.jungmo-item-body {
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--gray-100);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.loading-text {
+  font-size: 0.82rem;
+  color: var(--gray-400);
+  text-align: center;
+  padding: 10px 0;
+}
+
+/* 신청자 목록 */
+.jungmo-apps {
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.apps-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1565C0;
+  margin-bottom: 8px;
+}
+
+.jungmo-app-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.jungmo-app-item:last-child {
+  border-bottom: none;
+}
+
+.app-num {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1565C0;
+  color: var(--white);
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.app-nickname {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.app-note {
+  font-size: 0.76rem;
+  color: var(--gray-500);
+}
+
+.no-apps-text {
+  font-size: 0.8rem;
+  color: var(--gray-400);
+  text-align: center;
+  padding: 6px 0;
+}
+
+/* 신청 버튼 */
+.jungmo-apply-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: var(--radius-md);
+  background: #e8f0fe;
+  color: #1565C0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: all 0.15s;
+}
+
+.jungmo-apply-btn:hover {
+  background: #c8d9fd;
+}
+
+/* 신청 폼 (인라인 미니) */
+.jungmo-apply-form {
+  background: #f0f5ff;
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mini-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mini-field input,
+.mini-field-input {
+  padding: 9px 11px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  background: var(--white);
+  width: 100%;
+}
+
+.mini-field.error input {
+  border-color: var(--red);
+}
+
+.mini-field-input {
+  border: 1.5px solid var(--gray-200);
+}
+
+.mini-error {
+  font-size: 0.72rem;
+  color: var(--red);
+  font-weight: 600;
+}
+
+.apply-form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* 정모 삭제 */
+.jungmo-delete-btn {
+  align-self: flex-end;
+  font-size: 0.72rem;
+  color: var(--gray-400);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  transition: all 0.15s;
+}
+
+.jungmo-delete-btn:hover {
+  color: var(--red);
+  background: #fff5f7;
+}
+
+/* 빈 상태 */
+.jungmo-empty {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.jungmo-empty span {
+  font-size: 2.2rem;
+  opacity: 0.4;
+}
+
+.jungmo-empty p {
+  font-size: 0.88rem;
+  color: var(--gray-600);
+  font-weight: 600;
+}
+
+.jungmo-empty .empty-sub {
+  font-size: 0.76rem;
+  color: var(--gray-400);
+  font-weight: 400;
+}
+
+/* 정모 만들기 버튼 */
+.create-jungmo-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 2px dashed #1565C0;
+  background: #f0f5ff;
+  color: #1565C0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  transition: all 0.15s;
+}
+
+.create-jungmo-btn:hover {
+  background: #e0eaff;
+}
+
+/* 정모 만들기 폼 */
+.create-jungmo-form {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-top: 3px solid #1565C0;
+}
+
+.create-form-title {
+  font-size: 0.96rem;
+  font-weight: 800;
+  color: var(--black);
+}
+
+.create-jungmo-form .field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.create-jungmo-form .field label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gray-700);
+}
+
+.create-jungmo-form .field input,
+.create-jungmo-form .field textarea {
+  padding: 11px 13px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  color: var(--black);
+  background: var(--white);
+  transition: border-color 0.15s;
+  resize: vertical;
+}
+
+.create-jungmo-form .field input:focus,
+.create-jungmo-form .field textarea:focus {
+  border-color: #1565C0;
+  outline: none;
+}
+
+.create-jungmo-form .field.error input,
+.create-jungmo-form .field.error textarea {
+  border-color: var(--red);
+  background: #fff5f7;
+}
+
+.create-jungmo-form .error-msg {
+  font-size: 0.75rem;
+  color: var(--red);
+  font-weight: 600;
+}
+
+.optional-tag {
+  font-size: 0.72rem;
+  color: var(--gray-400);
+  font-weight: 400;
+}
+
+.create-form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* 공통 버튼 */
+.cancel-btn {
+  flex: 1;
+  padding: 11px;
+  border-radius: var(--radius-sm);
+  background: var(--gray-100);
+  color: var(--gray-600);
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: background 0.15s;
+}
+
+.cancel-btn:hover {
+  background: var(--gray-200);
+}
+
+.confirm-btn {
+  flex: 1;
+  padding: 11px;
+  border-radius: var(--radius-sm);
+  background: var(--red);
+  color: var(--white);
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: all 0.15s;
+}
+
+.confirm-btn.blue {
+  background: #1565C0;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 모달 */
+.jungmo-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.jungmo-modal {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.modal-icon {
+  font-size: 2rem;
+}
+
+.modal-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--black);
+}
+
+.modal-desc {
+  font-size: 0.82rem;
+  color: var(--gray-600);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.pw-input {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  text-align: center;
+  letter-spacing: 0.2em;
+}
+
+.pw-input:focus {
+  border-color: var(--red);
+  outline: none;
+}
+
+.pw-error {
+  font-size: 0.75rem;
+  color: var(--red);
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 11px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: all 0.15s;
+}
+
+.modal-btn.cancel {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.modal-btn.cancel:hover {
+  background: var(--gray-200);
+}
+
+.modal-btn.confirm {
+  background: var(--red);
+  color: var(--white);
+}
+
+.modal-btn.confirm.red {
+  background: var(--red);
+}
+
+.modal-btn.confirm:hover {
+  opacity: 0.9;
+}

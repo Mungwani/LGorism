@@ -1,0 +1,287 @@
+/* ── JikgwanPanel ─────────────────────────────────────────── */
+.jikgwan-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 폼 */
+.jikgwan-form {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.jikgwan-form-header {
+  margin-bottom: 2px;
+}
+
+.jikgwan-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--black);
+  margin-bottom: 2px;
+}
+
+.jikgwan-subtitle {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+}
+
+/* 수건요정 버튼 */
+.towel-fairy-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 2px dashed var(--gray-300);
+  background: var(--gray-100);
+  color: var(--gray-600);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.towel-fairy-btn:hover {
+  border-color: #ff8c42;
+  color: #e65c00;
+  background: #fff5ee;
+}
+
+.towel-fairy-btn.active {
+  background: linear-gradient(135deg, #ff8c42, #e65c00);
+  border-color: transparent;
+  color: var(--white);
+  box-shadow: 0 4px 12px rgba(230, 92, 0, 0.35);
+}
+
+/* 수건요정 안내 */
+.fairy-notice {
+  font-size: 0.76rem;
+  color: var(--gray-500);
+  text-align: center;
+  padding: 6px 10px;
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  margin-top: -6px;
+}
+
+.fairy-notice.active {
+  color: #e65c00;
+  background: #fff5ee;
+}
+
+/* 선택 태그 */
+.optional-tag {
+  font-size: 0.72rem;
+  color: var(--gray-400);
+  font-weight: 400;
+}
+
+/* 제출 버튼 */
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--red);
+  color: var(--white);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 700;
+  transition: all 0.15s;
+  box-shadow: 0 4px 12px rgba(200,16,46,0.25);
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #a50e28;
+  box-shadow: 0 6px 16px rgba(200,16,46,0.35);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 목록 */
+.jikgwan-list {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 16px;
+}
+
+.jikgwan-list-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.jikgwan-count {
+  background: var(--red);
+  color: var(--white);
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.jikgwan-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.jikgwan-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.jk-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--gray-100);
+  color: var(--gray-600);
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.jk-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.jk-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.jk-badges {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.badge.fairy {
+  background: #fff5ee;
+  color: #e65c00;
+}
+
+.badge.section {
+  background: #f0f5ff;
+  color: #1565C0;
+}
+
+.jk-delete-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--gray-100);
+  color: var(--gray-500);
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.jk-delete-btn:hover {
+  background: #ffe0e6;
+  color: var(--red);
+}
+
+/* 빈 상태 */
+.jikgwan-empty {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.jikgwan-empty span {
+  font-size: 2.2rem;
+  opacity: 0.4;
+}
+
+.jikgwan-empty p {
+  font-size: 0.88rem;
+  color: var(--gray-600);
+  font-weight: 600;
+}
+
+.jikgwan-empty .empty-sub {
+  font-size: 0.76rem;
+  color: var(--gray-400);
+  font-weight: 400;
+}
+
+/* 공통 필드 (ApplicationForm과 동일 스타일) */
+.jikgwan-form .field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.jikgwan-form .field label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gray-700);
+}
+
+.jikgwan-form .field input {
+  padding: 11px 13px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  color: var(--black);
+  background: var(--white);
+  transition: border-color 0.15s;
+}
+
+.jikgwan-form .field input:focus {
+  border-color: var(--red);
+  outline: none;
+}
+
+.jikgwan-form .field.error input {
+  border-color: var(--red);
+  background: #fff5f7;
+}
+
+.jikgwan-form .error-msg {
+  font-size: 0.75rem;
+  color: var(--red);
+  font-weight: 600;
+}

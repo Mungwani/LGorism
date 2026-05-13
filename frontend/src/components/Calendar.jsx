@@ -1,65 +1,57 @@
 import { useState } from "react";
-import { gameDateSet } from "../data/games";
+import { gameDateSet, allGameDateSet } from "../data/games";
 import "./Calendar.css";
 
 const DAYS = ["일", "월", "화", "수", "목", "금", "토"];
-const MONTHS = ["1월", "2월", "3월", "4월", "5월", "6월",
-                "7월", "8월", "9월", "10월", "11월", "12월"];
+const MONTHS = [
+  "1월","2월","3월","4월","5월","6월",
+  "7월","8월","9월","10월","11월","12월",
+];
 
 /**
  * 달력 컴포넌트
  * Props:
- *   selectedDate   - 현재 선택된 날짜 (YYYY-MM-DD)
- *   onSelectDate   - 날짜 클릭 시 호출되는 콜백
- *   summary        - { "YYYY-MM-DD": { applicantCount, totalPeople } }
- *   showOnlyGames  - true면 경기 있는 날만 필터 표시
+ *   selectedDate     - 현재 선택된 날짜 (YYYY-MM-DD)
+ *   onSelectDate     - 날짜 클릭 시 호출되는 콜백
+ *   dangwanSummary   - { "YYYY-MM-DD": { totalPeople } }  (단관 신청)
+ *   jikgwanSummary   - { "YYYY-MM-DD": count }            (직관 인원)
+ *   jungmoSummary    - { "YYYY-MM-DD": count }            (정모 개수)
+ *   showOnlyGames    - true면 경기·이벤트 있는 날만 표시
  */
-export default function Calendar({ selectedDate, onSelectDate, summary = {}, showOnlyGames }) {
+export default function Calendar({
+  selectedDate,
+  onSelectDate,
+  dangwanSummary = {},
+  jikgwanSummary = {},
+  jungmoSummary = {},
+  showOnlyGames,
+}) {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(today.getMonth()); // 0-based
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
 
   const todayStr = formatDate(today);
 
-  // 이전 달로
   function prevMonth() {
-    if (viewMonth === 0) {
-      setViewYear((y) => y - 1);
-      setViewMonth(11);
-    } else {
-      setViewMonth((m) => m - 1);
-    }
+    if (viewMonth === 0) { setViewYear((y) => y - 1); setViewMonth(11); }
+    else setViewMonth((m) => m - 1);
   }
 
-  // 다음 달로
   function nextMonth() {
-    if (viewMonth === 11) {
-      setViewYear((y) => y + 1);
-      setViewMonth(0);
-    } else {
-      setViewMonth((m) => m + 1);
-    }
+    if (viewMonth === 11) { setViewYear((y) => y + 1); setViewMonth(0); }
+    else setViewMonth((m) => m + 1);
   }
 
-  // 이번 달 달력 날짜 배열 생성
   const cells = buildCalendarCells(viewYear, viewMonth);
 
   return (
     <div className="calendar">
-      {/* 헤더: 연월 + 이전/다음 버튼 */}
       <div className="calendar-header">
-        <button className="nav-btn" onClick={prevMonth} aria-label="이전 달">
-          ‹
-        </button>
-        <span className="calendar-title">
-          {viewYear}년 {MONTHS[viewMonth]}
-        </span>
-        <button className="nav-btn" onClick={nextMonth} aria-label="다음 달">
-          ›
-        </button>
+        <button className="nav-btn" onClick={prevMonth} aria-label="이전 달">‹</button>
+        <span className="calendar-title">{viewYear}년 {MONTHS[viewMonth]}</span>
+        <button className="nav-btn" onClick={nextMonth} aria-label="다음 달">›</button>
       </div>
 
-      {/* 요일 행 */}
       <div className="calendar-grid">
         {DAYS.map((d, i) => (
           <div
@@ -70,21 +62,22 @@ export default function Calendar({ selectedDate, onSelectDate, summary = {}, sho
           </div>
         ))}
 
-        {/* 날짜 셀 */}
         {cells.map((cell, idx) => {
-          if (!cell) {
-            return <div key={`empty-${idx}`} className="day-cell empty" />;
-          }
+          if (!cell) return <div key={`empty-${idx}`} className="day-cell empty" />;
 
           const dateStr = formatDate(cell);
-          const hasGame = gameDateSet.has(dateStr);
+          const hasHomeGame = gameDateSet.has(dateStr);
+          const hasAnyGame = allGameDateSet.has(dateStr);
           const isToday = dateStr === todayStr;
           const isSelected = dateStr === selectedDate;
-          const daySummary = summary[dateStr];
           const dayOfWeek = cell.getDay();
 
-          // 경기만 보기 필터
-          if (showOnlyGames && !hasGame) {
+          const dangwanCount = dangwanSummary[dateStr]?.totalPeople || 0;
+          const jikgwanCount = jikgwanSummary[dateStr] || 0;
+          const jungmoCount = jungmoSummary[dateStr] || 0;
+          const hasAnyEvent = hasAnyGame || jikgwanCount > 0 || jungmoCount > 0;
+
+          if (showOnlyGames && !hasAnyEvent) {
             return <div key={dateStr} className="day-cell empty" />;
           }
 
@@ -93,22 +86,30 @@ export default function Calendar({ selectedDate, onSelectDate, summary = {}, sho
               key={dateStr}
               className={[
                 "day-cell",
-                hasGame ? "has-game" : "",
+                "clickable",
+                hasHomeGame ? "has-home-game" : hasAnyGame ? "has-away-game" : "",
                 isToday ? "today" : "",
                 isSelected ? "selected" : "",
                 dayOfWeek === 0 ? "sunday" : dayOfWeek === 6 ? "saturday" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              onClick={() => hasGame && onSelectDate(dateStr)}
-              role={hasGame ? "button" : undefined}
-              aria-label={hasGame ? `${dateStr} 경기` : undefined}
+              ].filter(Boolean).join(" ")}
+              onClick={() => onSelectDate(dateStr)}
+              role="button"
+              aria-label={`${dateStr}${hasHomeGame ? " 홈경기" : hasAnyGame ? " 원정경기" : ""}`}
             >
               <span className="day-number">{cell.getDate()}</span>
-              {hasGame && <span className="game-dot" />}
-              {/* 신청 인원 뱃지 */}
-              {daySummary && daySummary.totalPeople > 0 && (
-                <span className="count-badge">{daySummary.totalPeople}명</span>
+
+              {/* 컬러 점 행 */}
+              {(hasHomeGame || jikgwanCount > 0 || jungmoCount > 0) && (
+                <div className="day-dots">
+                  {hasHomeGame && <span className="dot game-dot" title="홈 경기" />}
+                  {jikgwanCount > 0 && <span className="dot jikgwan-dot" title="직관" />}
+                  {jungmoCount > 0 && <span className="dot jungmo-dot" title="정모" />}
+                </div>
+              )}
+
+              {/* 단관 인원 뱃지 */}
+              {dangwanCount > 0 && (
+                <span className="count-badge">{dangwanCount}명</span>
               )}
             </div>
           );
@@ -119,22 +120,24 @@ export default function Calendar({ selectedDate, onSelectDate, summary = {}, sho
       <div className="calendar-legend">
         <span className="legend-item">
           <span className="legend-dot game" />
-          경기 있음
+          홈 경기
+        </span>
+        <span className="legend-item">
+          <span className="legend-dot jikgwan" />
+          직관
+        </span>
+        <span className="legend-item">
+          <span className="legend-dot jungmo" />
+          정모
         </span>
         <span className="legend-item">
           <span className="legend-dot today-mark" />
           오늘
         </span>
-        <span className="legend-item">
-          <span className="legend-dot count-mark" />
-          신청 인원
-        </span>
       </div>
     </div>
   );
 }
-
-// ── 유틸 ──────────────────────────────────────────────────────
 
 function formatDate(date) {
   const y = date.getFullYear();
@@ -143,17 +146,11 @@ function formatDate(date) {
   return `${y}-${m}-${d}`;
 }
 
-/**
- * 해당 월의 달력 셀 배열 반환
- * 앞쪽 빈 칸은 null, 나머지는 Date 객체
- */
 function buildCalendarCells(year, month) {
-  const firstDay = new Date(year, month, 1).getDay(); // 0=일 ~ 6=토
+  const firstDay = new Date(year, month, 1).getDay();
   const lastDate = new Date(year, month + 1, 0).getDate();
   const cells = [];
-
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= lastDate; d++) cells.push(new Date(year, month, d));
-
   return cells;
 }
