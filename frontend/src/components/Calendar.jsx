@@ -76,15 +76,11 @@ export default function Calendar({
           const jikgwanCount = jikgwanSummary[dateStr] || 0;
           const jungmoCount = jungmoSummary[dateStr] || 0;
 
-          const hidden =
-            (filterMode === "games"   && !hasAnyGame)    ||
-            (filterMode === "jikgwan" && jikgwanCount === 0) ||
-            (filterMode === "jungmo"  && jungmoCount === 0)  ||
-            (filterMode === "dangwan" && dangwanCount === 0);
-
-          if (hidden) {
-            return <div key={dateStr} className="day-cell empty" />;
-          }
+          // 필터별로 표시할 점 결정 (날짜는 항상 보임)
+          const showGameDot    = hasHomeGame   && (filterMode === "all" || filterMode === "games"   || filterMode === "dangwan");
+          const showJikgwanDot = jikgwanCount > 0 && (filterMode === "all" || filterMode === "jikgwan");
+          const showJungmoDot  = jungmoCount  > 0 && (filterMode === "all" || filterMode === "jungmo");
+          const showDangwanBadge = dangwanCount > 0 && (filterMode === "all" || filterMode === "dangwan");
 
           return (
             <div
@@ -104,16 +100,16 @@ export default function Calendar({
               <span className="day-number">{cell.getDate()}</span>
 
               {/* 컬러 점 행 */}
-              {(hasHomeGame || jikgwanCount > 0 || jungmoCount > 0) && (
+              {(showGameDot || showJikgwanDot || showJungmoDot) && (
                 <div className="day-dots">
-                  {hasHomeGame && <span className="dot game-dot" title="홈 경기" />}
-                  {jikgwanCount > 0 && <span className="dot jikgwan-dot" title="직관" />}
-                  {jungmoCount > 0 && <span className="dot jungmo-dot" title="정모" />}
+                  {showGameDot    && <span className="dot game-dot"    title="홈 경기" />}
+                  {showJikgwanDot && <span className="dot jikgwan-dot" title="직관" />}
+                  {showJungmoDot  && <span className="dot jungmo-dot"  title="정모" />}
                 </div>
               )}
 
               {/* 단관 인원 뱃지 */}
-              {dangwanCount > 0 && (
+              {showDangwanBadge && (
                 <span className="count-badge">{dangwanCount}명</span>
               )}
             </div>
