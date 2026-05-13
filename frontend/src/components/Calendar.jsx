@@ -77,7 +77,6 @@ export default function Calendar({
           const jungmoCount = jungmoSummary[dateStr] || 0;
 
           // 필터별로 표시할 점 결정 (날짜는 항상 보임)
-          const showGameDot    = hasHomeGame   && (filterMode === "all" || filterMode === "games"   || filterMode === "dangwan");
           const showJikgwanDot = jikgwanCount > 0 && (filterMode === "all" || filterMode === "jikgwan");
           const showJungmoDot  = jungmoCount  > 0 && (filterMode === "all" || filterMode === "jungmo");
           const showDangwanBadge = dangwanCount > 0 && (filterMode === "all" || filterMode === "dangwan");
@@ -100,9 +99,8 @@ export default function Calendar({
               <span className="day-number">{cell.getDate()}</span>
 
               {/* 컬러 점 행 */}
-              {(showGameDot || showJikgwanDot || showJungmoDot) && (
+              {(showJikgwanDot || showJungmoDot) && (
                 <div className="day-dots">
-                  {showGameDot    && <span className="dot game-dot"    title="홈 경기" />}
                   {showJikgwanDot && <span className="dot jikgwan-dot" title="직관" />}
                   {showJungmoDot  && <span className="dot jungmo-dot"  title="정모" />}
                 </div>
@@ -119,10 +117,6 @@ export default function Calendar({
 
       {/* 범례 */}
       <div className="calendar-legend">
-        <span className="legend-item">
-          <span className="legend-dot game" />
-          홈 경기
-        </span>
         <span className="legend-item">
           <span className="legend-dot jikgwan" />
           직관
