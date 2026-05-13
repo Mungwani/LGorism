@@ -24,7 +24,7 @@ export default function Calendar({
   dangwanSummary = {},
   jikgwanSummary = {},
   jungmoSummary = {},
-  showOnlyGames,
+  filterMode = "all",
 }) {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -75,9 +75,14 @@ export default function Calendar({
           const dangwanCount = dangwanSummary[dateStr]?.totalPeople || 0;
           const jikgwanCount = jikgwanSummary[dateStr] || 0;
           const jungmoCount = jungmoSummary[dateStr] || 0;
-          const hasAnyEvent = hasAnyGame || jikgwanCount > 0 || jungmoCount > 0;
 
-          if (showOnlyGames && !hasAnyEvent) {
+          const hidden =
+            (filterMode === "games"   && !hasAnyGame)    ||
+            (filterMode === "jikgwan" && jikgwanCount === 0) ||
+            (filterMode === "jungmo"  && jungmoCount === 0)  ||
+            (filterMode === "dangwan" && dangwanCount === 0);
+
+          if (hidden) {
             return <div key={dateStr} className="day-cell empty" />;
           }
 
