@@ -32,10 +32,11 @@ export default function App() {
   // 탭: 'dangwan' | 'jikgwan' | 'jungmo'
   const [activeTab, setActiveTab] = useState("dangwan");
 
-  // 단관 관련 — localStorage로 영구 유지
-  const [isDangwanUnlocked, setIsDangwanUnlocked] = useState(
-    () => localStorage.getItem("dangwan_unlocked") === "true"
+  // 단관 관련 — 날짜별로 localStorage 저장
+  const [unlockedDates, setUnlockedDates] = useState(
+    () => new Set(JSON.parse(localStorage.getItem("dangwan_unlocked_dates") || "[]"))
   );
+  const isDangwanUnlocked = unlockedDates.has(selectedDate);
   const [dangwanSubTab, setDangwanSubTab] = useState("form"); // 'form' | 'list'
   const [applications, setApplications] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -122,8 +123,9 @@ export default function App() {
   function handleDangwanUnlock(e) {
     e.preventDefault();
     if (pwInput === DANGWAN_PASSWORD) {
-      localStorage.setItem("dangwan_unlocked", "true");
-      setIsDangwanUnlocked(true);
+      const next = new Set([...unlockedDates, selectedDate]);
+      localStorage.setItem("dangwan_unlocked_dates", JSON.stringify([...next]));
+      setUnlockedDates(next);
       setPwInput("");
       setPwError("");
       setDangwanSubTab("form");
