@@ -32,8 +32,10 @@ export default function App() {
   // 탭: 'dangwan' | 'jikgwan' | 'jungmo'
   const [activeTab, setActiveTab] = useState("dangwan");
 
-  // 단관 관련
-  const [isDangwanUnlocked, setIsDangwanUnlocked] = useState(false);
+  // 단관 관련 — localStorage로 영구 유지
+  const [isDangwanUnlocked, setIsDangwanUnlocked] = useState(
+    () => localStorage.getItem("dangwan_unlocked") === "true"
+  );
   const [dangwanSubTab, setDangwanSubTab] = useState("form"); // 'form' | 'list'
   const [applications, setApplications] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -60,9 +62,7 @@ export default function App() {
 
   function handleSelectDate(dateStr) {
     setSelectedDate(dateStr);
-    // 홈 경기만 단관탭 표시, 그 외엔 직관 탭이 기본
     setActiveTab(gameDateSet.has(dateStr) ? "dangwan" : "jikgwan");
-    setIsDangwanUnlocked(false);
     setPwInput("");
     setPwError("");
     setDangwanSubTab("form");
@@ -122,6 +122,7 @@ export default function App() {
   function handleDangwanUnlock(e) {
     e.preventDefault();
     if (pwInput === DANGWAN_PASSWORD) {
+      localStorage.setItem("dangwan_unlocked", "true");
       setIsDangwanUnlocked(true);
       setPwInput("");
       setPwError("");
