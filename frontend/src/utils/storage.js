@@ -119,6 +119,7 @@ function toJikgwan(row) {
     nickname:     row.nickname,
     section:      row.section || '',
     isTowelFairy: row.is_towel_fairy || false,
+    password:     row.password || '',
     createdAt:    row.created_at,
   }
 }
@@ -133,10 +134,10 @@ export async function getJikgwanList(date) {
   return (data || []).map(toJikgwan)
 }
 
-export async function addJikgwan(date, { nickname, section, isTowelFairy }) {
+export async function addJikgwan(date, { nickname, section, isTowelFairy, password }) {
   const { data, error } = await supabase
     .from('jikgwan')
-    .insert({ game_date: date, nickname, section: section || null, is_towel_fairy: isTowelFairy })
+    .insert({ game_date: date, nickname, section: section || null, is_towel_fairy: isTowelFairy, password: password || '' })
     .select()
     .single()
   if (error) throw error

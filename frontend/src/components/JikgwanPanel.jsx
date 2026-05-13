@@ -4,32 +4,57 @@ import "./JikgwanPanel.css";
 export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelete }) {
   const [nickname, setNickname] = useState("");
   const [section, setSection] = useState("");
+  const [password, setPassword] = useState("");
   const [isTowelFairy, setIsTowelFairy] = useState(false);
-  const [nicknameError, setNicknameError] = useState("");
+  const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+
+  // 삭제 모달 상태
+  const [deleteTarget, setDeleteTarget] = useState(null); // jikgwan item
+  const [deletePw, setDeletePw] = useState("");
+  const [deleteError, setDeleteError] = useState("");
 
   const towelFairies = jikgwanList.filter((p) => p.isTowelFairy);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!nickname.trim()) {
-      setNicknameError("닉네임을 입력해주세요");
-      return;
-    }
+    const newErrors = {};
+    if (!nickname.trim()) newErrors.nickname = "닉네임을 입력해주세요";
+    if (!password.trim()) newErrors.password = "비밀번호를 입력해주세요";
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+
     setSubmitting(true);
     try {
-      await onAdd({
-        nickname: nickname.trim(),
-        section: section.trim(),
-        isTowelFairy,
-      });
+      await onAdd({ nickname: nickname.trim(), section: section.trim(), isTowelFairy, password });
       setNickname("");
       setSection("");
+      setPassword("");
       setIsTowelFairy(false);
-      setNicknameError("");
+      setErrors({});
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function openDeleteModal(person) {
+    setDeleteTarget(person);
+    setDeletePw("");
+    setDeleteError("");
+  }
+
+  function closeDeleteModal() {
+    setDeleteTarget(null);
+    setDeletePw("");
+    setDeleteError("");
+  }
+
+  function handleDeleteConfirm() {
+    if (deletePw !== deleteTarget.password) {
+      setDeleteError("비밀번호가 틀렸어요");
+      return;
+    }
+    onDelete(deleteTarget.id);
+    closeDeleteModal();
   }
 
   return (
@@ -41,20 +66,17 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
           <p className="jikgwan-subtitle">참여 의사를 남겨보세요</p>
         </div>
 
-        <div className={`field ${nicknameError ? "error" : ""}`}>
+        <div className={`field ${errors.nickname ? "error" : ""}`}>
           <label htmlFor="jk-nickname">닉네임 *</label>
           <input
             id="jk-nickname"
             type="text"
             placeholder="예) 빨간유니폼박씨"
             value={nickname}
-            onChange={(e) => {
-              setNickname(e.target.value);
-              setNicknameError("");
-            }}
+            onChange={(e) => { setNickname(e.target.value); setErrors((p) => ({ ...p, nickname: "" })); }}
             maxLength={30}
           />
-          {nicknameError && <span className="error-msg">{nicknameError}</span>}
+          {errors.nickname && <span className="error-msg">{errors.nickname}</span>}
         </div>
 
         <div className="field">
@@ -71,13 +93,27 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
           />
         </div>
 
+        <div className={`field ${errors.password ? "error" : ""}`}>
+          <label htmlFor="jk-password">
+            비밀번호 * <span className="label-hint">(삭제 시 필요)</span>
+          </label>
+          <input
+            id="jk-password"
+            type="password"
+            placeholder="본인만 아는 비밀번호"
+            value={password}
+            onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: "" })); }}
+            maxLength={20}
+          />
+          {errors.password && <span className="error-msg">{errors.password}</span>}
+        </div>
+
         <button
           type="button"
           className={`towel-fairy-btn ${isTowelFairy ? "active" : ""}`}
           onClick={() => setIsTowelFairy((v) => !v)}
         >
-          🎽{" "}
-          {isTowelFairy ? "수건요정 신청됨! (취소하려면 클릭)" : "제가 수건요정할게요!"}
+          🎽 {isTowelFairy ? "수건요정 신청됨! (취소하려면 클릭)" : "제가 수건요정할게요!"}
         </button>
 
         {towelFairies.length > 0 && !isTowelFairy && (
@@ -86,9 +122,7 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
           </p>
         )}
         {isTowelFairy && (
-          <p className="fairy-notice active">
-            5회말에 모여서 수건 샷 찍어요!
-          </p>
+          <p className="fairy-notice active">5회말에 모여서 수건 샷 찍어요!</p>
         )}
 
         <button type="submit" className="submit-btn" disabled={submitting}>
@@ -119,7 +153,7 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
               </div>
               <button
                 className="jk-delete-btn"
-                onClick={() => onDelete(person.id)}
+                onClick={() => openDeleteModal(person)}
                 aria-label="삭제"
               >
                 ✕
@@ -132,6 +166,38 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
           <span>🏟</span>
           <p>아직 직관 등록자가 없어요</p>
           <p className="empty-sub">첫 번째로 등록해보세요!</p>
+        </div>
+      )}
+
+      {/* 삭제 비밀번호 모달 */}
+      {deleteTarget && (
+        <div className="jk-modal-overlay" onClick={closeDeleteModal}>
+          <div className="jk-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-icon">🔒</div>
+            <h4 className="modal-title">직관 등록 삭제</h4>
+            <p className="modal-desc">
+              <strong>{deleteTarget.nickname}</strong>님,<br />
+              등록 시 설정한 비밀번호를 입력해주세요
+            </p>
+            <input
+              className={`pw-input ${deleteError ? "error" : ""}`}
+              type="password"
+              placeholder="비밀번호 입력"
+              value={deletePw}
+              onChange={(e) => { setDeletePw(e.target.value); setDeleteError(""); }}
+              onKeyDown={(e) => e.key === "Enter" && handleDeleteConfirm()}
+              autoFocus
+            />
+            {deleteError && <p className="pw-error">{deleteError}</p>}
+            <div className="modal-actions">
+              <button className="modal-btn cancel" onClick={closeDeleteModal}>
+                취소
+              </button>
+              <button className="modal-btn confirm red" onClick={handleDeleteConfirm}>
+                삭제하기
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

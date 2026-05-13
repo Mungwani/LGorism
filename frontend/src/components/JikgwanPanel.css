@@ -247,6 +247,100 @@
   font-weight: 400;
 }
 
+/* 비밀번호 힌트 */
+.label-hint {
+  font-size: 0.7rem;
+  color: var(--gray-400);
+  font-weight: 400;
+}
+
+/* 삭제 모달 */
+.jk-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.jk-modal {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.modal-icon { font-size: 2rem; }
+
+.modal-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--black);
+}
+
+.modal-desc {
+  font-size: 0.82rem;
+  color: var(--gray-600);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.pw-input {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  text-align: center;
+  letter-spacing: 0.2em;
+  transition: border-color 0.15s;
+}
+
+.pw-input:focus { border-color: var(--red); outline: none; }
+.pw-input.error { border-color: var(--red); background: #fff5f7; }
+
+.pw-error {
+  font-size: 0.75rem;
+  color: var(--red);
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 11px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: all 0.15s;
+}
+
+.modal-btn.cancel {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.modal-btn.cancel:hover { background: var(--gray-200); }
+
+.modal-btn.confirm { background: var(--red); color: var(--white); }
+.modal-btn.confirm.red { background: var(--red); }
+.modal-btn.confirm:hover { opacity: 0.9; }
+
 /* 공통 필드 (ApplicationForm과 동일 스타일) */
 .jikgwan-form .field {
   display: flex;
