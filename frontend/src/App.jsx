@@ -62,10 +62,8 @@ export default function App() {
   // 달력 필터
   const [filterMode, setFilterMode] = useState("all");
 
-  // 우측 메뉴 드로어
+  // 우측 단관 드로어
   const [showMenu, setShowMenu] = useState(false);
-  // 단관 신청 모달
-  const [showDangwanModal, setShowDangwanModal] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
@@ -189,7 +187,8 @@ export default function App() {
       await refreshSummary();
       showToast("🏟 직관 등록 완료! 오늘도 엘지 화이팅!");
     } catch (e) {
-      showToast("❌ 등록 실패: " + (e?.message || "테이블이 없을 수 있어요"));
+      const msg = e?.message || e?.details || JSON.stringify(e) || "알 수 없는 오류";
+      showToast("❌ 직관 등록 실패: " + msg);
     }
   }
 
@@ -369,69 +368,23 @@ export default function App() {
         <p>LG 트윈스 팬 모임 · 엘고리즘 · 오늘도 엘지 화이팅! 🔴⚾</p>
       </footer>
 
-      {/* ── 우측 메뉴 드로어 ──────────────────────────────────── */}
+      {/* ── 단관 신청 드로어 (우측 슬라이드) ──────────────────── */}
       {showMenu && (
         <div className="menu-overlay" onClick={() => setShowMenu(false)}>
-          <div className="menu-drawer" onClick={(e) => e.stopPropagation()}>
+          <div className="menu-drawer dangwan-drawer" onClick={(e) => e.stopPropagation()}>
             <div className="drawer-header">
-              <span className="drawer-title">메뉴</span>
+              <span className="drawer-title">📋 단관 신청 받기</span>
               <button className="drawer-close" onClick={() => setShowMenu(false)}>✕</button>
             </div>
-            <div className="drawer-body">
-              <button
-                className="drawer-item"
-                onClick={() => {
-                  setShowMenu(false);
-                  setShowDangwanModal(true);
-                  setPwInput("");
-                  setPwError("");
-                }}
-              >
-                <span className="drawer-item-icon">📋</span>
-                <div className="drawer-item-text">
-                  <span className="drawer-item-label">단관 신청 받기</span>
-                  <span className="drawer-item-sub">관리자 전용</span>
-                </div>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* ── 단관 신청 모달 ────────────────────────────────────── */}
-      {showDangwanModal && (
-        <div
-          className="dangwan-modal-overlay"
-          onClick={() => setShowDangwanModal(false)}
-        >
-          <div
-            className="dangwan-modal-sheet"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-sheet-handle" />
-            <div className="modal-sheet-header">
-              <span className="modal-sheet-title">📋 단관 신청 받기</span>
-              <button
-                className="modal-sheet-close"
-                onClick={() => setShowDangwanModal(false)}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="modal-sheet-body">
+            <div className="drawer-body dangwan-drawer-body">
               {/* 날짜 미선택 */}
               {!selectedDate && (
                 <div className="dangwan-gate">
                   <div className="gate-icon">📅</div>
                   <h3 className="gate-title">날짜를 먼저 선택해주세요</h3>
-                  <p className="gate-desc">
-                    달력에서 홈 경기 날짜를 탭하면 단관 신청을 관리할 수 있어요
-                  </p>
-                  <button
-                    className="gate-btn"
-                    onClick={() => setShowDangwanModal(false)}
-                  >
+                  <p className="gate-desc">달력에서 홈 경기 날짜를 탭한 뒤 다시 열어주세요</p>
+                  <button className="gate-btn" onClick={() => setShowMenu(false)}>
                     달력으로 이동
                   </button>
                 </div>
@@ -446,7 +399,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* 홈 경기 날짜 선택됨 */}
+              {/* 홈 경기 선택됨 */}
               {selectedDate && isHomeGame && (
                 <>
                   <p className="modal-date-label">

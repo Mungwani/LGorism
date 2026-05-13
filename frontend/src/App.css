@@ -343,13 +343,25 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: 260px;
+  width: 300px;
   background: var(--white);
   box-shadow: -8px 0 32px rgba(0,0,0,0.18);
   display: flex;
   flex-direction: column;
   animation: slideInRight 0.25s ease;
   z-index: 1001;
+}
+
+/* 단관 신청 드로어 — 더 넓게 */
+.dangwan-drawer {
+  width: min(360px, 92vw);
+}
+
+.dangwan-drawer-body {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 @keyframes slideInRight {
