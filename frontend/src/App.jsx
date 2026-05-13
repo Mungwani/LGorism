@@ -5,7 +5,7 @@ import ApplicationForm from "./components/ApplicationForm";
 import ApplicationList from "./components/ApplicationList";
 import JikgwanPanel from "./components/JikgwanPanel";
 import JungmoPanel from "./components/JungmoPanel";
-import { getGameByDate } from "./data/games";
+import { getGameByDate, gameDateSet } from "./data/games";
 import {
   getApplications,
   saveApplication,
@@ -60,7 +60,8 @@ export default function App() {
 
   function handleSelectDate(dateStr) {
     setSelectedDate(dateStr);
-    setActiveTab("dangwan");
+    // 홈 경기만 단관탭 표시, 그 외엔 직관 탭이 기본
+    setActiveTab(gameDateSet.has(dateStr) ? "dangwan" : "jikgwan");
     setIsDangwanUnlocked(false);
     setPwInput("");
     setPwError("");
@@ -182,8 +183,8 @@ export default function App() {
       setJikgwanList(updated);
       await refreshSummary();
       showToast("🏟 직관 등록 완료! 오늘도 엘지 화이팅!");
-    } catch {
-      showToast("❌ 등록에 실패했어요. 다시 시도해주세요.");
+    } catch (e) {
+      showToast("❌ 등록 실패: " + (e?.message || "테이블이 없을 수 있어요"));
     }
   }
 
@@ -208,8 +209,8 @@ export default function App() {
       setJungmoList(updated);
       await refreshSummary();
       showToast("🎮 정모가 열렸어요!");
-    } catch {
-      showToast("❌ 정모 생성에 실패했어요.");
+    } catch (e) {
+      showToast("❌ 정모 생성 실패: " + (e?.message || "테이블이 없을 수 있어요"));
     }
   }
 
@@ -233,6 +234,7 @@ export default function App() {
   }
 
   const selectedGame = selectedDate ? getGameByDate(selectedDate) : null;
+  const isHomeGame = selectedDate ? gameDateSet.has(selectedDate) : false;
 
   return (
     <div className="app">
@@ -286,17 +288,19 @@ export default function App() {
         {/* ── 날짜 선택 후 ──────────────────────────────────── */}
         {selectedDate && (
           <>
-            {/* 3탭 네비게이션 */}
+            {/* 탭 네비게이션 — 홈경기만 단관 탭 표시 */}
             <div className="tab-nav">
-              <button
-                className={`tab-btn ${activeTab === "dangwan" ? "active" : ""}`}
-                onClick={() => setActiveTab("dangwan")}
-              >
-                📝 단관신청
-                {totalCount > 0 && (
-                  <span className="tab-badge">{totalCount}</span>
-                )}
-              </button>
+              {isHomeGame && (
+                <button
+                  className={`tab-btn ${activeTab === "dangwan" ? "active" : ""}`}
+                  onClick={() => setActiveTab("dangwan")}
+                >
+                  📋 단관 신청 받기
+                  {totalCount > 0 && (
+                    <span className="tab-badge">{totalCount}</span>
+                  )}
+                </button>
+              )}
               <button
                 className={`tab-btn ${activeTab === "jikgwan" ? "active" : ""} jikgwan-tab`}
                 onClick={() => setActiveTab("jikgwan")}
@@ -331,9 +335,9 @@ export default function App() {
                       {!isDangwanUnlocked ? (
                         <div className="dangwan-gate">
                           <div className="gate-icon">🔐</div>
-                          <h3 className="gate-title">단관 신청 페이지</h3>
+                          <h3 className="gate-title">단관 신청 받기</h3>
                           <p className="gate-desc">
-                            단관 신청은 관리자 비밀번호가 필요해요
+                            관리자 비밀번호를 입력해야 열 수 있어요
                           </p>
                           <form
                             className="gate-form"
