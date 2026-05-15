@@ -164,8 +164,31 @@
   color: var(--black);
 }
 
-.app-delete-btn {
+.app-item-actions {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.app-edit-btn {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: #e3f2fd;
+  color: #1565C0;
+  border: 1px solid #90caf9;
+  transition: all 0.15s;
+}
+
+.app-edit-btn:hover {
+  background: #1565C0;
+  color: var(--white);
+}
+
+.app-delete-btn {
   flex-shrink: 0;
   width: 20px;
   height: 20px;

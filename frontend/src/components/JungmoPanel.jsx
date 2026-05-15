@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getJungmoApplications, addJungmoApplication, deleteJungmoApplication } from "../utils/storage";
+import { getJungmoApplications, addJungmoApplication, updateJungmoApplication, deleteJungmoApplication, logAudit } from "../utils/storage";
 import "./JungmoPanel.css";
 
 function JungmoItem({ jungmo, onDelete }) {
@@ -24,6 +24,15 @@ function JungmoItem({ jungmo, onDelete }) {
   const [deleteModal, setDeleteModal] = useState(null); // { app }
   const [deletePw, setDeletePw] = useState("");
   const [deletePwError, setDeletePwError] = useState("");
+
+  // 수정 모달
+  const [editModal, setEditModal] = useState(null); // { app }
+  const [editPw, setEditPw] = useState("");
+  const [editPwError, setEditPwError] = useState("");
+  const [editStep, setEditStep] = useState("pw"); // 'pw' | 'form'
+  const [editNickname, setEditNickname] = useState("");
+  const [editCount, setEditCount] = useState(1);
+  const [editNote, setEditNote] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [jungmoDeletePw, setJungmoDeletePw] = useState("");
   const [jungmoDeleteError, setJungmoDeleteError] = useState("");
@@ -47,14 +56,8 @@ function JungmoItem({ jungmo, onDelete }) {
 
   async function handleApply(e) {
     e.preventDefault();
-    if (!applyNickname.trim()) {
-      setApplyError("닉네임을 입력해주세요");
-      return;
-    }
-    if (!applyPassword.trim()) {
-      setApplyError("비밀번호를 입력해주세요");
-      return;
-    }
+    if (!applyNickname.trim()) { setApplyError("닉네임을 입력해주세요"); return; }
+    if (!applyPassword.trim()) { setApplyError("비밀번호를 입력해주세요"); return; }
     setApplying(true);
     try {
       await addJungmoApplication(jungmo.id, {
@@ -63,11 +66,8 @@ function JungmoItem({ jungmo, onDelete }) {
         note: applyNote.trim(),
         password: applyPassword.trim(),
       });
-      setApplyNickname("");
-      setApplyCount(1);
-      setApplyNote("");
-      setApplyPassword("");
-      setApplyError("");
+      logAudit('create', 'jungmo', jungmo.eventDate, applyNickname.trim(), `${applyCount}명`);
+      setApplyNickname(""); setApplyCount(1); setApplyNote(""); setApplyPassword(""); setApplyError("");
       setShowApplyForm(false);
       loadApplications();
     } finally {
@@ -75,15 +75,33 @@ function JungmoItem({ jungmo, onDelete }) {
     }
   }
 
+  function openEditModal(app) {
+    setEditModal({ app });
+    setEditPw(""); setEditPwError(""); setEditStep("pw");
+    setEditNickname(app.nickname); setEditCount(app.count || 1); setEditNote(app.note || "");
+  }
+
+  function handleEditPwConfirm() {
+    if (editPw !== editModal.app.password) { setEditPwError("비밀번호가 틀렸어요."); return; }
+    setEditStep("form");
+  }
+
+  async function handleEditSubmit(e) {
+    e.preventDefault();
+    if (!editNickname.trim()) return;
+    await updateJungmoApplication(editModal.app.id, {
+      nickname: editNickname.trim(), count: editCount, note: editNote.trim(),
+    });
+    logAudit('update', 'jungmo', jungmo.eventDate, editNickname.trim(), `${editCount}명`);
+    setEditModal(null);
+    loadApplications();
+  }
+
   async function handleDeleteApp() {
-    if (deletePw !== deleteModal.app.password) {
-      setDeletePwError("비밀번호가 틀렸어요.");
-      return;
-    }
+    if (deletePw !== deleteModal.app.password) { setDeletePwError("비밀번호가 틀렸어요."); return; }
     await deleteJungmoApplication(deleteModal.app.id);
-    setDeleteModal(null);
-    setDeletePw("");
-    setDeletePwError("");
+    logAudit('delete', 'jungmo', jungmo.eventDate, deleteModal.app.nickname, null);
+    setDeleteModal(null); setDeletePw(""); setDeletePwError("");
     loadApplications();
   }
 
@@ -133,14 +151,13 @@ function JungmoItem({ jungmo, onDelete }) {
                       {app.note && (
                         <span className="app-note">· {app.note}</span>
                       )}
-                      <button
-                        className="app-delete-btn"
-                        onClick={() => {
-                          setDeleteModal({ app });
-                          setDeletePw("");
-                          setDeletePwError("");
-                        }}
-                      >✕</button>
+                      <div className="app-item-actions">
+                        <button className="app-edit-btn" onClick={() => openEditModal(app)}>수정</button>
+                        <button
+                          className="app-delete-btn"
+                          onClick={() => { setDeleteModal({ app }); setDeletePw(""); setDeletePwError(""); }}
+                        >✕</button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -266,6 +283,51 @@ function JungmoItem({ jungmo, onDelete }) {
               <button className="modal-btn cancel" onClick={() => setDeleteModal(null)}>취소</button>
               <button className="modal-btn confirm red" onClick={handleDeleteApp}>삭제하기</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {editModal && (
+        <div className="jungmo-modal-overlay" onClick={() => setEditModal(null)}>
+          <div className="jungmo-modal" onClick={e => e.stopPropagation()}>
+            {editStep === "pw" ? (
+              <>
+                <div className="modal-icon">🔒</div>
+                <h4 className="modal-title">본인 확인</h4>
+                <p className="modal-desc"><strong>{editModal.app.nickname}</strong>님,<br />신청 시 설정한 비밀번호를 입력해주세요.</p>
+                <input className="pw-input" type="password" placeholder="비밀번호 입력"
+                  value={editPw} onChange={e => { setEditPw(e.target.value); setEditPwError(""); }}
+                  onKeyDown={e => e.key === "Enter" && handleEditPwConfirm()} autoFocus />
+                {editPwError && <p className="pw-error">{editPwError}</p>}
+                <div className="modal-actions">
+                  <button className="modal-btn cancel" onClick={() => setEditModal(null)}>취소</button>
+                  <button className="modal-btn confirm blue" onClick={handleEditPwConfirm}>확인</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="modal-icon">✏️</div>
+                <h4 className="modal-title">신청 수정</h4>
+                <form onSubmit={handleEditSubmit} style={{ width: "100%", display: "flex", flexDirection: "column", gap: 8 }}>
+                  <input className="pw-input" type="text" placeholder="닉네임"
+                    value={editNickname} onChange={e => setEditNickname(e.target.value)} autoFocus />
+                  <div className="mini-count-row">
+                    <span className="mini-count-label">참석 인원</span>
+                    <div className="mini-count-ctrl">
+                      <button type="button" className="count-btn" onClick={() => setEditCount(v => Math.max(1, v - 1))}>－</button>
+                      <span className="count-val">{editCount}명</span>
+                      <button type="button" className="count-btn" onClick={() => setEditCount(v => Math.min(10, v + 1))}>＋</button>
+                    </div>
+                  </div>
+                  <input className="pw-input" type="text" placeholder="한마디 (선택)"
+                    value={editNote} onChange={e => setEditNote(e.target.value)} />
+                  <div className="modal-actions">
+                    <button type="button" className="modal-btn cancel" onClick={() => setEditModal(null)}>취소</button>
+                    <button type="submit" className="modal-btn confirm blue">수정하기</button>
+                  </div>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}

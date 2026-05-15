@@ -253,6 +253,14 @@ export async function addJungmoApplication(jungmoId, { nickname, count, note, pa
   return toJungmoApp(data)
 }
 
+export async function updateJungmoApplication(id, { nickname, count, note }) {
+  const { error } = await supabase
+    .from('jungmo_applications')
+    .update({ nickname, count: Number(count) || 1, note: note || null })
+    .eq('id', id)
+  if (error) throw error
+}
+
 export async function deleteJungmoApplication(id) {
   const { error } = await supabase.from('jungmo_applications').delete().eq('id', id)
   if (error) throw error
