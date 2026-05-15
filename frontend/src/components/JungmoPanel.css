@@ -36,8 +36,12 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   overflow: hidden;
-  border: 2px solid transparent;
+  border: 2px solid var(--gray-200);
   transition: border-color 0.15s;
+}
+
+.jungmo-item.has-apps {
+  border-color: #bbdefb;
 }
 
 .jungmo-item.expanded {
@@ -52,6 +56,23 @@
   padding: 14px 16px;
   cursor: pointer;
   user-select: none;
+}
+
+.jungmo-item-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.jungmo-app-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #1565C0;
+  color: var(--white);
+  border-radius: 20px;
+  padding: 3px 9px;
 }
 
 .jungmo-item-left {
@@ -143,6 +164,36 @@
   color: var(--black);
 }
 
+.app-delete-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gray-400);
+  font-size: 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.app-delete-btn:hover {
+  background: #fff5f7;
+  color: var(--red);
+}
+
+.app-count-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #1565C0;
+  background: #e8f0fe;
+  border-radius: 10px;
+  padding: 1px 7px;
+  flex-shrink: 0;
+}
+
 .app-note {
   font-size: 0.76rem;
   color: var(--gray-500);
@@ -209,6 +260,55 @@
   font-size: 0.72rem;
   color: var(--red);
   font-weight: 600;
+}
+
+.mini-count-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--white);
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  padding: 8px 11px;
+}
+
+.mini-count-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.mini-count-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.count-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e8f0fe;
+  color: #1565C0;
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.count-btn:hover {
+  background: #c8d9fd;
+}
+
+.count-val {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--black);
+  min-width: 28px;
+  text-align: center;
 }
 
 .apply-form-actions {

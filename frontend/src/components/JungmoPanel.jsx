@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getJungmoApplications, addJungmoApplication, deleteJungmoApplication } from "../utils/storage";
 import "./JungmoPanel.css";
 
@@ -6,6 +6,14 @@ function JungmoItem({ jungmo, onDelete }) {
   const [expanded, setExpanded] = useState(false);
   const [applications, setApplications] = useState([]);
   const [loadingApps, setLoadingApps] = useState(false);
+  const [totalApplicants, setTotalApplicants] = useState(0);
+
+  useEffect(() => {
+    getJungmoApplications(jungmo.id).then(apps => {
+      setApplications(apps);
+      setTotalApplicants(apps.reduce((s, a) => s + (a.count || 1), 0));
+    }).catch(() => {});
+  }, [jungmo.id]);
   const [showApplyForm, setShowApplyForm] = useState(false);
   const [applyNickname, setApplyNickname] = useState("");
   const [applyCount, setApplyCount] = useState(1);
@@ -25,6 +33,7 @@ function JungmoItem({ jungmo, onDelete }) {
     try {
       const apps = await getJungmoApplications(jungmo.id);
       setApplications(apps);
+      setTotalApplicants(apps.reduce((s, a) => s + (a.count || 1), 0));
     } finally {
       setLoadingApps(false);
     }
@@ -88,7 +97,7 @@ function JungmoItem({ jungmo, onDelete }) {
   }
 
   return (
-    <div className={`jungmo-item ${expanded ? "expanded" : ""}`}>
+    <div className={`jungmo-item ${expanded ? "expanded" : ""} ${totalApplicants > 0 ? "has-apps" : ""}`}>
       <div className="jungmo-item-header" onClick={toggleExpand}>
         <div className="jungmo-item-left">
           <span className="jungmo-item-title">{jungmo.title}</span>
@@ -96,7 +105,12 @@ function JungmoItem({ jungmo, onDelete }) {
             <p className="jungmo-item-desc">{jungmo.description}</p>
           )}
         </div>
-        <span className="expand-chevron">{expanded ? "▲" : "▼"}</span>
+        <div className="jungmo-item-right">
+          {totalApplicants > 0 && (
+            <span className="jungmo-app-badge">{totalApplicants}명</span>
+          )}
+          <span className="expand-chevron">{expanded ? "▲" : "▼"}</span>
+        </div>
       </div>
 
       {expanded && (
