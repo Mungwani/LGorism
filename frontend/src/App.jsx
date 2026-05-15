@@ -27,6 +27,7 @@ import {
   getAllJungmo,
   logAudit,
   updatePaymentStatus,
+  getDangwanOpenDates,
 } from "./utils/storage";
 import "./App.css";
 
@@ -62,6 +63,7 @@ export default function App() {
 
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
+  const [dangwanOpenDates, setDangwanOpenDates] = useState(new Set());
 
   // 관리자 페이지
   const [showAdmin, setShowAdmin] = useState(false);
@@ -128,6 +130,10 @@ export default function App() {
   }, []);
 
   useEffect(() => { refreshSummary(); }, [refreshSummary]);
+
+  useEffect(() => {
+    getDangwanOpenDates().then(setDangwanOpenDates).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (filterMode !== "jungmo") return;
@@ -382,40 +388,50 @@ export default function App() {
                 <>
                   {activeTab === "dangwan" && isHomeGame && (
                     <div className="dangwan-section">
-                      <div className="sub-tab-nav">
-                        <button
-                          className={`sub-tab-btn ${dangwanSubTab === "form" ? "active" : ""}`}
-                          onClick={() => setDangwanSubTab("form")}
-                        >
-                          📝 신청하기
-                          {editingItem && <span className="tab-dot" />}
-                        </button>
-                        <button
-                          className={`sub-tab-btn ${dangwanSubTab === "list" ? "active" : ""}`}
-                          onClick={() => setDangwanSubTab("list")}
-                        >
-                          👥 신청 목록
-                          {totalCount > 0 && <span className="tab-badge">{totalCount}</span>}
-                        </button>
-                      </div>
-                      {dangwanSubTab === "form" && (
-                        <ApplicationForm
-                          selectedDate={selectedDate}
-                          editingItem={editingItem}
-                          onSubmit={handleDangwanSubmit}
-                          onCancelEdit={() => { setEditingItem(null); setDangwanSubTab("list"); }}
-                          isClosed={selectedGame?.isClosed || false}
-                        />
-                      )}
-                      {dangwanSubTab === "list" && (
-                        <ApplicationList
-                          applications={applications}
-                          totalCount={totalCount}
-                          onEdit={handleEdit}
-                          onDelete={handleDelete}
-                          onPay={handlePay}
-                          selectedDate={selectedDate}
-                        />
+                      {!dangwanOpenDates.has(selectedDate) ? (
+                        <div className="dangwan-closed-card">
+                          <span className="dangwan-closed-icon">📋</span>
+                          <p className="dangwan-closed-text">단관 일정이 없습니다</p>
+                          <p className="dangwan-closed-sub">관리자가 단관을 열면 신청할 수 있어요</p>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="sub-tab-nav">
+                            <button
+                              className={`sub-tab-btn ${dangwanSubTab === "form" ? "active" : ""}`}
+                              onClick={() => setDangwanSubTab("form")}
+                            >
+                              📝 신청하기
+                              {editingItem && <span className="tab-dot" />}
+                            </button>
+                            <button
+                              className={`sub-tab-btn ${dangwanSubTab === "list" ? "active" : ""}`}
+                              onClick={() => setDangwanSubTab("list")}
+                            >
+                              👥 신청 목록
+                              {totalCount > 0 && <span className="tab-badge">{totalCount}</span>}
+                            </button>
+                          </div>
+                          {dangwanSubTab === "form" && (
+                            <ApplicationForm
+                              selectedDate={selectedDate}
+                              editingItem={editingItem}
+                              onSubmit={handleDangwanSubmit}
+                              onCancelEdit={() => { setEditingItem(null); setDangwanSubTab("list"); }}
+                              isClosed={selectedGame?.isClosed || false}
+                            />
+                          )}
+                          {dangwanSubTab === "list" && (
+                            <ApplicationList
+                              applications={applications}
+                              totalCount={totalCount}
+                              onEdit={handleEdit}
+                              onDelete={handleDelete}
+                              onPay={handlePay}
+                              selectedDate={selectedDate}
+                            />
+                          )}
+                        </>
                       )}
                     </div>
                   )}
@@ -460,7 +476,7 @@ export default function App() {
       )}
 
       {showAdmin && (
-        <AdminPage onClose={() => setShowAdmin(false)} />
+        <AdminPage onClose={() => setShowAdmin(false)} onDangwanChange={setDangwanOpenDates} />
       )}
     </div>
   );

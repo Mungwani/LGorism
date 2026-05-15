@@ -547,3 +547,55 @@
 }
 
 .confirm-btn.ok.revert:hover { opacity: 0.85; }
+
+/* ── 단관 관리 ───────────────────────────────────────────────── */
+.dangwan-manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dangwan-manage-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--gray-200);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.dangwan-manage-item:hover {
+  border-color: var(--gray-400);
+}
+
+.dangwan-manage-item.open {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.dangwan-manage-date {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.dangwan-manage-badge {
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.dangwan-manage-badge.open {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.dangwan-manage-badge.closed {
+  background: var(--gray-100);
+  color: var(--gray-500);
+}

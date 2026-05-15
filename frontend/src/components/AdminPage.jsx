@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
-import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit } from '../utils/storage'
+import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, openDangwanDate, closeDangwanDate } from '../utils/storage'
+import { games } from '../data/games'
+
+const homeGames = games.filter(g => g.isHome).map(g => g.date)
 import './AdminPage.css'
 
 const ADMIN_PW = 'admin60'
@@ -17,7 +20,7 @@ const ACTION_LABELS = {
   pay:    '입금',
 }
 
-export default function AdminPage({ onClose }) {
+export default function AdminPage({ onClose, onDangwanChange }) {
   const [authed, setAuthed] = useState(false)
   const [pw, setPw] = useState('')
   const [pwError, setPwError] = useState('')
@@ -29,6 +32,11 @@ export default function AdminPage({ onClose }) {
 
   const [apps, setApps] = useState([])
   const [payLoading, setPayLoading] = useState(false)
+
+  // 단관 관리
+  const [dangwanOpen, setDangwanOpen] = useState(new Set())
+  const [dangwanLoading, setDangwanLoading] = useState(false)
+  const [dangwanConfirm, setDangwanConfirm] = useState(null) // { date, willOpen }
 
   // 날짜별 접기/펼치기 (기본: 전부 펼침)
   const [collapsedDates, setCollapsedDates] = useState(new Set())
@@ -65,11 +73,35 @@ export default function AdminPage({ onClose }) {
     }
   }
 
+  async function loadDangwan() {
+    setDangwanLoading(true)
+    try {
+      const dates = await getDangwanOpenDates()
+      setDangwanOpen(dates)
+    } finally {
+      setDangwanLoading(false)
+    }
+  }
+
   useEffect(() => {
     if (!authed) return
     if (tab === 'log') loadLogs()
     if (tab === 'pay') loadApps()
+    if (tab === 'dangwan') loadDangwan()
   }, [tab, authed])
+
+  async function confirmDangwanToggle() {
+    const { date, willOpen } = dangwanConfirm
+    setDangwanConfirm(null)
+    if (willOpen) {
+      await openDangwanDate(date)
+    } else {
+      await closeDangwanDate(date)
+    }
+    const updated = await getDangwanOpenDates()
+    setDangwanOpen(updated)
+    if (onDangwanChange) onDangwanChange(updated)
+  }
 
   function toggleDateCollapse(date) {
     setCollapsedDates(prev => {
@@ -139,17 +171,14 @@ export default function AdminPage({ onClose }) {
         </div>
 
         <div className="admin-tab-nav">
-          <button
-            className={`admin-tab-btn ${tab === 'log' ? 'active' : ''}`}
-            onClick={() => setTab('log')}
-          >
-            📋 활동 로그
+          <button className={`admin-tab-btn ${tab === 'log' ? 'active' : ''}`} onClick={() => setTab('log')}>
+            📋 로그
           </button>
-          <button
-            className={`admin-tab-btn ${tab === 'pay' ? 'active' : ''}`}
-            onClick={() => setTab('pay')}
-          >
-            💳 입금 관리
+          <button className={`admin-tab-btn ${tab === 'pay' ? 'active' : ''}`} onClick={() => setTab('pay')}>
+            💳 입금
+          </button>
+          <button className={`admin-tab-btn ${tab === 'dangwan' ? 'active' : ''}`} onClick={() => setTab('dangwan')}>
+            🎟 단관
           </button>
         </div>
 
@@ -254,7 +283,59 @@ export default function AdminPage({ onClose }) {
             )}
           </div>
         )}
+
+        {tab === 'dangwan' && (
+          <div className="admin-body">
+            <p className="pay-header-hint" style={{ marginBottom: 8 }}>날짜를 눌러 단관 신청을 열거나 닫아요</p>
+            {dangwanLoading ? (
+              <div className="admin-state">불러오는 중...</div>
+            ) : (
+              <div className="dangwan-manage-list">
+                {homeGames.map(date => {
+                  const isOpen = dangwanOpen.has(date)
+                  return (
+                    <div
+                      key={date}
+                      className={`dangwan-manage-item ${isOpen ? 'open' : ''}`}
+                      onClick={() => setDangwanConfirm({ date, willOpen: !isOpen })}
+                    >
+                      <span className="dangwan-manage-date">{date}</span>
+                      <span className={`dangwan-manage-badge ${isOpen ? 'open' : 'closed'}`}>
+                        {isOpen ? '🟢 열림' : '🔴 닫힘'}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* 단관 열기/닫기 확인 모달 */}
+      {dangwanConfirm && (
+        <div className="admin-confirm-overlay" onClick={() => setDangwanConfirm(null)}>
+          <div className="admin-confirm-modal" onClick={e => e.stopPropagation()}>
+            <div className="confirm-icon">{dangwanConfirm.willOpen ? '🟢' : '🔴'}</div>
+            <h4 className="confirm-title">단관 {dangwanConfirm.willOpen ? '열기' : '닫기'}</h4>
+            <p className="confirm-desc">
+              <strong>{dangwanConfirm.date}</strong><br />
+              단관 신청을 <strong className={dangwanConfirm.willOpen ? 'status-paid' : 'status-unpaid'}>
+                {dangwanConfirm.willOpen ? '오픈' : '마감'}
+              </strong>하시겠어요?
+            </p>
+            <div className="confirm-actions">
+              <button className="confirm-btn cancel" onClick={() => setDangwanConfirm(null)}>취소</button>
+              <button
+                className={`confirm-btn ok ${dangwanConfirm.willOpen ? 'pay' : 'revert'}`}
+                onClick={confirmDangwanToggle}
+              >
+                {dangwanConfirm.willOpen ? '열기' : '닫기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 입금 상태 변경 확인 모달 */}
       {confirmTarget && (

@@ -288,6 +288,24 @@ export async function getAuditLogs(limit = 200) {
   return data || []
 }
 
+// ── 단관 오픈 날짜 ─────────────────────────────────────────────
+
+export async function getDangwanOpenDates() {
+  const { data, error } = await supabase.from('dangwan_open_dates').select('game_date')
+  if (error) throw error
+  return new Set((data || []).map(r => r.game_date))
+}
+
+export async function openDangwanDate(date) {
+  const { error } = await supabase.from('dangwan_open_dates').upsert({ game_date: date })
+  if (error) throw error
+}
+
+export async function closeDangwanDate(date) {
+  const { error } = await supabase.from('dangwan_open_dates').delete().eq('game_date', date)
+  if (error) throw error
+}
+
 export async function getAllApplications() {
   const { data, error } = await supabase
     .from('applications')
