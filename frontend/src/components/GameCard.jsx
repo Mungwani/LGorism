@@ -26,16 +26,12 @@ export default function GameCard({ game, date }) {
   }
 
   return (
-    <div className={`game-card ${game.isClosed ? "closed" : "open"}`}>
-      {/* 마감 배너 */}
-      {game.isClosed && <div className="closed-banner">신청 마감</div>}
-
+    <div className="game-card">
       {/* 홈/원정 배지 */}
       <div className="game-badges">
         <span className={`badge ${game.isHome ? "home" : "away"}`}>
           {game.isHome ? "🏠 홈" : "✈️ 원정"}
         </span>
-        {!game.isClosed && <span className="badge recruiting">신청 가능</span>}
       </div>
 
       {/* 경기 정보 */}
