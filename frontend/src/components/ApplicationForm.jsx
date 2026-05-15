@@ -98,7 +98,7 @@ export default function ApplicationForm({
               id="name"
               name="name"
               type="text"
-              placeholder="예) 빨간유니폼박씨"
+              placeholder="예) 이블"
               value={form.name}
               onChange={handleChange}
               maxLength={30}
@@ -165,7 +165,7 @@ export default function ApplicationForm({
             <textarea
               id="request"
               name="request"
-              placeholder="예) 30분 늦게 도착해요"
+              placeholder="예) 친구 2명 데리고 가요"
               value={form.request}
               onChange={handleChange}
               rows={3}
