@@ -165,7 +165,7 @@ export default function ApplicationForm({
             <textarea
               id="request"
               name="request"
-              placeholder="예) 친구 2명 데리고 가요"
+              placeholder="예) 30분 늦어요, 친구 2명 데리고 가요"
               value={form.request}
               onChange={handleChange}
               rows={3}
