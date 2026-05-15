@@ -145,6 +145,7 @@ export default function App() {
     setActiveTab("dangwan");
     setDangwanSubTab("form");
     setEditingItem(null);
+    setFilterMode("all");
   }
 
   // ── 단관 신청 핸들러 ─────────────────────────────────────────
@@ -306,7 +307,6 @@ export default function App() {
                   setFilterMode(mode);
                   if (mode !== "all") {
                     setSelectedDate(null);
-                    setShowDangwan(false);
                   }
                 }}
               >
