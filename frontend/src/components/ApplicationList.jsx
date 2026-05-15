@@ -6,10 +6,10 @@ export default function ApplicationList({
   totalCount,
   onEdit,
   onDelete,
+  onPay,
   selectedDate,
 }) {
-  // 비밀번호 확인 모달 상태
-  const [pwModal, setPwModal] = useState(null); // { type: 'edit'|'delete', item }
+  const [pwModal, setPwModal] = useState(null); // { type: 'edit'|'delete'|'pay', item }
   const [pwInput, setPwInput] = useState('');
   const [pwError, setPwError] = useState('');
 
@@ -34,8 +34,10 @@ export default function ApplicationList({
     }
     if (pwModal.type === 'edit') {
       onEdit(pwModal.item);
-    } else {
+    } else if (pwModal.type === 'delete') {
       onDelete(pwModal.item.id);
+    } else if (pwModal.type === 'pay') {
+      onPay(pwModal.item.id);
     }
     closePwModal();
   }
@@ -59,7 +61,7 @@ export default function ApplicationList({
       ) : (
         <div className="application-list">
           {applications.map((item, index) => (
-            <div key={item.id} className="application-item">
+            <div key={item.id} className={`application-item ${item.isPaid ? 'is-paid' : ''}`}>
               {/* 순번 + 이름 */}
               <div className="item-header">
                 <div className="item-left">
@@ -70,6 +72,17 @@ export default function ApplicationList({
                   </div>
                 </div>
                 <div className="item-actions">
+                  {item.isPaid ? (
+                    <span className="action-btn paid-badge">✓ 입금완료</span>
+                  ) : (
+                    <button
+                      className="action-btn pay"
+                      onClick={() => openPwModal('pay', item)}
+                      aria-label="입금완료"
+                    >
+                      💳 입금
+                    </button>
+                  )}
                   <button
                     className="action-btn edit"
                     onClick={() => openPwModal('edit', item)}
@@ -105,11 +118,17 @@ export default function ApplicationList({
       {pwModal && (
         <div className="modal-overlay" onClick={closePwModal}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon">🔒</div>
-            <h4 className="modal-title">본인 확인</h4>
+            <div className="modal-icon">
+              {pwModal.type === 'pay' ? '💳' : '🔒'}
+            </div>
+            <h4 className="modal-title">
+              {pwModal.type === 'pay' ? '입금 확인' : '본인 확인'}
+            </h4>
             <p className="modal-desc">
               <strong>{pwModal.item.name}</strong>님,
-              신청 시 설정한 비밀번호를 입력해주세요.
+              {pwModal.type === 'pay'
+                ? ' 신청 시 설정한 비밀번호로 입금완료 처리해요.'
+                : ' 신청 시 설정한 비밀번호를 입력해주세요.'}
             </p>
             <input
               className="pw-input"
@@ -126,10 +145,10 @@ export default function ApplicationList({
                 취소
               </button>
               <button
-                className={`modal-btn confirm ${pwModal.type === 'delete' ? 'red' : 'blue'}`}
+                className={`modal-btn confirm ${pwModal.type === 'delete' ? 'red' : pwModal.type === 'pay' ? 'green' : 'blue'}`}
                 onClick={handlePwConfirm}
               >
-                {pwModal.type === 'edit' ? '수정하기' : '삭제하기'}
+                {pwModal.type === 'edit' ? '수정하기' : pwModal.type === 'pay' ? '입금완료' : '삭제하기'}
               </button>
             </div>
           </div>
@@ -138,8 +157,6 @@ export default function ApplicationList({
     </div>
   );
 }
-
-// ── 유틸 ──────────────────────────────────────────────────────
 
 function formatTime(isoStr) {
   if (!isoStr) return "";

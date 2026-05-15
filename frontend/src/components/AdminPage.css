@@ -1,0 +1,549 @@
+/* ── 오버레이 ────────────────────────────────────────────────── */
+.admin-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 2000;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── 로그인 카드 ─────────────────────────────────────────────── */
+.admin-login-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--white);
+  border-radius: 20px 20px 0 0;
+  padding: 36px 24px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.admin-login-icon {
+  font-size: 3rem;
+  margin-bottom: 4px;
+}
+
+.admin-login-title {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--black);
+}
+
+.admin-login-sub {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  margin-bottom: 8px;
+}
+
+.admin-login-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-pw-input {
+  width: 100%;
+  max-width: 240px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  text-align: center;
+  letter-spacing: 0.2em;
+  transition: border-color 0.15s;
+}
+
+.admin-pw-input:focus {
+  border-color: var(--black);
+  outline: none;
+}
+
+.admin-pw-input.error {
+  border-color: var(--red);
+  background: #fff5f7;
+}
+
+.admin-pw-error {
+  font-size: 0.78rem;
+  color: var(--red);
+  font-weight: 600;
+}
+
+.admin-login-btn {
+  padding: 12px 36px;
+  background: var(--black);
+  color: var(--white);
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  font-weight: 700;
+  transition: opacity 0.15s;
+  margin-top: 4px;
+}
+
+.admin-login-btn:hover { opacity: 0.8; }
+
+/* ── 메인 어드민 페이지 ──────────────────────────────────────── */
+.admin-page {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--gray-100);
+  height: 92vh;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+  overflow: hidden;
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  background: var(--black);
+  border-radius: 20px 20px 0 0;
+  flex-shrink: 0;
+}
+
+.admin-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--white);
+}
+
+/* 닫기 버튼 (공통) */
+.admin-x-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--white);
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.admin-login-card .admin-x-btn {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.admin-x-btn:hover { opacity: 0.75; }
+
+/* 어드민 헤더의 닫기 버튼은 absolute 아님 */
+.admin-header .admin-x-btn {
+  position: static;
+}
+
+/* ── 탭 네비 ─────────────────────────────────────────────────── */
+.admin-tab-nav {
+  display: flex;
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  flex-shrink: 0;
+}
+
+.admin-tab-btn {
+  flex: 1;
+  padding: 13px 4px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gray-500);
+  border-bottom: 2.5px solid transparent;
+  transition: all 0.15s;
+}
+
+.admin-tab-btn.active {
+  color: var(--black);
+  border-bottom-color: var(--black);
+}
+
+/* ── 바디 (스크롤) ─────────────────────────────────────────── */
+.admin-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 14px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── 로그 필터 바 ────────────────────────────────────────────── */
+.log-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.log-filter-chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1.5px solid var(--gray-200);
+  background: var(--white);
+  color: var(--gray-600);
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+
+.log-filter-chip.active        { border-color: transparent; color: var(--white); }
+.log-filter-chip.active.all     { background: var(--black); }
+.log-filter-chip.active.dangwan { background: #6a1b9a; }
+.log-filter-chip.active.jikgwan { background: #FF6B35; }
+.log-filter-chip.active.jungmo  { background: #1565C0; }
+.log-filter-chip.active.pay     { background: #15803d; }
+
+.log-refresh-btn {
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 1.5px solid var(--gray-200);
+  color: var(--gray-600);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.log-refresh-btn:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-400);
+}
+
+/* ── 로그 리스트 ─────────────────────────────────────────────── */
+.log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.log-item {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  box-shadow: var(--shadow-sm);
+  border-left: 3px solid var(--gray-200);
+}
+
+.log-item.action-create { border-left-color: #e65100; }
+.log-item.action-update { border-left-color: #1565C0; }
+.log-item.action-delete { border-left-color: var(--red); }
+.log-item.action-pay    { border-left-color: #15803d; }
+
+.log-row-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.log-row-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.log-cat {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  color: var(--white);
+}
+
+.log-cat.cat-dangwan { background: #6a1b9a; }
+.log-cat.cat-jikgwan { background: #FF6B35; }
+.log-cat.cat-jungmo  { background: #1565C0; }
+
+.log-action {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+.log-action.act-create { background: #fff3e0; color: #e65100; }
+.log-action.act-update { background: #e3f2fd; color: #1565C0; }
+.log-action.act-delete { background: #ffebee; color: var(--red); }
+.log-action.act-pay    { background: #dcfce7; color: #15803d; }
+
+.log-time {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: var(--gray-400);
+}
+
+.log-actor {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.log-game-date {
+  font-size: 0.72rem;
+  color: var(--gray-500);
+  background: var(--gray-100);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.log-details {
+  font-size: 0.72rem;
+  color: var(--gray-500);
+}
+
+/* ── 입금 관리 ───────────────────────────────────────────────── */
+.pay-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.pay-header-hint {
+  font-size: 0.74rem;
+  color: var(--gray-500);
+}
+
+.pay-date-group {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 4px;
+}
+
+.pay-date-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--black);
+  transition: background 0.15s;
+}
+
+.pay-date-header:hover {
+  background: #222;
+}
+
+.pay-date-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pay-date-chevron {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.pay-date {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: var(--white);
+}
+
+.pay-date-stat {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.pay-date-stat.all-paid {
+  color: #86efac;
+}
+
+.pay-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--gray-100);
+  cursor: pointer;
+  transition: background 0.12s;
+  gap: 8px;
+}
+
+.pay-item:last-child { border-bottom: none; }
+
+.pay-item:hover { background: #f8f8f8; }
+.pay-item.paid  { background: #f0fdf4; }
+
+.pay-item-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pay-item-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.pay-item-count {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  flex-shrink: 0;
+}
+
+.pay-item-req {
+  font-size: 0.72rem;
+  color: var(--gray-400);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 80px;
+}
+
+.pay-badge {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  transition: all 0.15s;
+}
+
+.pay-badge.unpaid {
+  background: var(--gray-100);
+  color: var(--gray-500);
+  border: 1.5px solid var(--gray-200);
+}
+
+.pay-badge.paid {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1.5px solid #bbf7d0;
+}
+
+/* ── 공통 빈 상태 ────────────────────────────────────────────── */
+.admin-state {
+  text-align: center;
+  color: var(--gray-400);
+  font-size: 0.86rem;
+  padding: 40px 0;
+}
+
+/* ── 입금 변경 확인 모달 ─────────────────────────────────────── */
+.admin-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.15s ease;
+}
+
+.admin-confirm-modal {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  animation: slideUp 0.2s ease;
+}
+
+.confirm-icon {
+  font-size: 2.4rem;
+  margin-bottom: 8px;
+}
+
+.confirm-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--black);
+  margin-bottom: 10px;
+}
+
+.confirm-desc {
+  font-size: 0.86rem;
+  color: var(--gray-600);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.confirm-desc strong {
+  color: var(--black);
+}
+
+.status-paid   { color: #15803d; }
+.status-unpaid { color: var(--red); }
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.confirm-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.confirm-btn:active { transform: scale(0.96); }
+
+.confirm-btn.cancel {
+  background: var(--gray-100);
+  color: var(--gray-700);
+}
+
+.confirm-btn.cancel:hover { background: var(--gray-200); }
+
+.confirm-btn.ok.pay {
+  background: #15803d;
+  color: var(--white);
+  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
+}
+
+.confirm-btn.ok.pay:hover { opacity: 0.85; }
+
+.confirm-btn.ok.revert {
+  background: var(--red);
+  color: var(--white);
+  box-shadow: 0 4px 12px rgba(200, 16, 46, 0.3);
+}
+
+.confirm-btn.ok.revert:hover { opacity: 0.85; }

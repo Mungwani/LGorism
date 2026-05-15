@@ -161,6 +161,33 @@
   color: var(--white);
 }
 
+.action-btn.pay {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.action-btn.pay:hover {
+  background: #15803d;
+  color: var(--white);
+}
+
+/* 입금완료 — 비활성 배지 */
+.action-btn.paid-badge {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+  cursor: default;
+  opacity: 0.8;
+  font-size: 0.72rem;
+}
+
+/* 입금완료된 아이템 행 배경 */
+.application-item.is-paid {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
 /* 상세 칩 */
 .item-details {
   display: flex;
@@ -312,6 +339,13 @@
 }
 
 .modal-btn.confirm.blue:hover { background: #0d47a1; }
+
+.modal-btn.confirm.green {
+  background: #15803d;
+  box-shadow: 0 4px 12px rgba(21,128,61,0.3);
+}
+
+.modal-btn.confirm.green:hover { background: #166534; }
 
 /* 비밀번호 입력 */
 .pw-input {

@@ -21,6 +21,7 @@ function toApp(row) {
     count:     row.count,
     request:   row.request || '',
     password:  row.password || '',
+    isPaid:    row.is_paid || false,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
@@ -79,6 +80,17 @@ export async function deleteApplication(date, id) {
   const { error } = await supabase
     .from('applications')
     .delete()
+    .eq('id', id)
+    .eq('game_date', date)
+
+  if (error) throw error
+}
+
+/** 입금 여부 토글 */
+export async function updatePaymentStatus(date, id, isPaid) {
+  const { error } = await supabase
+    .from('applications')
+    .update({ is_paid: isPaid, updated_at: new Date().toISOString() })
     .eq('id', id)
     .eq('game_date', date)
 
@@ -214,7 +226,9 @@ function toJungmoApp(row) {
     id:        row.id,
     jungmoId:  row.jungmo_id,
     nickname:  row.nickname,
+    count:     row.count || 1,
     note:      row.note || '',
+    password:  row.password || '',
     createdAt: row.created_at,
   }
 }
@@ -229,10 +243,10 @@ export async function getJungmoApplications(jungmoId) {
   return (data || []).map(toJungmoApp)
 }
 
-export async function addJungmoApplication(jungmoId, { nickname, note }) {
+export async function addJungmoApplication(jungmoId, { nickname, count, note, password }) {
   const { data, error } = await supabase
     .from('jungmo_applications')
-    .insert({ jungmo_id: jungmoId, nickname, note: note || null })
+    .insert({ jungmo_id: jungmoId, nickname, count: Number(count) || 1, note: note || null, password: password || '' })
     .select()
     .single()
   if (error) throw error
@@ -242,4 +256,47 @@ export async function addJungmoApplication(jungmoId, { nickname, note }) {
 export async function deleteJungmoApplication(id) {
   const { error } = await supabase.from('jungmo_applications').delete().eq('id', id)
   if (error) throw error
+}
+
+// ── 감사 로그 ──────────────────────────────────────────────────
+
+export function logAudit(action, category, gameDate, actorName, details) {
+  supabase.from('audit_logs').insert({
+    action,
+    category,
+    game_date: gameDate || null,
+    actor_name: actorName,
+    details: details || null,
+  }).then(() => {})
+}
+
+export async function getAuditLogs(limit = 200) {
+  const { data, error } = await supabase
+    .from('audit_logs')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return data || []
+}
+
+export async function getAllApplications() {
+  const { data, error } = await supabase
+    .from('applications')
+    .select('*')
+    .order('game_date', { ascending: false })
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return (data || []).map(row => ({ ...toApp(row), gameDate: row.game_date }))
+}
+
+export async function getAllJungmo() {
+  const today = new Date().toISOString().slice(0, 10)
+  const { data, error } = await supabase
+    .from('jungmo')
+    .select('*')
+    .gte('event_date', today)
+    .order('event_date', { ascending: true })
+  if (error) throw error
+  return (data || []).map(toJungmo)
 }
