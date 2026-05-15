@@ -388,7 +388,17 @@ export default function App() {
                 <>
                   {activeTab === "dangwan" && isHomeGame && (
                     <div className="dangwan-section">
-                      {!dangwanOpenDates.has(selectedDate) ? (
+                      {!dangwanOpenDates.has(selectedDate) && applications.length > 0 ? (
+                        <>
+                          <div className="dangwan-closed-banner">🔴 단관 마감</div>
+                          <ApplicationList
+                            applications={applications}
+                            totalCount={totalCount}
+                            selectedDate={selectedDate}
+                            readOnly
+                          />
+                        </>
+                      ) : !dangwanOpenDates.has(selectedDate) ? (
                         <div className="dangwan-closed-card">
                           <span className="dangwan-closed-icon">📋</span>
                           <p className="dangwan-closed-text">단관 일정이 없습니다</p>

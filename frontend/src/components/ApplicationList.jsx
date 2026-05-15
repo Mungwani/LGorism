@@ -8,6 +8,7 @@ export default function ApplicationList({
   onDelete,
   onPay,
   selectedDate,
+  readOnly = false,
 }) {
   const [pwModal, setPwModal] = useState(null); // { type: 'edit'|'delete'|'pay', item }
   const [pwInput, setPwInput] = useState('');
@@ -72,31 +73,37 @@ export default function ApplicationList({
                   </div>
                 </div>
                 <div className="item-actions">
-                  {item.isPaid ? (
-                    <span className="action-btn paid-badge">✓ 입금완료</span>
+                  {readOnly ? (
+                    item.isPaid && <span className="action-btn paid-badge">✓ 입금완료</span>
                   ) : (
-                    <button
-                      className="action-btn pay"
-                      onClick={() => openPwModal('pay', item)}
-                      aria-label="입금완료"
-                    >
-                      💳 입금
-                    </button>
+                    <>
+                      {item.isPaid ? (
+                        <span className="action-btn paid-badge">✓ 입금완료</span>
+                      ) : (
+                        <button
+                          className="action-btn pay"
+                          onClick={() => openPwModal('pay', item)}
+                          aria-label="입금완료"
+                        >
+                          💳 입금
+                        </button>
+                      )}
+                      <button
+                        className="action-btn edit"
+                        onClick={() => openPwModal('edit', item)}
+                        aria-label="수정"
+                      >
+                        수정
+                      </button>
+                      <button
+                        className="action-btn delete"
+                        onClick={() => openPwModal('delete', item)}
+                        aria-label="삭제"
+                      >
+                        삭제
+                      </button>
+                    </>
                   )}
-                  <button
-                    className="action-btn edit"
-                    onClick={() => openPwModal('edit', item)}
-                    aria-label="수정"
-                  >
-                    수정
-                  </button>
-                  <button
-                    className="action-btn delete"
-                    onClick={() => openPwModal('delete', item)}
-                    aria-label="삭제"
-                  >
-                    삭제
-                  </button>
                 </div>
               </div>
 
