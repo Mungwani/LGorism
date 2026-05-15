@@ -38,7 +38,7 @@ const FILTER_LABELS = {
 
 export default function App() {
   const [selectedDate, setSelectedDate] = useState(null);
-  const [activeTab, setActiveTab] = useState("jikgwan"); // 'jikgwan' | 'jungmo'
+  const [activeTab, setActiveTab] = useState("dangwan"); // 'dangwan' | 'jikgwan' | 'jungmo'
 
   const [dangwanSubTab, setDangwanSubTab] = useState("form");
   const [applications, setApplications] = useState([]);
@@ -59,9 +59,6 @@ export default function App() {
 
   // 정모 전체 리스트 (정모 필터 클릭 시)
   const [allJungmoList, setAllJungmoList] = useState([]);
-
-  // 단관 패널 열기/닫기
-  const [showDangwan, setShowDangwan] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
@@ -85,8 +82,7 @@ export default function App() {
 
   function handleSelectDate(dateStr) {
     setSelectedDate(dateStr);
-    setActiveTab("jikgwan");
-    setShowDangwan(false);
+    setActiveTab(gameDateSet.has(dateStr) ? "dangwan" : "jikgwan");
     setDangwanSubTab("form");
     setEditingItem(null);
   }
@@ -140,8 +136,7 @@ export default function App() {
 
   function handleDangwanDateSelect(dateStr) {
     setSelectedDate(dateStr);
-    setActiveTab("jikgwan");
-    setShowDangwan(true);
+    setActiveTab("dangwan");
     setDangwanSubTab("form");
     setEditingItem(null);
   }
@@ -336,87 +331,27 @@ export default function App() {
           )}
         </section>
 
-        {/* ── 경기 정보 카드 + 단관 열기 ──────────────────────── */}
-        {selectedGame && (
+        {/* ── 경기 정보 카드 ───────────────────────────────────── */}
+        {selectedGame && filterMode === "all" && (
           <section className="section game-info-section">
             <h2 className="section-heading">⚾ 경기 정보</h2>
             <GameCard game={selectedGame} date={selectedDate} />
-
-            {/* 홈 경기에만 단관 버튼 표시 */}
-            {isHomeGame && (
-              <button
-                className={`dangwan-open-btn ${showDangwan ? "open" : ""}`}
-                onClick={() => setShowDangwan((v) => !v)}
-              >
-                📋 단관 신청하기
-                <span className="dangwan-chevron">{showDangwan ? "▲" : "▼"}</span>
-              </button>
-            )}
           </section>
         )}
 
-        {/* ── 단관 신청 패널 (인라인) ──────────────────────────── */}
-        {showDangwan && selectedDate && isHomeGame && (
-          <section className="section dangwan-section">
-            <div className="sub-tab-nav">
-              <button
-                className={`sub-tab-btn ${dangwanSubTab === "form" ? "active" : ""}`}
-                onClick={() => setDangwanSubTab("form")}
-              >
-                📝 신청하기
-                {editingItem && <span className="tab-dot" />}
-              </button>
-              <button
-                className={`sub-tab-btn ${dangwanSubTab === "list" ? "active" : ""}`}
-                onClick={() => setDangwanSubTab("list")}
-              >
-                👥 신청 목록
-                {totalCount > 0 && <span className="tab-badge">{totalCount}</span>}
-              </button>
-            </div>
-            {dangwanSubTab === "form" && (
-              <ApplicationForm
-                selectedDate={selectedDate}
-                editingItem={editingItem}
-                onSubmit={handleDangwanSubmit}
-                onCancelEdit={() => { setEditingItem(null); setDangwanSubTab("list"); }}
-                isClosed={selectedGame?.isClosed || false}
-              />
-            )}
-            {dangwanSubTab === "list" && (
-              <ApplicationList
-                applications={applications}
-                totalCount={totalCount}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onPay={handlePay}
-                selectedDate={selectedDate}
-              />
-            )}
-
-            {/* 정모 추천 멘트 */}
-            {jungmoList.length > 0 && (
-              <div className="jungmo-recommend-card">
-                <span className="jungmo-recommend-icon">🎮</span>
-                <div className="jungmo-recommend-text">
-                  <p className="jungmo-recommend-main">이 날 정모 이벤트가 있어요!</p>
-                  <p className="jungmo-recommend-sub">같이 참여해보는 건 어때요?</p>
-                </div>
-                <button
-                  className="jungmo-recommend-btn"
-                  onClick={() => { setFilterMode("all"); setActiveTab("jungmo"); }}
-                >
-                  보러가기
-                </button>
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* ── 날짜 선택 후 — 직관·정모 탭만 (전체 모드일 때만) ── */}
+        {/* ── 단관·직관·정모 통합 탭 ──────────────────────────── */}
         {selectedDate && filterMode === "all" && (
           <>
             <div className="tab-nav">
+              {isHomeGame && (
+                <button
+                  className={`tab-btn ${activeTab === "dangwan" ? "active" : ""} dangwan-tab`}
+                  onClick={() => setActiveTab("dangwan")}
+                >
+                  📋 단관
+                  {totalCount > 0 && <span className="tab-badge">{totalCount}</span>}
+                </button>
+              )}
               <button
                 className={`tab-btn ${activeTab === "jikgwan" ? "active" : ""} jikgwan-tab`}
                 onClick={() => setActiveTab("jikgwan")}
@@ -445,6 +380,45 @@ export default function App() {
                 </div>
               ) : (
                 <>
+                  {activeTab === "dangwan" && isHomeGame && (
+                    <div className="dangwan-section">
+                      <div className="sub-tab-nav">
+                        <button
+                          className={`sub-tab-btn ${dangwanSubTab === "form" ? "active" : ""}`}
+                          onClick={() => setDangwanSubTab("form")}
+                        >
+                          📝 신청하기
+                          {editingItem && <span className="tab-dot" />}
+                        </button>
+                        <button
+                          className={`sub-tab-btn ${dangwanSubTab === "list" ? "active" : ""}`}
+                          onClick={() => setDangwanSubTab("list")}
+                        >
+                          👥 신청 목록
+                          {totalCount > 0 && <span className="tab-badge">{totalCount}</span>}
+                        </button>
+                      </div>
+                      {dangwanSubTab === "form" && (
+                        <ApplicationForm
+                          selectedDate={selectedDate}
+                          editingItem={editingItem}
+                          onSubmit={handleDangwanSubmit}
+                          onCancelEdit={() => { setEditingItem(null); setDangwanSubTab("list"); }}
+                          isClosed={selectedGame?.isClosed || false}
+                        />
+                      )}
+                      {dangwanSubTab === "list" && (
+                        <ApplicationList
+                          applications={applications}
+                          totalCount={totalCount}
+                          onEdit={handleEdit}
+                          onDelete={handleDelete}
+                          onPay={handlePay}
+                          selectedDate={selectedDate}
+                        />
+                      )}
+                    </div>
+                  )}
                   {activeTab === "jikgwan" && (
                     <JikgwanPanel
                       selectedDate={selectedDate}

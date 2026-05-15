@@ -633,6 +633,12 @@
   animation: fadeSlideIn 0.2s ease;
 }
 
+/* ── 단관 탭 활성 색 ────────────────────────────────────────── */
+.tab-btn.dangwan-tab.active {
+  background: var(--red);
+  box-shadow: 0 2px 8px rgba(200,16,46,0.3);
+}
+
 /* ── 직관 탭 활성 색 ────────────────────────────────────────── */
 .tab-btn.jikgwan-tab.active {
   background: #FF6B35;
