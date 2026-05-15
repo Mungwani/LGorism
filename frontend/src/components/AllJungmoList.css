@@ -1,0 +1,253 @@
+.all-jungmo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ajl-heading {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--black);
+  margin-bottom: 6px;
+}
+
+.ajl-item {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.ajl-item-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ajl-item-header:hover {
+  background: var(--gray-100);
+}
+
+.ajl-date-chip {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #e8f0fe;
+  color: #1565C0;
+  padding: 3px 9px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ajl-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ajl-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.ajl-desc {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ajl-chevron {
+  font-size: 0.7rem;
+  color: var(--gray-400);
+  flex-shrink: 0;
+}
+
+.ajl-item-body {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.ajl-loading {
+  font-size: 0.8rem;
+  color: var(--gray-400);
+  padding-top: 10px;
+}
+
+.ajl-apps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+}
+
+.ajl-apps-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1565C0;
+}
+
+.ajl-app-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ajl-app-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--gray-100);
+  color: var(--gray-600);
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ajl-app-nick {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.ajl-app-note {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+.ajl-apply-btn {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: #e8f0fe;
+  color: #1565C0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.ajl-apply-btn:hover {
+  background: #c5d8ff;
+}
+
+.ajl-apply-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ajl-mini-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ajl-mini-field input {
+  padding: 9px 12px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  color: var(--black);
+  transition: border-color 0.15s;
+}
+
+.ajl-mini-field input:focus {
+  border-color: #1565C0;
+  outline: none;
+}
+
+.ajl-mini-field.error input {
+  border-color: var(--red);
+  background: #fff5f7;
+}
+
+.ajl-mini-error {
+  font-size: 0.72rem;
+  color: var(--red);
+  font-weight: 600;
+}
+
+.ajl-note-input {
+  padding: 9px 12px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  color: var(--black);
+  transition: border-color 0.15s;
+}
+
+.ajl-note-input:focus {
+  border-color: #1565C0;
+  outline: none;
+}
+
+.ajl-form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ajl-cancel-btn {
+  flex: 1;
+  padding: 9px;
+  border-radius: var(--radius-sm);
+  background: var(--gray-100);
+  color: var(--gray-600);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ajl-cancel-btn:hover { background: var(--gray-200); }
+
+.ajl-confirm-btn {
+  flex: 2;
+  padding: 9px;
+  border-radius: var(--radius-sm);
+  background: #1565C0;
+  color: var(--white);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.ajl-confirm-btn:hover:not(:disabled) { opacity: 0.85; }
+.ajl-confirm-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* 빈 상태 */
+.ajl-empty {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.ajl-empty span {
+  font-size: 2.2rem;
+  opacity: 0.4;
+}
+
+.ajl-empty p {
+  font-size: 0.88rem;
+  color: var(--gray-600);
+  font-weight: 600;
+}

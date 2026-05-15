@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./JikgwanPanel.css";
 
 export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelete }) {
+  const [showForm, setShowForm] = useState(false);
   const [nickname, setNickname] = useState("");
   const [section, setSection] = useState("");
   const [password, setPassword] = useState("");
@@ -31,6 +32,7 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
       setPassword("");
       setIsTowelFairy(false);
       setErrors({});
+      setShowForm(false);
     } finally {
       setSubmitting(false);
     }
@@ -59,10 +61,19 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
 
   return (
     <div className="jikgwan-panel">
+      {/* 등록 토글 버튼 */}
+      <button
+        className={`jikgwan-toggle-btn ${showForm ? "open" : ""}`}
+        onClick={() => setShowForm((v) => !v)}
+      >
+        🏟 오늘 직관 가요!
+        <span className="jikgwan-toggle-chevron">{showForm ? "▲" : "▼"}</span>
+      </button>
+
       {/* 등록 폼 */}
+      {showForm && (
       <form className="jikgwan-form" onSubmit={handleSubmit}>
         <div className="jikgwan-form-header">
-          <h3 className="jikgwan-title">🏟 오늘 직관 가요!</h3>
           <p className="jikgwan-subtitle">참여 의사를 남겨보세요</p>
         </div>
 
@@ -113,12 +124,12 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
           className={`towel-fairy-btn ${isTowelFairy ? "active" : ""}`}
           onClick={() => setIsTowelFairy((v) => !v)}
         >
-          🎽 {isTowelFairy ? "수건요정 신청됨! (취소하려면 클릭)" : "제가 수건요정할게요!"}
+          🎽 {isTowelFairy ? "수건대장 신청됨! (취소하려면 클릭)" : "제가 수건대장할게요!"}
         </button>
 
         {towelFairies.length > 0 && !isTowelFairy && (
           <p className="fairy-notice">
-            이미 수건요정이 있어요 — {towelFairies.map((p) => p.nickname).join(", ")}
+            이미 수건대장이 있어요 — {towelFairies.map((p) => p.nickname).join(", ")}
           </p>
         )}
         {isTowelFairy && (
@@ -129,6 +140,7 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
           {submitting ? "등록 중..." : "⚾ 직관 등록하기"}
         </button>
       </form>
+      )}
 
       {/* 직관 가는 사람 목록 */}
       {jikgwanList.length > 0 ? (
@@ -144,7 +156,7 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
                 <span className="jk-name">{person.nickname}</span>
                 <div className="jk-badges">
                   {person.isTowelFairy && (
-                    <span className="badge fairy">🎽 수건요정</span>
+                    <span className="badge fairy">🎽 수건대장</span>
                   )}
                   {person.section && (
                     <span className="badge section">📍 {person.section}</span>

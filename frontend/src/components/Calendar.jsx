@@ -24,7 +24,6 @@ export default function Calendar({
   dangwanSummary = {},
   jikgwanSummary = {},
   jungmoSummary = {},
-  filterMode = "all",
 }) {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -76,10 +75,9 @@ export default function Calendar({
           const jikgwanCount = jikgwanSummary[dateStr] || 0;
           const jungmoCount = jungmoSummary[dateStr] || 0;
 
-          // 필터별로 표시할 점 결정 (날짜는 항상 보임)
-          const showJikgwanDot = jikgwanCount > 0 && (filterMode === "all" || filterMode === "jikgwan");
-          const showJungmoDot  = jungmoCount  > 0 && (filterMode === "all" || filterMode === "jungmo");
-          const showDangwanBadge = dangwanCount > 0 && (filterMode === "all" || filterMode === "dangwan");
+          const showJikgwanDot = jikgwanCount > 0;
+          const showJungmoDot  = jungmoCount  > 0;
+          const showDangwanBadge = dangwanCount > 0;
 
           return (
             <div

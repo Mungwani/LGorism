@@ -5,6 +5,38 @@
   gap: 14px;
 }
 
+.jikgwan-toggle-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--black);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.jikgwan-toggle-btn:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.jikgwan-toggle-btn.open {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.jikgwan-toggle-chevron {
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
 /* 폼 */
 .jikgwan-form {
   background: var(--white);

@@ -1,0 +1,81 @@
+.dangwan-date-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ddl-heading {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--black);
+  margin-bottom: 6px;
+}
+
+.ddl-item {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ddl-item-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ddl-date {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.ddl-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--red);
+  color: var(--white);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.ddl-goto-btn {
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--red);
+  color: var(--white);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.ddl-goto-btn:hover { opacity: 0.85; }
+
+/* 빈 상태 */
+.ddl-empty {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.ddl-empty span {
+  font-size: 2.2rem;
+  opacity: 0.4;
+}
+
+.ddl-empty p {
+  font-size: 0.88rem;
+  color: var(--gray-600);
+  font-weight: 600;
+}
