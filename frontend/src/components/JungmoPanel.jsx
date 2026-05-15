@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getJungmoApplications, addJungmoApplication } from "../utils/storage";
+import { getJungmoApplications, addJungmoApplication, deleteJungmoApplication } from "../utils/storage";
 import "./JungmoPanel.css";
 
 function JungmoItem({ jungmo, onDelete }) {
@@ -8,12 +8,17 @@ function JungmoItem({ jungmo, onDelete }) {
   const [loadingApps, setLoadingApps] = useState(false);
   const [showApplyForm, setShowApplyForm] = useState(false);
   const [applyNickname, setApplyNickname] = useState("");
+  const [applyCount, setApplyCount] = useState(1);
   const [applyNote, setApplyNote] = useState("");
+  const [applyPassword, setApplyPassword] = useState("");
   const [applyError, setApplyError] = useState("");
   const [applying, setApplying] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(null); // { app }
   const [deletePw, setDeletePw] = useState("");
-  const [deleteError, setDeleteError] = useState("");
+  const [deletePwError, setDeletePwError] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [jungmoDeletePw, setJungmoDeletePw] = useState("");
+  const [jungmoDeleteError, setJungmoDeleteError] = useState("");
 
   async function loadApplications() {
     setLoadingApps(true);
@@ -37,14 +42,22 @@ function JungmoItem({ jungmo, onDelete }) {
       setApplyError("닉네임을 입력해주세요");
       return;
     }
+    if (!applyPassword.trim()) {
+      setApplyError("비밀번호를 입력해주세요");
+      return;
+    }
     setApplying(true);
     try {
       await addJungmoApplication(jungmo.id, {
         nickname: applyNickname.trim(),
+        count: applyCount,
         note: applyNote.trim(),
+        password: applyPassword.trim(),
       });
       setApplyNickname("");
+      setApplyCount(1);
       setApplyNote("");
+      setApplyPassword("");
       setApplyError("");
       setShowApplyForm(false);
       loadApplications();
@@ -53,9 +66,21 @@ function JungmoItem({ jungmo, onDelete }) {
     }
   }
 
+  async function handleDeleteApp() {
+    if (deletePw !== deleteModal.app.password) {
+      setDeletePwError("비밀번호가 틀렸어요.");
+      return;
+    }
+    await deleteJungmoApplication(deleteModal.app.id);
+    setDeleteModal(null);
+    setDeletePw("");
+    setDeletePwError("");
+    loadApplications();
+  }
+
   function handleDeleteConfirm() {
-    if (deletePw !== jungmo.password) {
-      setDeleteError("비밀번호가 틀렸어요");
+    if (jungmoDeletePw !== jungmo.password) {
+      setJungmoDeleteError("비밀번호가 틀렸어요");
       return;
     }
     onDelete(jungmo.id);
@@ -82,14 +107,26 @@ function JungmoItem({ jungmo, onDelete }) {
             <>
               {applications.length > 0 ? (
                 <div className="jungmo-apps">
-                  <p className="apps-count">{applications.length}명 신청 중</p>
-                  {applications.map((app, i) => (
+                  <p className="apps-count">
+                    총 {applications.reduce((s, a) => s + (a.count || 1), 0)}명 참석 예정
+                  </p>
+                  {applications.map((app) => (
                     <div key={app.id} className="jungmo-app-item">
-                      <span className="app-num">{i + 1}</span>
                       <span className="app-nickname">{app.nickname}</span>
+                      {app.count > 1 && (
+                        <span className="app-count-badge">+{app.count - 1}명</span>
+                      )}
                       {app.note && (
                         <span className="app-note">· {app.note}</span>
                       )}
+                      <button
+                        className="app-delete-btn"
+                        onClick={() => {
+                          setDeleteModal({ app });
+                          setDeletePw("");
+                          setDeletePwError("");
+                        }}
+                      >✕</button>
                     </div>
                   ))}
                 </div>
@@ -122,6 +159,22 @@ function JungmoItem({ jungmo, onDelete }) {
                       <span className="mini-error">{applyError}</span>
                     )}
                   </div>
+                  <div className="mini-count-row">
+                    <span className="mini-count-label">참석 인원</span>
+                    <div className="mini-count-ctrl">
+                      <button
+                        type="button"
+                        className="count-btn"
+                        onClick={() => setApplyCount((v) => Math.max(1, v - 1))}
+                      >－</button>
+                      <span className="count-val">{applyCount}명</span>
+                      <button
+                        type="button"
+                        className="count-btn"
+                        onClick={() => setApplyCount((v) => Math.min(10, v + 1))}
+                      >＋</button>
+                    </div>
+                  </div>
                   <input
                     type="text"
                     placeholder="한마디 (선택)"
@@ -130,6 +183,15 @@ function JungmoItem({ jungmo, onDelete }) {
                     maxLength={50}
                     className="mini-field-input"
                   />
+                  <div className="mini-field">
+                    <input
+                      type="password"
+                      placeholder="비밀번호 * (삭제 시 필요)"
+                      value={applyPassword}
+                      onChange={(e) => { setApplyPassword(e.target.value); setApplyError(""); }}
+                      maxLength={20}
+                    />
+                  </div>
                   <div className="apply-form-actions">
                     <button
                       type="button"
@@ -156,14 +218,41 @@ function JungmoItem({ jungmo, onDelete }) {
                 className="jungmo-delete-btn"
                 onClick={() => {
                   setShowDeleteModal(true);
-                  setDeletePw("");
-                  setDeleteError("");
+                  setJungmoDeletePw("");
+                  setJungmoDeleteError("");
                 }}
               >
                 정모 삭제
               </button>
             </>
           )}
+        </div>
+      )}
+
+      {deleteModal && (
+        <div className="jungmo-modal-overlay" onClick={() => setDeleteModal(null)}>
+          <div className="jungmo-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-icon">🔒</div>
+            <h4 className="modal-title">신청 삭제</h4>
+            <p className="modal-desc">
+              <strong>{deleteModal.app.nickname}</strong>님,<br />
+              신청 시 설정한 비밀번호를 입력해주세요.
+            </p>
+            <input
+              className="pw-input"
+              type="password"
+              placeholder="비밀번호 입력"
+              value={deletePw}
+              onChange={(e) => { setDeletePw(e.target.value); setDeletePwError(""); }}
+              onKeyDown={(e) => e.key === "Enter" && handleDeleteApp()}
+              autoFocus
+            />
+            {deletePwError && <p className="pw-error">{deletePwError}</p>}
+            <div className="modal-actions">
+              <button className="modal-btn cancel" onClick={() => setDeleteModal(null)}>취소</button>
+              <button className="modal-btn confirm red" onClick={handleDeleteApp}>삭제하기</button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -187,15 +276,15 @@ function JungmoItem({ jungmo, onDelete }) {
               className="pw-input"
               type="password"
               placeholder="비밀번호 입력"
-              value={deletePw}
+              value={jungmoDeletePw}
               onChange={(e) => {
-                setDeletePw(e.target.value);
-                setDeleteError("");
+                setJungmoDeletePw(e.target.value);
+                setJungmoDeleteError("");
               }}
               onKeyDown={(e) => e.key === "Enter" && handleDeleteConfirm()}
               autoFocus
             />
-            {deleteError && <p className="pw-error">{deleteError}</p>}
+            {jungmoDeleteError && <p className="pw-error">{jungmoDeleteError}</p>}
             <div className="modal-actions">
               <button
                 className="modal-btn cancel"
