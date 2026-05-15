@@ -106,7 +106,7 @@ export default function ApplicationList({
 
               <p className="item-time">
                 {item.updatedAt
-                  ? `수정됨 ${formatTime(item.updatedAt)}`
+                  ? `${formatTime(item.updatedAt)} 수정됨`
                   : formatTime(item.createdAt)}
               </p>
             </div>
@@ -165,5 +165,5 @@ function formatTime(isoStr) {
   const day = String(d.getDate()).padStart(2, "0");
   const h = String(d.getHours()).padStart(2, "0");
   const min = String(d.getMinutes()).padStart(2, "0");
-  return `${m}/${day} ${h}:${min} 등록`;
+  return `${m}/${day} ${h}:${min}`;
 }

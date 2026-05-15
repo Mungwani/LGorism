@@ -348,7 +348,7 @@ export default function App() {
                 className={`dangwan-open-btn ${showDangwan ? "open" : ""}`}
                 onClick={() => setShowDangwan((v) => !v)}
               >
-                📋 단관 신청 받기
+                📋 단관 신청하기
                 <span className="dangwan-chevron">{showDangwan ? "▲" : "▼"}</span>
               </button>
             )}
