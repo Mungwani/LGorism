@@ -6,7 +6,7 @@ const today = new Date().toISOString().slice(0, 10)
 const homeGames = games.filter(g => g.isHome && g.date >= today).map(g => g.date)
 import './AdminPage.css'
 
-const ADMIN_PW = 'admin60'
+const ADMIN_PW = import.meta.env.VITE_ADMIN_PASSWORD
 
 const CATEGORY_LABELS = {
   dangwan: '단관',
