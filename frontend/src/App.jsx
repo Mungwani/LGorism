@@ -70,6 +70,21 @@ export default function App() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [logoTapCount, setLogoTapCount] = useState(0);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const date = params.get('date')
+    const tab = params.get('tab')
+    if (!date) return
+    setSelectedDate(date)
+    setFilterMode('all')
+    setDangwanSubTab('list')
+    if (tab === 'dangwan' || tab === 'jikgwan' || tab === 'jungmo') {
+      setActiveTab(tab)
+    } else {
+      setActiveTab(gameDateSet.has(date) ? 'dangwan' : 'jikgwan')
+    }
+  }, [])
+
   function handleLogoTap() {
     setLogoTapCount(prev => {
       const next = prev + 1;

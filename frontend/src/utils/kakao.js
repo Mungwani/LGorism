@@ -1,5 +1,6 @@
-export function shareContent({ title, text }) {
+export function shareContent({ title, text, url }) {
   const key = import.meta.env.VITE_KAKAO_APP_KEY
+  const shareUrl = url || 'https://lgorism.vercel.app'
   const fullText = `${title}\n\n${text}`
 
   if (key && window.Kakao) {
@@ -8,21 +9,20 @@ export function shareContent({ title, text }) {
       objectType: 'text',
       text: fullText,
       link: {
-        mobileWebUrl: 'https://lgorism.vercel.app',
-        webUrl: 'https://lgorism.vercel.app',
+        mobileWebUrl: shareUrl,
+        webUrl: shareUrl,
       },
-      buttonTitle: '엘고리즘 바로가기',
+      buttonTitle: '바로 가기',
     })
     return
   }
 
   if (navigator.share) {
-    navigator.share({ title, text: fullText + '\nhttps://lgorism.vercel.app' }).catch(() => {})
+    navigator.share({ title, text: fullText + '\n' + shareUrl }).catch(() => {})
     return
   }
 
-  const copyText = `${fullText}\nhttps://lgorism.vercel.app`
-  navigator.clipboard?.writeText(copyText)
+  navigator.clipboard?.writeText(`${fullText}\n${shareUrl}`)
     .then(() => alert('링크가 복사됐어요!'))
-    .catch(() => alert('lgorism.vercel.app'))
+    .catch(() => alert(shareUrl))
 }

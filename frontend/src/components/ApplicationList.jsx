@@ -58,6 +58,7 @@ export default function ApplicationList({
             onClick={() => shareContent({
               title: `⚾ ${selectedDate} 단관 신청 모집 중!`,
               text: `현재 ${totalCount}명 신청했어요\n지금 바로 신청하러 오세요!`,
+              url: `https://lgorism.vercel.app?date=${selectedDate}&tab=dangwan`,
             })}
           >
             카카오 공유

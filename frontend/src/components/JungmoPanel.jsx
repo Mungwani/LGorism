@@ -135,6 +135,7 @@ function JungmoItem({ jungmo, onDelete }) {
               shareContent({
                 title: `🎮 ${jungmo.title}`,
                 text: `${jungmo.eventDate}${jungmo.description ? '\n' + jungmo.description : ''}\n지금 참여 신청하러 오세요!`,
+                url: `https://lgorism.vercel.app?date=${jungmo.eventDate}&tab=jungmo`,
               })
             }}
           >
