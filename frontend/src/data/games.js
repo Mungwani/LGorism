@@ -87,6 +87,42 @@ export const games = [
   { id: 72, date: "2026-07-29", opponent: "키움", time: "18:30", stadium: "잠실",                  isHome: true,  isClosed: false },
   { id: 73, date: "2026-07-30", opponent: "키움", time: "18:30", stadium: "잠실",                  isHome: true,  isClosed: false },
   { id: 74, date: "2026-07-31", opponent: "두산", time: "18:30", stadium: "잠실",                  isHome: false, isClosed: false },
+
+  // ── 8월 ────────────────────────────────────────────────────
+  { id: 75,  date: "2026-08-01", opponent: "두산", time: "18:00", stadium: "잠실",                  isHome: false, isClosed: false },
+  { id: 76,  date: "2026-08-02", opponent: "두산", time: "14:00", stadium: "잠실",                  isHome: false, isClosed: false },
+  { id: 77,  date: "2026-08-04", opponent: "SSG",  time: "18:30", stadium: "인천SSG랜더스필드",       isHome: false, isClosed: false },
+  { id: 78,  date: "2026-08-05", opponent: "SSG",  time: "18:30", stadium: "인천SSG랜더스필드",       isHome: false, isClosed: false },
+  { id: 79,  date: "2026-08-06", opponent: "SSG",  time: "18:30", stadium: "인천SSG랜더스필드",       isHome: false, isClosed: false },
+  { id: 80,  date: "2026-08-07", opponent: "KIA",  time: "18:30", stadium: "잠실",                  isHome: true,  isClosed: false },
+  { id: 81,  date: "2026-08-08", opponent: "KIA",  time: "17:00", stadium: "잠실",                  isHome: true,  isClosed: false },
+  { id: 82,  date: "2026-08-09", opponent: "KIA",  time: "14:00", stadium: "잠실",                  isHome: true,  isClosed: false },
+  { id: 83,  date: "2026-08-11", opponent: "키움", time: "18:30", stadium: "고척스카이돔",            isHome: false, isClosed: false },
+  { id: 84,  date: "2026-08-12", opponent: "키움", time: "18:30", stadium: "고척스카이돔",            isHome: false, isClosed: false },
+  { id: 85,  date: "2026-08-13", opponent: "키움", time: "18:30", stadium: "고척스카이돔",            isHome: false, isClosed: false },
+  { id: 86,  date: "2026-08-14", opponent: "SSG",  time: "18:30", stadium: "잠실",                  isHome: true,  isClosed: false },
+  { id: 87,  date: "2026-08-15", opponent: "SSG",  time: "17:00", stadium: "잠실",                  isHome: true,  isClosed: false },
+  { id: 88,  date: "2026-08-16", opponent: "SSG",  time: "14:00", stadium: "잠실",                  isHome: true,  isClosed: false },
+  { id: 89,  date: "2026-08-18", opponent: "KT",   time: "18:30", stadium: "잠실",                  isHome: true,  isClosed: false },
+  { id: 90,  date: "2026-08-19", opponent: "KT",   time: "18:30", stadium: "잠실",                  isHome: true,  isClosed: false },
+  { id: 91,  date: "2026-08-20", opponent: "KT",   time: "18:30", stadium: "잠실",                  isHome: true,  isClosed: false },
+  { id: 92,  date: "2026-08-21", opponent: "한화", time: "18:30", stadium: "한화생명이글스파크",       isHome: false, isClosed: false },
+  { id: 93,  date: "2026-08-22", opponent: "한화", time: "17:00", stadium: "한화생명이글스파크",       isHome: false, isClosed: false },
+  { id: 94,  date: "2026-08-23", opponent: "한화", time: "14:00", stadium: "한화생명이글스파크",       isHome: false, isClosed: false },
+  { id: 95,  date: "2026-08-25", opponent: "NC",   time: "18:30", stadium: "잠실",                  isHome: true,  isClosed: false },
+  { id: 96,  date: "2026-08-26", opponent: "NC",   time: "18:30", stadium: "잠실",                  isHome: true,  isClosed: false },
+  { id: 97,  date: "2026-08-27", opponent: "NC",   time: "18:30", stadium: "잠실",                  isHome: true,  isClosed: false },
+  { id: 98,  date: "2026-08-28", opponent: "롯데", time: "18:30", stadium: "사직",                  isHome: false, isClosed: false },
+  { id: 99,  date: "2026-08-29", opponent: "롯데", time: "17:00", stadium: "사직",                  isHome: false, isClosed: false },
+  { id: 100, date: "2026-08-30", opponent: "롯데", time: "14:00", stadium: "사직",                  isHome: false, isClosed: false },
+
+  // ── 9월 ────────────────────────────────────────────────────
+  { id: 101, date: "2026-09-01", opponent: "두산", time: "18:30", stadium: "잠실",                  isHome: false, isClosed: false },
+  { id: 102, date: "2026-09-02", opponent: "두산", time: "18:30", stadium: "잠실",                  isHome: false, isClosed: false },
+  { id: 103, date: "2026-09-03", opponent: "두산", time: "18:30", stadium: "잠실",                  isHome: false, isClosed: false },
+  { id: 104, date: "2026-09-04", opponent: "삼성", time: "18:30", stadium: "잠실",                  isHome: true,  isClosed: false },
+  { id: 105, date: "2026-09-05", opponent: "삼성", time: "17:00", stadium: "잠실",                  isHome: true,  isClosed: false },
+  { id: 106, date: "2026-09-06", opponent: "삼성", time: "14:00", stadium: "잠실",                  isHome: true,  isClosed: false },
 ];
 
 /** 날짜 문자열로 경기 찾기 */
