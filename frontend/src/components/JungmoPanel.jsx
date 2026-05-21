@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getJungmoApplications, addJungmoApplication, updateJungmoApplication, deleteJungmoApplication, logAudit } from "../utils/storage";
-import { shareContent } from "../utils/kakao";
+import { shareContent, formatDateKo } from "../utils/kakao";
 import "./JungmoPanel.css";
 
 function JungmoItem({ jungmo, onDelete }) {
@@ -134,7 +134,7 @@ function JungmoItem({ jungmo, onDelete }) {
               e.stopPropagation()
               shareContent({
                 title: `🎮 ${jungmo.title}`,
-                text: `${jungmo.eventDate}${jungmo.description ? '\n' + jungmo.description : ''}\n지금 참여 신청하러 오세요!`,
+                text: `${formatDateKo(jungmo.eventDate)}${jungmo.description ? '\n' + jungmo.description : ''}\n지금 참여 신청하러 오세요!`,
                 url: `https://lgorism.vercel.app?date=${jungmo.eventDate}&tab=jungmo`,
               })
             }}

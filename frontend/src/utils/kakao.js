@@ -1,3 +1,8 @@
+export function formatDateKo(dateStr) {
+  const [, m, d] = dateStr.split('-')
+  return `${parseInt(m)}월 ${parseInt(d)}일`
+}
+
 export function shareContent({ title, text, url }) {
   const key = import.meta.env.VITE_KAKAO_APP_KEY
   const shareUrl = url || 'https://lgorism.vercel.app'
@@ -12,7 +17,15 @@ export function shareContent({ title, text, url }) {
         mobileWebUrl: shareUrl,
         webUrl: shareUrl,
       },
-      buttonTitle: '바로 가기',
+      buttons: [
+        {
+          title: '바로 가기',
+          link: {
+            mobileWebUrl: shareUrl,
+            webUrl: shareUrl,
+          },
+        },
+      ],
     })
     return
   }

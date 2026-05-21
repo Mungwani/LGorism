@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { shareContent } from "../utils/kakao";
+import { shareContent, formatDateKo } from "../utils/kakao";
 import "./ApplicationList.css";
 
 export default function ApplicationList({
@@ -56,7 +56,7 @@ export default function ApplicationList({
           <button
             className="share-btn"
             onClick={() => shareContent({
-              title: `⚾ ${selectedDate} 단관 신청 모집 중!`,
+              title: `⚾ ${formatDateKo(selectedDate)} 단관 신청 모집 중!`,
               text: `현재 ${totalCount}명 신청했어요\n지금 바로 신청하러 오세요!`,
               url: `https://lgorism.vercel.app?date=${selectedDate}&tab=dangwan`,
             })}
