@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, openDangwanDate, closeDangwanDate, getAllNotices, createNotice, deleteNotice } from '../utils/storage'
+import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, openDangwanDate, closeDangwanDate, getAllNotices, createNotice, updateNotice, toggleNoticeActive, deleteNotice } from '../utils/storage'
 import { games } from '../data/games'
 
 const today = new Date().toISOString().slice(0, 10)
@@ -39,6 +39,9 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   const [noticeInput, setNoticeInput] = useState('')
   const [noticeLoading, setNoticeLoading] = useState(false)
   const [noticeSaving, setNoticeSaving] = useState(false)
+  const [editingNoticeId, setEditingNoticeId] = useState(null)
+  const [editNoticeContent, setEditNoticeContent] = useState('')
+  const [deleteNoticeTarget, setDeleteNoticeTarget] = useState(null)
 
   // 단관 관리
   const [dangwanOpen, setDangwanOpen] = useState(new Set())
@@ -113,9 +116,23 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     }
   }
 
-  async function handleDeleteNotice(id) {
-    await deleteNotice(id)
-    setNotices(prev => prev.filter(n => n.id !== id))
+  async function handleEditNoticeSubmit(e, id) {
+    e.preventDefault()
+    if (!editNoticeContent.trim()) return
+    await updateNotice(id, editNoticeContent.trim())
+    setNotices(prev => prev.map(n => n.id === id ? { ...n, content: editNoticeContent.trim() } : n))
+    setEditingNoticeId(null)
+  }
+
+  async function handleToggleNotice(id, isActive) {
+    await toggleNoticeActive(id, isActive)
+    setNotices(prev => prev.map(n => n.id === id ? { ...n, isActive } : n))
+  }
+
+  async function confirmDeleteNotice() {
+    await deleteNotice(deleteNoticeTarget)
+    setNotices(prev => prev.filter(n => n.id !== deleteNoticeTarget))
+    setDeleteNoticeTarget(null)
   }
 
   useEffect(() => {
@@ -374,11 +391,44 @@ export default function AdminPage({ onClose, onDangwanChange }) {
               <div className="notice-list">
                 {notices.map(n => (
                   <div key={n.id} className={`notice-admin-item ${n.isActive ? 'active' : 'inactive'}`}>
-                    <p className="notice-admin-content">{n.content}</p>
-                    <div className="notice-admin-footer">
-                      <span className="notice-admin-time">{formatLogTime(n.createdAt)}</span>
-                      <button className="notice-delete-btn" onClick={() => handleDeleteNotice(n.id)}>삭제</button>
-                    </div>
+                    {!n.isActive && <span className="notice-paused-badge">게시 중단</span>}
+                    {editingNoticeId === n.id ? (
+                      <form onSubmit={e => handleEditNoticeSubmit(e, n.id)} className="notice-edit-form">
+                        <textarea
+                          className="notice-textarea"
+                          value={editNoticeContent}
+                          onChange={e => setEditNoticeContent(e.target.value)}
+                          rows={3}
+                          maxLength={300}
+                          autoFocus
+                        />
+                        <div className="notice-edit-actions">
+                          <button type="button" className="notice-action-btn cancel" onClick={() => setEditingNoticeId(null)}>취소</button>
+                          <button type="submit" className="notice-action-btn save">저장</button>
+                        </div>
+                      </form>
+                    ) : (
+                      <>
+                        <p className="notice-admin-content">{n.content}</p>
+                        <div className="notice-admin-footer">
+                          <span className="notice-admin-time">{formatLogTime(n.createdAt)}</span>
+                          <div className="notice-admin-actions">
+                            <button
+                              className="notice-action-btn edit"
+                              onClick={() => { setEditingNoticeId(n.id); setEditNoticeContent(n.content) }}
+                            >수정</button>
+                            <button
+                              className={`notice-action-btn ${n.isActive ? 'pause' : 'resume'}`}
+                              onClick={() => handleToggleNotice(n.id, !n.isActive)}
+                            >{n.isActive ? '게시 멈춤' : '다시 게시'}</button>
+                            <button
+                              className="notice-action-btn delete"
+                              onClick={() => setDeleteNoticeTarget(n.id)}
+                            >삭제</button>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
@@ -435,6 +485,19 @@ export default function AdminPage({ onClose, onDangwanChange }) {
               >
                 변경
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {deleteNoticeTarget && (
+        <div className="admin-confirm-overlay" onClick={() => setDeleteNoticeTarget(null)}>
+          <div className="admin-confirm-modal" onClick={e => e.stopPropagation()}>
+            <div className="confirm-icon">🗑️</div>
+            <h4 className="confirm-title">공지 삭제</h4>
+            <p className="confirm-desc">이 공지를 삭제하시겠어요?<br />삭제하면 복구할 수 없어요.</p>
+            <div className="confirm-actions">
+              <button className="confirm-btn cancel" onClick={() => setDeleteNoticeTarget(null)}>취소</button>
+              <button className="confirm-btn ok revert" onClick={confirmDeleteNotice}>삭제</button>
             </div>
           </div>
         </div>

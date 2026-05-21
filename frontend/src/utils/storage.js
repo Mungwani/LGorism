@@ -367,6 +367,22 @@ export async function createNotice(content) {
   return toNotice(data)
 }
 
+export async function updateNotice(id, content) {
+  const { error } = await supabase
+    .from('notices')
+    .update({ content })
+    .eq('id', id)
+  if (error) throw error
+}
+
+export async function toggleNoticeActive(id, isActive) {
+  const { error } = await supabase
+    .from('notices')
+    .update({ is_active: isActive })
+    .eq('id', id)
+  if (error) throw error
+}
+
 export async function deleteNotice(id) {
   const { error } = await supabase.from('notices').delete().eq('id', id)
   if (error) throw error
