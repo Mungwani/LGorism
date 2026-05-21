@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { shareContent } from "../utils/kakao";
 import "./ApplicationList.css";
 
 export default function ApplicationList({
@@ -48,8 +49,19 @@ export default function ApplicationList({
       {/* 헤더 */}
       <div className="list-header">
         <h3 className="list-title">⚾ 신청 현황</h3>
-        <div className="total-badge">
-          총 <strong>{totalCount}</strong>명
+        <div className="list-header-right">
+          <div className="total-badge">
+            총 <strong>{totalCount}</strong>명
+          </div>
+          <button
+            className="share-btn"
+            onClick={() => shareContent({
+              title: `⚾ ${selectedDate} 단관 신청 모집 중!`,
+              text: `현재 ${totalCount}명 신청했어요\n지금 바로 신청하러 오세요!`,
+            })}
+          >
+            카카오 공유
+          </button>
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, openDangwanDate, closeDangwanDate } from '../utils/storage'
+import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, openDangwanDate, closeDangwanDate, getAllNotices, createNotice, deleteNotice } from '../utils/storage'
 import { games } from '../data/games'
 
 const today = new Date().toISOString().slice(0, 10)
@@ -33,6 +33,12 @@ export default function AdminPage({ onClose, onDangwanChange }) {
 
   const [apps, setApps] = useState([])
   const [payLoading, setPayLoading] = useState(false)
+
+  // 공지 관리
+  const [notices, setNotices] = useState([])
+  const [noticeInput, setNoticeInput] = useState('')
+  const [noticeLoading, setNoticeLoading] = useState(false)
+  const [noticeSaving, setNoticeSaving] = useState(false)
 
   // 단관 관리
   const [dangwanOpen, setDangwanOpen] = useState(new Set())
@@ -84,11 +90,40 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     }
   }
 
+  async function loadNotices() {
+    setNoticeLoading(true)
+    try {
+      const data = await getAllNotices()
+      setNotices(data)
+    } finally {
+      setNoticeLoading(false)
+    }
+  }
+
+  async function handleCreateNotice(e) {
+    e.preventDefault()
+    if (!noticeInput.trim()) return
+    setNoticeSaving(true)
+    try {
+      await createNotice(noticeInput.trim())
+      setNoticeInput('')
+      await loadNotices()
+    } finally {
+      setNoticeSaving(false)
+    }
+  }
+
+  async function handleDeleteNotice(id) {
+    await deleteNotice(id)
+    setNotices(prev => prev.filter(n => n.id !== id))
+  }
+
   useEffect(() => {
     if (!authed) return
     if (tab === 'log') loadLogs()
     if (tab === 'pay') loadApps()
     if (tab === 'dangwan') loadDangwan()
+    if (tab === 'notice') loadNotices()
   }, [tab, authed])
 
   async function confirmDangwanToggle() {
@@ -180,6 +215,9 @@ export default function AdminPage({ onClose, onDangwanChange }) {
           </button>
           <button className={`admin-tab-btn ${tab === 'dangwan' ? 'active' : ''}`} onClick={() => setTab('dangwan')}>
             🎟 단관
+          </button>
+          <button className={`admin-tab-btn ${tab === 'notice' ? 'active' : ''}`} onClick={() => setTab('notice')}>
+            📢 공지
           </button>
         </div>
 
@@ -307,6 +345,42 @@ export default function AdminPage({ onClose, onDangwanChange }) {
                     </div>
                   )
                 })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === 'notice' && (
+          <div className="admin-body">
+            <form className="notice-create-form" onSubmit={handleCreateNotice}>
+              <textarea
+                className="notice-textarea"
+                placeholder="공지 내용을 입력하세요"
+                value={noticeInput}
+                onChange={e => setNoticeInput(e.target.value)}
+                rows={3}
+                maxLength={300}
+              />
+              <button type="submit" className="notice-submit-btn" disabled={noticeSaving || !noticeInput.trim()}>
+                {noticeSaving ? '등록 중...' : '공지 등록'}
+              </button>
+            </form>
+
+            {noticeLoading ? (
+              <div className="admin-state">불러오는 중...</div>
+            ) : notices.length === 0 ? (
+              <div className="admin-state">등록된 공지가 없어요</div>
+            ) : (
+              <div className="notice-list">
+                {notices.map(n => (
+                  <div key={n.id} className={`notice-admin-item ${n.isActive ? 'active' : 'inactive'}`}>
+                    <p className="notice-admin-content">{n.content}</p>
+                    <div className="notice-admin-footer">
+                      <span className="notice-admin-time">{formatLogTime(n.createdAt)}</span>
+                      <button className="notice-delete-btn" onClick={() => handleDeleteNotice(n.id)}>삭제</button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

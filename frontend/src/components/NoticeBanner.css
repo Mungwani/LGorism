@@ -1,0 +1,58 @@
+.notice-banner-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 16px 0;
+}
+
+.notice-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #fffbea;
+  border: 1.5px solid #fbbf24;
+  border-left: 4px solid #C8102E;
+  border-radius: 10px;
+  padding: 10px 12px;
+  animation: noticeSlide 0.25s ease;
+}
+
+@keyframes noticeSlide {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.notice-icon {
+  font-size: 0.88rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.notice-content {
+  font-size: 0.82rem;
+  color: #1a1a1a;
+  font-weight: 600;
+  line-height: 1.55;
+  flex: 1;
+  white-space: pre-wrap;
+}
+
+.notice-dismiss {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  color: #aaa;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  margin-top: 1px;
+}
+
+.notice-dismiss:hover {
+  background: rgba(0, 0, 0, 0.14);
+  color: #555;
+}

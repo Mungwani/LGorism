@@ -326,3 +326,48 @@ export async function getAllJungmo() {
   if (error) throw error
   return (data || []).map(toJungmo)
 }
+
+// ── 공지 CRUD ──────────────────────────────────────────────────
+
+function toNotice(row) {
+  return {
+    id:        row.id,
+    content:   row.content,
+    isActive:  row.is_active,
+    createdAt: row.created_at,
+  }
+}
+
+export async function getActiveNotices() {
+  const { data, error } = await supabase
+    .from('notices')
+    .select('*')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data || []).map(toNotice)
+}
+
+export async function getAllNotices() {
+  const { data, error } = await supabase
+    .from('notices')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data || []).map(toNotice)
+}
+
+export async function createNotice(content) {
+  const { data, error } = await supabase
+    .from('notices')
+    .insert({ content })
+    .select()
+    .single()
+  if (error) throw error
+  return toNotice(data)
+}
+
+export async function deleteNotice(id) {
+  const { error } = await supabase.from('notices').delete().eq('id', id)
+  if (error) throw error
+}

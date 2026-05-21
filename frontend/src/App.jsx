@@ -8,6 +8,7 @@ import JungmoPanel from "./components/JungmoPanel";
 import AllJungmoList from "./components/AllJungmoList";
 import DangwanDateList from "./components/DangwanDateList";
 import AdminPage from "./components/AdminPage";
+import NoticeBanner from "./components/NoticeBanner";
 import { getGameByDate, gameDateSet } from "./data/games";
 import {
   getApplications,
@@ -291,6 +292,8 @@ export default function App() {
           </div>
         </div>
       </header>
+
+      <NoticeBanner />
 
       <main className="app-main">
         {/* ── 달력 + 필터 칩 ───────────────────────────────── */}
