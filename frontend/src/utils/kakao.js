@@ -8,34 +8,22 @@ export function shareContent({ title, text, url }) {
   const shareUrl = url || 'https://lgorism.vercel.app'
   const fullText = `${title}\n\n${text}`
 
-  if (key && window.Kakao) {
-    if (!window.Kakao.isInitialized()) window.Kakao.init(key)
-    window.Kakao.Share.sendDefault({
-      objectType: 'text',
-      text: fullText,
-      link: {
-        mobileWebUrl: shareUrl,
-        webUrl: shareUrl,
-      },
-      buttons: [
-        {
-          title: '바로 가기',
-          link: {
-            mobileWebUrl: shareUrl,
-            webUrl: shareUrl,
-          },
-        },
-      ],
-    })
+  if (!key || !window.Kakao) {
+    navigator.clipboard?.writeText(`${fullText}\n${shareUrl}`)
+      .then(() => alert('링크가 복사됐어요!'))
+      .catch(() => alert(shareUrl))
     return
   }
 
-  if (navigator.share) {
-    navigator.share({ title, text: fullText + '\n' + shareUrl }).catch(() => {})
-    return
-  }
+  if (!window.Kakao.isInitialized()) window.Kakao.init(key)
 
-  navigator.clipboard?.writeText(`${fullText}\n${shareUrl}`)
-    .then(() => alert('링크가 복사됐어요!'))
-    .catch(() => alert(shareUrl))
+  window.Kakao.Share.sendDefault({
+    objectType: 'text',
+    text: fullText,
+    link: {
+      mobileWebUrl: shareUrl,
+      webUrl: shareUrl,
+    },
+    buttonTitle: '바로 가기',
+  })
 }
