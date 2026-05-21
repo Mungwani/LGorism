@@ -61,7 +61,7 @@ export default function ApplicationList({
               url: `https://lgorism.vercel.app?date=${selectedDate}&tab=dangwan`,
             })}
           >
-            카카오 공유
+            공유하기
           </button>
         </div>
       </div>

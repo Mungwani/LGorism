@@ -139,7 +139,7 @@ function JungmoItem({ jungmo, onDelete }) {
               })
             }}
           >
-            공유
+            공유하기
           </button>
           <span className="expand-chevron">{expanded ? "▲" : "▼"}</span>
         </div>
