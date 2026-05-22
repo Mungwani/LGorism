@@ -53,6 +53,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   const [dangwanLoading, setDangwanLoading] = useState(false)
   const [dangwanConfirm, setDangwanConfirm] = useState(null) // { date, willOpen }
   const [dangwanDateInput, setDangwanDateInput] = useState('')
+  const [showDangwanInput, setShowDangwanInput] = useState(false)
 
   // 날짜별 접기/펼치기 (기본: 전부 펼침)
   const [collapsedDates, setCollapsedDates] = useState(new Set())
@@ -373,30 +374,46 @@ export default function AdminPage({ onClose, onDangwanChange }) {
 
         {tab === 'dangwan' && (
           <div className="admin-body">
-            <div className="dangwan-input-row">
-              <input
-                type="date"
-                className="dangwan-date-input"
-                value={dangwanDateInput}
-                onChange={e => setDangwanDateInput(e.target.value)}
-              />
-              {dangwanDateInput && (
-                <button
-                  className={`dangwan-toggle-btn ${dangwanOpen.has(dangwanDateInput) ? 'close' : 'open'}`}
-                  onClick={() => setDangwanConfirm({ date: dangwanDateInput, willOpen: !dangwanOpen.has(dangwanDateInput) })}
-                >
-                  {dangwanOpen.has(dangwanDateInput) ? '🔴 닫기' : '🟢 열기'}
-                </button>
-              )}
-            </div>
+            {showDangwanInput ? (
+              <div className="dangwan-open-form">
+                <p className="dangwan-open-label">오픈할 날짜를 선택하세요</p>
+                <div className="dangwan-input-row">
+                  <input
+                    type="date"
+                    className="dangwan-date-input"
+                    value={dangwanDateInput}
+                    onChange={e => setDangwanDateInput(e.target.value)}
+                    autoFocus
+                  />
+                  <button
+                    className="dangwan-toggle-btn open"
+                    disabled={!dangwanDateInput}
+                    onClick={() => {
+                      setShowDangwanInput(false)
+                      setDangwanConfirm({ date: dangwanDateInput, willOpen: true })
+                      setDangwanDateInput('')
+                    }}
+                  >확인</button>
+                  <button
+                    className="dangwan-toggle-btn cancel"
+                    onClick={() => { setShowDangwanInput(false); setDangwanDateInput('') }}
+                  >취소</button>
+                </div>
+              </div>
+            ) : (
+              <button
+                className="dangwan-open-trigger-btn"
+                onClick={() => setShowDangwanInput(true)}
+              >+ 단관 날짜 오픈하기</button>
+            )}
 
             {dangwanLoading ? (
               <div className="admin-state">불러오는 중...</div>
             ) : dangwanOpen.size === 0 ? (
-              <div className="admin-state">현재 열린 단관 날짜가 없어요</div>
+              <div className="admin-state" style={{ marginTop: 16 }}>현재 열린 단관 날짜가 없어요</div>
             ) : (
               <>
-                <p className="pay-header-hint" style={{ marginBottom: 6 }}>현재 열린 날짜</p>
+                <p className="pay-header-hint" style={{ margin: '14px 0 6px' }}>현재 열린 날짜 (눌러서 닫기)</p>
                 <div className="dangwan-manage-list">
                   {[...dangwanOpen].sort().map(date => (
                     <div

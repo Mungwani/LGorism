@@ -549,11 +549,40 @@
 .confirm-btn.ok.revert:hover { opacity: 0.85; }
 
 /* ── 단관 관리 ───────────────────────────────────────────────── */
+.dangwan-open-trigger-btn {
+  width: 100%;
+  padding: 12px;
+  background: #C8102E;
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.dangwan-open-trigger-btn:hover { opacity: 0.85; }
+
+.dangwan-open-form {
+  background: var(--gray-50);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-bottom: 4px;
+}
+
+.dangwan-open-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gray-500);
+  margin-bottom: 10px;
+}
+
 .dangwan-input-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 14px;
 }
 
 .dangwan-date-input {
@@ -568,29 +597,24 @@
   outline: none;
 }
 
-.dangwan-date-input:focus {
-  border-color: #C8102E;
-}
+.dangwan-date-input:focus { border-color: #C8102E; }
 
 .dangwan-toggle-btn {
-  padding: 10px 16px;
+  padding: 10px 14px;
   border-radius: var(--radius-md);
   font-size: 0.86rem;
   font-weight: 700;
   border: none;
   cursor: pointer;
   white-space: nowrap;
+  transition: opacity 0.15s;
 }
 
-.dangwan-toggle-btn.open {
-  background: #dcfce7;
-  color: #15803d;
-}
+.dangwan-toggle-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.dangwan-toggle-btn:not(:disabled):hover { opacity: 0.8; }
 
-.dangwan-toggle-btn.close {
-  background: #fee2e2;
-  color: #b91c1c;
-}
+.dangwan-toggle-btn.open  { background: #dcfce7; color: #15803d; }
+.dangwan-toggle-btn.cancel { background: var(--gray-100); color: var(--gray-600); }
 
 .dangwan-manage-list {
   display: flex;
