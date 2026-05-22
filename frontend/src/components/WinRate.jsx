@@ -38,15 +38,13 @@ export default function WinRate({ dangwanOpenDates }) {
         <div className="winrate-stat total"><span className="stat-num">{openDates.length}</span><span className="stat-label">전체</span></div>
       </div>
 
-      {rate !== null ? (
+      {rate !== null && (
         <div className="winrate-bar-wrap">
           <div className="winrate-bar-bg">
             <div className="winrate-bar-fill" style={{ width: `${rate}%` }} />
           </div>
           <span className="winrate-pct">{rate}%</span>
         </div>
-      ) : (
-        <p className="winrate-empty">결과가 입력되면 승률이 표시돼요</p>
       )}
     </div>
   )
