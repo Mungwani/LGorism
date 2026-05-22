@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react'
 import { getGameResults } from '../utils/storage'
 import './WinRate.css'
 
-export default function WinRate({ dangwanOpenDates }) {
+export default function WinRate({ dangwanDates }) {
   const [results, setResults] = useState([])
 
   useEffect(() => {
     getGameResults().then(setResults).catch(() => {})
   }, [])
 
-  const openDates = [...dangwanOpenDates]
+  const openDates = [...dangwanDates]
   const resultMap = Object.fromEntries(results.map(r => [r.game_date, r.result]))
 
   const datesWithResult = openDates.filter(d => resultMap[d])

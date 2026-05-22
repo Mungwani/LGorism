@@ -30,6 +30,7 @@ import {
   logAudit,
   updatePaymentStatus,
   getDangwanOpenDates,
+  getAllDangwanDates,
 } from "./utils/storage";
 import "./App.css";
 
@@ -66,6 +67,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
   const [dangwanOpenDates, setDangwanOpenDates] = useState(new Set());
+  const [allDangwanDates, setAllDangwanDates] = useState(new Set());
 
   // 관리자 페이지
   const [showAdmin, setShowAdmin] = useState(false);
@@ -150,6 +152,9 @@ export default function App() {
 
   useEffect(() => {
     getDangwanOpenDates().then(setDangwanOpenDates).catch(() => {});
+    getAllDangwanDates()
+      .then(rows => setAllDangwanDates(new Set(rows.map(r => r.game_date))))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -314,7 +319,7 @@ export default function App() {
       <main className="app-main">
         {/* ── 승률 카드 ────────────────────────────────────── */}
         <section className="section" style={{ paddingTop: 0 }}>
-          <WinRate dangwanOpenDates={dangwanOpenDates} />
+          <WinRate dangwanDates={allDangwanDates} />
         </section>
 
         {/* ── 달력 + 필터 칩 ───────────────────────────────── */}
