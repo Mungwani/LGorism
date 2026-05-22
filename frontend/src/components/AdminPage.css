@@ -549,6 +549,49 @@
 .confirm-btn.ok.revert:hover { opacity: 0.85; }
 
 /* ── 단관 관리 ───────────────────────────────────────────────── */
+.dangwan-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.dangwan-date-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--black);
+  background: var(--white);
+  outline: none;
+}
+
+.dangwan-date-input:focus {
+  border-color: #C8102E;
+}
+
+.dangwan-toggle-btn {
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.86rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dangwan-toggle-btn.open {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.dangwan-toggle-btn.close {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
 .dangwan-manage-list {
   display: flex;
   flex-direction: column;

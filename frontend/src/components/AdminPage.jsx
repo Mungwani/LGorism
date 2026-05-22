@@ -52,6 +52,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   const [dangwanOpen, setDangwanOpen] = useState(new Set())
   const [dangwanLoading, setDangwanLoading] = useState(false)
   const [dangwanConfirm, setDangwanConfirm] = useState(null) // { date, willOpen }
+  const [dangwanDateInput, setDangwanDateInput] = useState('')
 
   // 날짜별 접기/펼치기 (기본: 전부 펼침)
   const [collapsedDates, setCollapsedDates] = useState(new Set())
@@ -146,7 +147,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     if (tab === 'pay') loadApps()
     if (tab === 'dangwan') loadDangwan()
     if (tab === 'notice') loadNotices()
-    if (tab === 'result') loadResults()
+    if (tab === 'result') { loadResults(); loadDangwan() }
   }, [tab, authed])
 
   async function loadResults() {
@@ -372,27 +373,43 @@ export default function AdminPage({ onClose, onDangwanChange }) {
 
         {tab === 'dangwan' && (
           <div className="admin-body">
-            <p className="pay-header-hint" style={{ marginBottom: 8 }}>날짜를 눌러 단관 신청을 열거나 닫아요</p>
+            <div className="dangwan-input-row">
+              <input
+                type="date"
+                className="dangwan-date-input"
+                value={dangwanDateInput}
+                onChange={e => setDangwanDateInput(e.target.value)}
+              />
+              {dangwanDateInput && (
+                <button
+                  className={`dangwan-toggle-btn ${dangwanOpen.has(dangwanDateInput) ? 'close' : 'open'}`}
+                  onClick={() => setDangwanConfirm({ date: dangwanDateInput, willOpen: !dangwanOpen.has(dangwanDateInput) })}
+                >
+                  {dangwanOpen.has(dangwanDateInput) ? '🔴 닫기' : '🟢 열기'}
+                </button>
+              )}
+            </div>
+
             {dangwanLoading ? (
               <div className="admin-state">불러오는 중...</div>
+            ) : dangwanOpen.size === 0 ? (
+              <div className="admin-state">현재 열린 단관 날짜가 없어요</div>
             ) : (
-              <div className="dangwan-manage-list">
-                {homeGames.map(date => {
-                  const isOpen = dangwanOpen.has(date)
-                  return (
+              <>
+                <p className="pay-header-hint" style={{ marginBottom: 6 }}>현재 열린 날짜</p>
+                <div className="dangwan-manage-list">
+                  {[...dangwanOpen].sort().map(date => (
                     <div
                       key={date}
-                      className={`dangwan-manage-item ${isOpen ? 'open' : ''}`}
-                      onClick={() => setDangwanConfirm({ date, willOpen: !isOpen })}
+                      className="dangwan-manage-item open"
+                      onClick={() => setDangwanConfirm({ date, willOpen: false })}
                     >
                       <span className="dangwan-manage-date">{date}</span>
-                      <span className={`dangwan-manage-badge ${isOpen ? 'open' : 'closed'}`}>
-                        {isOpen ? '🟢 열림' : '🔴 닫힘'}
-                      </span>
+                      <span className="dangwan-manage-badge open">🟢 열림</span>
                     </div>
-                  )
-                })}
-              </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         )}
@@ -468,14 +485,14 @@ export default function AdminPage({ onClose, onDangwanChange }) {
 
         {tab === 'result' && (
           <div className="admin-body">
-            <p className="pay-header-hint" style={{ marginBottom: 8 }}>홈 경기 결과를 입력해요 (승률에 반영돼요)</p>
-            {resultsLoading ? (
+            <p className="pay-header-hint" style={{ marginBottom: 8 }}>단관 오픈된 경기 결과를 입력해요 (승률에 반영돼요)</p>
+            {resultsLoading || dangwanLoading ? (
               <div className="admin-state">불러오는 중...</div>
-            ) : allHomeGames.length === 0 ? (
-              <div className="admin-state">홈 경기 일정이 없어요</div>
+            ) : dangwanOpen.size === 0 ? (
+              <div className="admin-state">단관 오픈된 경기가 없어요</div>
             ) : (
               <div className="result-list">
-                {allHomeGames.map(date => {
+                {[...dangwanOpen].sort().map(date => {
                   const result = gameResults[date]
                   return (
                     <div key={date} className="result-item">
