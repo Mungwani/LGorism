@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, openDangwanDate, closeDangwanDate, getAllNotices, createNotice, updateNotice, toggleNoticeActive, deleteNotice } from '../utils/storage'
+import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, openDangwanDate, closeDangwanDate, getAllNotices, createNotice, updateNotice, toggleNoticeActive, deleteNotice, getGameResults, setGameResult, deleteGameResult } from '../utils/storage'
 import { games } from '../data/games'
 
 const today = new Date().toISOString().slice(0, 10)
 const homeGames = games.filter(g => g.isHome && g.date >= today).map(g => g.date)
+const allHomeGames = games.filter(g => g.isHome).map(g => g.date).sort().reverse()
 import './AdminPage.css'
 
 const ADMIN_PW = import.meta.env.VITE_ADMIN_PASSWORD
@@ -42,6 +43,10 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   const [editingNoticeId, setEditingNoticeId] = useState(null)
   const [editNoticeContent, setEditNoticeContent] = useState('')
   const [deleteNoticeTarget, setDeleteNoticeTarget] = useState(null)
+
+  // 경기 결과
+  const [gameResults, setGameResults] = useState({})
+  const [resultsLoading, setResultsLoading] = useState(false)
 
   // 단관 관리
   const [dangwanOpen, setDangwanOpen] = useState(new Set())
@@ -141,7 +146,29 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     if (tab === 'pay') loadApps()
     if (tab === 'dangwan') loadDangwan()
     if (tab === 'notice') loadNotices()
+    if (tab === 'result') loadResults()
   }, [tab, authed])
+
+  async function loadResults() {
+    setResultsLoading(true)
+    try {
+      const data = await getGameResults()
+      setGameResults(Object.fromEntries(data.map(r => [r.game_date, r.result])))
+    } finally {
+      setResultsLoading(false)
+    }
+  }
+
+  async function handleSetResult(date, result) {
+    const current = gameResults[date]
+    if (current === result) {
+      await deleteGameResult(date)
+      setGameResults(prev => { const n = { ...prev }; delete n[date]; return n })
+    } else {
+      await setGameResult(date, result)
+      setGameResults(prev => ({ ...prev, [date]: result }))
+    }
+  }
 
   async function confirmDangwanToggle() {
     const { date, willOpen } = dangwanConfirm
@@ -235,6 +262,9 @@ export default function AdminPage({ onClose, onDangwanChange }) {
           </button>
           <button className={`admin-tab-btn ${tab === 'notice' ? 'active' : ''}`} onClick={() => setTab('notice')}>
             📢 공지
+          </button>
+          <button className={`admin-tab-btn ${tab === 'result' ? 'active' : ''}`} onClick={() => setTab('result')}>
+            🏆 결과
           </button>
         </div>
 
@@ -435,6 +465,37 @@ export default function AdminPage({ onClose, onDangwanChange }) {
             )}
           </div>
         )}
+
+        {tab === 'result' && (
+          <div className="admin-body">
+            <p className="pay-header-hint" style={{ marginBottom: 8 }}>홈 경기 결과를 입력해요 (승률에 반영돼요)</p>
+            {resultsLoading ? (
+              <div className="admin-state">불러오는 중...</div>
+            ) : allHomeGames.length === 0 ? (
+              <div className="admin-state">홈 경기 일정이 없어요</div>
+            ) : (
+              <div className="result-list">
+                {allHomeGames.map(date => {
+                  const result = gameResults[date]
+                  return (
+                    <div key={date} className="result-item">
+                      <span className="result-date">{date}</span>
+                      <div className="result-btns">
+                        {['승', '패', '무'].map(r => (
+                          <button
+                            key={r}
+                            className={`result-btn result-${r} ${result === r ? 'active' : ''}`}
+                            onClick={() => handleSetResult(date, r)}
+                          >{r}</button>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 단관 열기/닫기 확인 모달 */}
@@ -489,6 +550,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
           </div>
         </div>
       )}
+
       {deleteNoticeTarget && (
         <div className="admin-confirm-overlay" onClick={() => setDeleteNoticeTarget(null)}>
           <div className="admin-confirm-modal" onClick={e => e.stopPropagation()}>

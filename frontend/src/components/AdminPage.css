@@ -673,6 +673,57 @@
 }
 
 
+/* ── 경기 결과 ───────────────────────────────────────────────── */
+.result-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--white);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.result-date {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.result-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.result-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 0.82rem;
+  font-weight: 800;
+  border: 2px solid var(--gray-200);
+  background: var(--white);
+  color: var(--gray-400);
+  transition: all 0.15s;
+}
+
+.result-btn:hover { opacity: 0.8; }
+
+.result-btn.result-승.active { background: #C8102E; color: var(--white); border-color: #C8102E; }
+.result-btn.result-패.active { background: #1565C0; color: var(--white); border-color: #1565C0; }
+.result-btn.result-무.active { background: var(--gray-500); color: var(--white); border-color: var(--gray-500); }
+
+.result-btn.result-승:not(.active):hover { border-color: #C8102E; color: #C8102E; }
+.result-btn.result-패:not(.active):hover { border-color: #1565C0; color: #1565C0; }
+.result-btn.result-무:not(.active):hover { border-color: var(--gray-500); color: var(--gray-500); }
+
+/* ── 공지 관리 ───────────────────────────────────────────────── */
 .notice-paused-badge {
   display: inline-block;
   font-size: 0.68rem;

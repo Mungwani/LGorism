@@ -387,3 +387,26 @@ export async function deleteNotice(id) {
   const { error } = await supabase.from('notices').delete().eq('id', id)
   if (error) throw error
 }
+
+// ── 경기 결과 CRUD ─────────────────────────────────────────────
+
+export async function getGameResults() {
+  const { data, error } = await supabase
+    .from('game_results')
+    .select('*')
+    .order('game_date', { ascending: true })
+  if (error) throw error
+  return data || []
+}
+
+export async function setGameResult(date, result) {
+  const { error } = await supabase
+    .from('game_results')
+    .upsert({ game_date: date, result })
+  if (error) throw error
+}
+
+export async function deleteGameResult(date) {
+  const { error } = await supabase.from('game_results').delete().eq('game_date', date)
+  if (error) throw error
+}

@@ -9,6 +9,7 @@ import AllJungmoList from "./components/AllJungmoList";
 import DangwanDateList from "./components/DangwanDateList";
 import AdminPage from "./components/AdminPage";
 import NoticeBanner from "./components/NoticeBanner";
+import WinRate from "./components/WinRate";
 import { getGameByDate, gameDateSet } from "./data/games";
 import {
   getApplications,
@@ -311,6 +312,11 @@ export default function App() {
       <NoticeBanner />
 
       <main className="app-main">
+        {/* ── 승률 카드 ────────────────────────────────────── */}
+        <section className="section" style={{ paddingTop: 0 }}>
+          <WinRate dangwanOpenDates={dangwanOpenDates} />
+        </section>
+
         {/* ── 달력 + 필터 칩 ───────────────────────────────── */}
         <section className="section">
           <h2 className="section-heading">📅 경기 일정</h2>

@@ -1,0 +1,100 @@
+.winrate-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.winrate-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.winrate-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--black);
+}
+
+.winrate-sub {
+  font-size: 0.72rem;
+  color: var(--gray-400);
+}
+
+.winrate-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.winrate-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stat-num {
+  font-size: 1.4rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--gray-500);
+}
+
+.winrate-stat.win  .stat-num { color: #C8102E; }
+.winrate-stat.loss .stat-num { color: #1565C0; }
+.winrate-stat.draw .stat-num { color: var(--gray-500); }
+.winrate-stat.total .stat-num { color: var(--black); }
+
+.winrate-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--gray-200);
+}
+
+.winrate-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.winrate-bar-bg {
+  flex: 1;
+  height: 10px;
+  background: var(--gray-100);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.winrate-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #C8102E, #ff4d6d);
+  border-radius: 99px;
+  transition: width 0.6s ease;
+}
+
+.winrate-pct {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #C8102E;
+  min-width: 40px;
+  text-align: right;
+}
+
+.winrate-empty {
+  font-size: 0.78rem;
+  color: var(--gray-400);
+  text-align: center;
+  padding: 4px 0;
+}
