@@ -25,7 +25,6 @@ export default function WinRate({ dangwanOpenDates }) {
     <div className="winrate-card">
       <div className="winrate-header">
         <span className="winrate-title">⚾ 단체관람 승률</span>
-        <span className="winrate-sub">단관 오픈 경기 기준</span>
       </div>
 
       <div className="winrate-stats">
