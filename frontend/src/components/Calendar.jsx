@@ -24,6 +24,7 @@ export default function Calendar({
   dangwanSummary = {},
   jikgwanSummary = {},
   jungmoSummary = {},
+  dangwanOpenDates = new Set(),
 }) {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -74,10 +75,11 @@ export default function Calendar({
           const dangwanCount = dangwanSummary[dateStr]?.totalPeople || 0;
           const jikgwanCount = jikgwanSummary[dateStr] || 0;
           const jungmoCount = jungmoSummary[dateStr] || 0;
+          const isDangwanOpen = dangwanOpenDates.has(dateStr);
 
           const showJikgwanDot = jikgwanCount > 0;
           const showJungmoDot  = jungmoCount  > 0;
-          const showDangwanBadge = dangwanCount > 0;
+          const showDangwanBadge = dangwanCount > 0 || isDangwanOpen;
 
           return (
             <div
@@ -106,7 +108,9 @@ export default function Calendar({
 
               {/* 단관 인원 뱃지 */}
               {showDangwanBadge && (
-                <span className="count-badge">{dangwanCount}명</span>
+                <span className="count-badge">
+                  {dangwanCount > 0 ? `${dangwanCount}명` : '단관'}
+                </span>
               )}
             </div>
           );

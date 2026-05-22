@@ -351,6 +351,7 @@ export default function App() {
               dangwanSummary={dangwanSummary}
               jikgwanSummary={jikgwanSummary}
               jungmoSummary={jungmoSummary}
+              dangwanOpenDates={dangwanOpenDates}
             />
           )}
 
@@ -515,7 +516,14 @@ export default function App() {
       )}
 
       {showAdmin && (
-        <AdminPage onClose={() => setShowAdmin(false)} onDangwanChange={setDangwanOpenDates} />
+        <AdminPage
+          onClose={() => setShowAdmin(false)}
+          onDangwanChange={(openDates, allDates) => {
+            setDangwanOpenDates(openDates)
+            if (allDates) setAllDangwanDates(new Set([...allDates].map(r => typeof r === 'string' ? r : r.game_date)))
+            getAllDangwanDates().then(rows => setAllDangwanDates(new Set(rows.map(r => r.game_date)))).catch(() => {})
+          }}
+        />
       )}
     </div>
   );
