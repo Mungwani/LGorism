@@ -167,27 +167,36 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   }
 
   async function handleSetResult(date, result) {
-    const current = gameResults[date]
-    if (current === result) {
-      await deleteGameResult(date)
-      setGameResults(prev => { const n = { ...prev }; delete n[date]; return n })
-    } else {
-      await setGameResult(date, result)
-      setGameResults(prev => ({ ...prev, [date]: result }))
+    try {
+      const current = gameResults[date]
+      if (current === result) {
+        await deleteGameResult(date)
+        setGameResults(prev => { const n = { ...prev }; delete n[date]; return n })
+      } else {
+        await setGameResult(date, result)
+        setGameResults(prev => ({ ...prev, [date]: result }))
+      }
+    } catch (e) {
+      alert('결과 저장 오류: ' + e.message)
     }
   }
 
   async function confirmDangwanToggle() {
     const { date, willOpen } = dangwanConfirm
     setDangwanConfirm(null)
-    if (willOpen) {
-      await openDangwanDate(date)
-    } else {
-      await closeDangwanDate(date)
+    try {
+      if (willOpen) {
+        await openDangwanDate(date)
+      } else {
+        await closeDangwanDate(date)
+      }
+      const [openDates, allDates] = await Promise.all([getDangwanOpenDates(), getAllDangwanDates()])
+      setDangwanOpen(openDates)
+      setAllDangwanArr(allDates)
+      if (onDangwanChange) onDangwanChange(openDates)
+    } catch (e) {
+      alert('단관 변경 오류: ' + e.message)
     }
-    const updated = await getDangwanOpenDates()
-    setDangwanOpen(updated)
-    if (onDangwanChange) onDangwanChange(updated)
   }
 
   function toggleDateCollapse(date) {
