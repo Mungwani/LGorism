@@ -30,6 +30,10 @@ export default function ApplicationList({
   }
 
   function handlePwConfirm() {
+    if (!pwInput.trim()) {
+      setPwError('비밀번호를 입력해주세요.');
+      return;
+    }
     if (pwInput !== pwModal.item.password && pwInput !== import.meta.env.VITE_ADMIN_PASSWORD) {
       setPwError('비밀번호가 틀렸어요.');
       return;

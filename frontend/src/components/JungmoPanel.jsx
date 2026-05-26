@@ -89,6 +89,7 @@ function JungmoItem({ jungmo, onDelete }) {
   }
 
   function handleEditPwConfirm() {
+    if (!editPw.trim()) { setEditPwError("비밀번호를 입력해주세요."); return; }
     if (editPw !== editModal.app.password && editPw !== import.meta.env.VITE_ADMIN_PASSWORD) { setEditPwError("비밀번호가 틀렸어요."); return; }
     setEditStep("form");
   }
@@ -105,6 +106,7 @@ function JungmoItem({ jungmo, onDelete }) {
   }
 
   async function handleDeleteApp() {
+    if (!deletePw.trim()) { setDeletePwError("비밀번호를 입력해주세요."); return; }
     if (deletePw !== deleteModal.app.password && deletePw !== import.meta.env.VITE_ADMIN_PASSWORD) { setDeletePwError("비밀번호가 틀렸어요."); return; }
     await deleteJungmoApplication(deleteModal.app.id);
     logAudit('delete', 'jungmo', jungmo.eventDate, deleteModal.app.nickname, null);
@@ -128,6 +130,7 @@ function JungmoItem({ jungmo, onDelete }) {
   }
 
   async function handlePayApp() {
+    if (!payPw.trim()) { setPayPwError("비밀번호를 입력해주세요."); return; }
     if (payPw !== payModal.app.password && payPw !== import.meta.env.VITE_ADMIN_PASSWORD) {
       setPayPwError("비밀번호가 틀렸어요.");
       return;
