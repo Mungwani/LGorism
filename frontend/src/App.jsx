@@ -170,6 +170,13 @@ export default function App() {
     setFilterMode("all");
   }
 
+  function handleJungmoDateSelect(dateStr) {
+    setSelectedDate(dateStr);
+    setActiveTab("jungmo");
+    setFilterMode("all");
+    setEditingItem(null);
+  }
+
   // ── 단관 신청 핸들러 ─────────────────────────────────────────
 
   async function handleDangwanSubmit(formData) {
@@ -356,7 +363,7 @@ export default function App() {
           )}
 
           {filterMode === "jungmo" && (
-            <AllJungmoList jungmoList={allJungmoList} />
+            <AllJungmoList jungmoList={allJungmoList} onSelectDate={handleJungmoDateSelect} />
           )}
 
           {filterMode === "dangwan" && (

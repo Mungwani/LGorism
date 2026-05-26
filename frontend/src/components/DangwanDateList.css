@@ -57,6 +57,20 @@
 
 .ddl-goto-btn:hover { opacity: 0.85; }
 
+.ddl-goto-btn.ddl-goto-jungmo {
+  background: #1565C0;
+}
+
+.ddl-jungmo-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+}
+
 /* 빈 상태 */
 .ddl-empty {
   background: var(--white);
