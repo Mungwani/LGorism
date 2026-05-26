@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getJungmoApplications, addJungmoApplication, updateJungmoApplication, deleteJungmoApplication, logAudit } from "../utils/storage";
+import { getJungmoApplications, addJungmoApplication, updateJungmoApplication, deleteJungmoApplication, updateJungmoPaymentStatus, logAudit } from "../utils/storage";
 import { shareContent, formatDateKo } from "../utils/kakao";
 import "./JungmoPanel.css";
 
@@ -37,6 +37,12 @@ function JungmoItem({ jungmo, onDelete }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [jungmoDeletePw, setJungmoDeletePw] = useState("");
   const [jungmoDeleteError, setJungmoDeleteError] = useState("");
+
+  // 입금 모달
+  const [payModal, setPayModal] = useState(null); // { app }
+  const [payPw, setPayPw] = useState("");
+  const [payPwError, setPayPwError] = useState("");
+  const [paying, setPaying] = useState(false);
 
   async function loadApplications() {
     setLoadingApps(true);
@@ -115,6 +121,28 @@ function JungmoItem({ jungmo, onDelete }) {
     setShowDeleteModal(false);
   }
 
+  function openPayModal(app) {
+    setPayModal({ app });
+    setPayPw("");
+    setPayPwError("");
+  }
+
+  async function handlePayApp() {
+    if (payPw !== payModal.app.password && payPw !== import.meta.env.VITE_ADMIN_PASSWORD) {
+      setPayPwError("비밀번호가 틀렸어요.");
+      return;
+    }
+    setPaying(true);
+    try {
+      await updateJungmoPaymentStatus(payModal.app.id, true);
+      logAudit('pay', 'jungmo', jungmo.eventDate, payModal.app.nickname, '입금완료');
+      setPayModal(null);
+      loadApplications();
+    } finally {
+      setPaying(false);
+    }
+  }
+
   return (
     <div className={`jungmo-item ${expanded ? "expanded" : ""} ${totalApplicants > 0 ? "has-apps" : ""}`}>
       <div className="jungmo-item-header" onClick={toggleExpand}>
@@ -157,7 +185,7 @@ function JungmoItem({ jungmo, onDelete }) {
                     총 {applications.reduce((s, a) => s + (a.count || 1), 0)}명 참석 예정
                   </p>
                   {applications.map((app) => (
-                    <div key={app.id} className="jungmo-app-item">
+                    <div key={app.id} className={`jungmo-app-item ${app.isPaid ? 'is-paid' : ''}`}>
                       <span className="app-nickname">{app.nickname}</span>
                       {app.count > 1 && (
                         <span className="app-count-badge">+{app.count - 1}명</span>
@@ -166,6 +194,11 @@ function JungmoItem({ jungmo, onDelete }) {
                         <span className="app-note">· {app.note}</span>
                       )}
                       <div className="app-item-actions">
+                        {app.isPaid ? (
+                          <span className="app-paid-badge">✓ 입금</span>
+                        ) : (
+                          <button className="app-pay-btn" onClick={() => openPayModal(app)}>💳 입금</button>
+                        )}
                         <button className="app-edit-btn" onClick={() => openEditModal(app)}>수정</button>
                         <button
                           className="app-delete-btn"
@@ -296,6 +329,35 @@ function JungmoItem({ jungmo, onDelete }) {
             <div className="modal-actions">
               <button className="modal-btn cancel" onClick={() => setDeleteModal(null)}>취소</button>
               <button className="modal-btn confirm red" onClick={handleDeleteApp}>삭제하기</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {payModal && (
+        <div className="jungmo-modal-overlay" onClick={() => { setPayModal(null); setPayPw(""); setPayPwError(""); }}>
+          <div className="jungmo-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-icon">💳</div>
+            <h4 className="modal-title">입금 확인</h4>
+            <p className="modal-desc">
+              <strong>{payModal.app.nickname}</strong>님,<br />
+              신청 시 설정한 비밀번호를 입력하면<br />입금완료로 처리돼요.
+            </p>
+            <input
+              className="pw-input"
+              type="password"
+              placeholder="비밀번호 입력"
+              value={payPw}
+              onChange={e => { setPayPw(e.target.value); setPayPwError(""); }}
+              onKeyDown={e => e.key === "Enter" && handlePayApp()}
+              autoFocus
+            />
+            {payPwError && <p className="pw-error">{payPwError}</p>}
+            <div className="modal-actions">
+              <button className="modal-btn cancel" onClick={() => { setPayModal(null); setPayPw(""); setPayPwError(""); }}>취소</button>
+              <button className="modal-btn confirm green" onClick={handlePayApp} disabled={paying}>
+                {paying ? "처리 중..." : "입금완료"}
+              </button>
             </div>
           </div>
         </div>

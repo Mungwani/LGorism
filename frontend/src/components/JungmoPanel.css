@@ -158,6 +158,10 @@
   border-bottom: none;
 }
 
+.jungmo-app-item.is-paid {
+  background: rgba(220, 252, 231, 0.5);
+}
+
 .app-num {
   width: 18px;
   height: 18px;
@@ -219,6 +223,33 @@
 .app-delete-btn:hover {
   background: #fff5f7;
   color: var(--red);
+}
+
+.app-pay-btn {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.app-pay-btn:hover {
+  background: #dcfce7;
+}
+
+.app-paid-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  white-space: nowrap;
 }
 
 .app-count-badge {
@@ -622,6 +653,14 @@
 
 .modal-btn.confirm.red {
   background: var(--red);
+}
+
+.modal-btn.confirm.blue {
+  background: #1565C0;
+}
+
+.modal-btn.confirm.green {
+  background: #15803d;
 }
 
 .modal-btn.confirm:hover {

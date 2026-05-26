@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, getAllDangwanDates, openDangwanDate, closeDangwanDate, getAllNotices, createNotice, updateNotice, toggleNoticeActive, deleteNotice, getGameResults, setGameResult, deleteGameResult } from '../utils/storage'
+import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, getAllDangwanDates, openDangwanDate, closeDangwanDate, getAllNotices, createNotice, updateNotice, toggleNoticeActive, deleteNotice, getGameResults, setGameResult, deleteGameResult, getAllJungmoApplicationsWithInfo, updateJungmoPaymentStatus } from '../utils/storage'
 import { games } from '../data/games'
 
 const today = new Date().toISOString().slice(0, 10)
@@ -34,6 +34,11 @@ export default function AdminPage({ onClose, onDangwanChange }) {
 
   const [apps, setApps] = useState([])
   const [payLoading, setPayLoading] = useState(false)
+  const [payCategory, setPayCategory] = useState('dangwan')
+  const [jungmoApps, setJungmoApps] = useState([])
+  const [jungmoPayLoading, setJungmoPayLoading] = useState(false)
+  const [jungmoConfirmTarget, setJungmoConfirmTarget] = useState(null) // { item, jungmoId, jungmoTitle, eventDate }
+  const [collapsedJungmos, setCollapsedJungmos] = useState(new Set())
 
   // 공지 관리
   const [notices, setNotices] = useState([])
@@ -88,6 +93,16 @@ export default function AdminPage({ onClose, onDangwanChange }) {
       setApps(data)
     } finally {
       setPayLoading(false)
+    }
+  }
+
+  async function loadJungmoApps() {
+    setJungmoPayLoading(true)
+    try {
+      const data = await getAllJungmoApplicationsWithInfo()
+      setJungmoApps(data)
+    } finally {
+      setJungmoPayLoading(false)
     }
   }
 
@@ -150,7 +165,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   useEffect(() => {
     if (!authed) return
     if (tab === 'log') loadLogs()
-    if (tab === 'pay') loadApps()
+    if (tab === 'pay') { loadApps(); loadJungmoApps() }
     if (tab === 'dangwan') loadDangwan()
     if (tab === 'notice') loadNotices()
     if (tab === 'result') { loadResults(); loadDangwan() }
@@ -207,6 +222,23 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     })
   }
 
+  function toggleJungmoCollapse(jungmoId) {
+    setCollapsedJungmos(prev => {
+      const next = new Set(prev)
+      next.has(jungmoId) ? next.delete(jungmoId) : next.add(jungmoId)
+      return next
+    })
+  }
+
+  async function confirmToggleJungmoPay() {
+    const { item, jungmoTitle, eventDate } = jungmoConfirmTarget
+    const newStatus = !item.isPaid
+    setJungmoConfirmTarget(null)
+    await updateJungmoPaymentStatus(item.id, newStatus)
+    logAudit('pay', 'jungmo', eventDate, item.nickname, newStatus ? '입금완료' : '입금취소')
+    setJungmoApps(prev => prev.map(a => a.id === item.id ? { ...a, isPaid: newStatus } : a))
+  }
+
   function handlePayClick(item, gameDate) {
     setConfirmTarget({ item, gameDate })
   }
@@ -224,6 +256,13 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     const key = app.gameDate
     if (!acc[key]) acc[key] = []
     acc[key].push(app)
+    return acc
+  }, {})
+
+  const jungmoAppsByJungmo = jungmoApps.reduce((acc, app) => {
+    const key = app.jungmoId
+    if (!acc[key]) acc[key] = { title: app.jungmoTitle, eventDate: app.eventDate, apps: [] }
+    acc[key].apps.push(app)
     return acc
   }, {})
 
@@ -332,56 +371,117 @@ export default function AdminPage({ onClose, onDangwanChange }) {
           <div className="admin-body">
             <div className="pay-header-bar">
               <span className="pay-header-hint">항목을 눌러 입금 여부를 변경해요</span>
-              <button className="log-refresh-btn" onClick={loadApps}>↻</button>
+              <button className="log-refresh-btn" onClick={() => { loadApps(); loadJungmoApps() }}>↻</button>
             </div>
 
-            {payLoading ? (
-              <div className="admin-state">불러오는 중...</div>
-            ) : Object.keys(appsByDate).length === 0 ? (
-              <div className="admin-state">신청 내역이 없어요</div>
-            ) : (
-              Object.entries(appsByDate)
-                .sort(([a], [b]) => b.localeCompare(a))
-                .map(([date, items]) => {
-                  const totalPeople = items.reduce((s, i) => s + (i.count || 0), 0)
-                  const paidCount = items.filter(i => i.isPaid).reduce((s, i) => s + (i.count || 0), 0)
-                  const isCollapsed = collapsedDates.has(date)
-                  return (
-                    <div key={date} className="pay-date-group">
-                      <button
-                        className="pay-date-header"
-                        onClick={() => toggleDateCollapse(date)}
-                      >
-                        <div className="pay-date-left">
-                          <span className="pay-date-chevron">{isCollapsed ? '▶' : '▼'}</span>
-                          <span className="pay-date">{date}</span>
-                        </div>
-                        <span className={`pay-date-stat ${paidCount === totalPeople ? 'all-paid' : ''}`}>
-                          {paidCount}/{totalPeople}명 입금
-                        </span>
-                      </button>
+            <div className="pay-cat-switch">
+              <button className={`pay-cat-btn ${payCategory === 'dangwan' ? 'active' : ''}`} onClick={() => setPayCategory('dangwan')}>단관</button>
+              <button className={`pay-cat-btn ${payCategory === 'jungmo' ? 'active' : ''}`} onClick={() => setPayCategory('jungmo')}>정모</button>
+            </div>
 
-                      {!isCollapsed && items.map(item => (
-                        <div
-                          key={item.id}
-                          className={`pay-item ${item.isPaid ? 'paid' : ''}`}
-                          onClick={() => handlePayClick(item, date)}
+            {payCategory === 'dangwan' && (
+              payLoading ? (
+                <div className="admin-state">불러오는 중...</div>
+              ) : Object.keys(appsByDate).length === 0 ? (
+                <div className="admin-state">신청 내역이 없어요</div>
+              ) : (
+                Object.entries(appsByDate)
+                  .sort(([a], [b]) => b.localeCompare(a))
+                  .map(([date, items]) => {
+                    const totalPeople = items.reduce((s, i) => s + (i.count || 0), 0)
+                    const paidCount = items.filter(i => i.isPaid).reduce((s, i) => s + (i.count || 0), 0)
+                    const isCollapsed = collapsedDates.has(date)
+                    return (
+                      <div key={date} className="pay-date-group">
+                        <button
+                          className="pay-date-header"
+                          onClick={() => toggleDateCollapse(date)}
                         >
-                          <div className="pay-item-info">
-                            <span className="pay-item-name">{item.name}</span>
-                            <span className="pay-item-count">{item.count}명</span>
-                            {item.request && (
-                              <span className="pay-item-req">{item.request}</span>
-                            )}
+                          <div className="pay-date-left">
+                            <span className="pay-date-chevron">{isCollapsed ? '▶' : '▼'}</span>
+                            <span className="pay-date">{date}</span>
                           </div>
-                          <span className={`pay-badge ${item.isPaid ? 'paid' : 'unpaid'}`}>
-                            {item.isPaid ? '✓ 입금완료' : '미입금'}
+                          <span className={`pay-date-stat ${paidCount === totalPeople ? 'all-paid' : ''}`}>
+                            {paidCount}/{totalPeople}명 입금
                           </span>
-                        </div>
-                      ))}
-                    </div>
-                  )
-                })
+                        </button>
+
+                        {!isCollapsed && items.map(item => (
+                          <div
+                            key={item.id}
+                            className={`pay-item ${item.isPaid ? 'paid' : ''}`}
+                            onClick={() => handlePayClick(item, date)}
+                          >
+                            <div className="pay-item-info">
+                              <span className="pay-item-name">{item.name}</span>
+                              <span className="pay-item-count">{item.count}명</span>
+                              {item.request && (
+                                <span className="pay-item-req">{item.request}</span>
+                              )}
+                            </div>
+                            <span className={`pay-badge ${item.isPaid ? 'paid' : 'unpaid'}`}>
+                              {item.isPaid ? '✓ 입금완료' : '미입금'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })
+              )
+            )}
+
+            {payCategory === 'jungmo' && (
+              jungmoPayLoading ? (
+                <div className="admin-state">불러오는 중...</div>
+              ) : Object.keys(jungmoAppsByJungmo).length === 0 ? (
+                <div className="admin-state">정모 신청 내역이 없어요</div>
+              ) : (
+                Object.entries(jungmoAppsByJungmo)
+                  .sort(([, a], [, b]) => b.eventDate.localeCompare(a.eventDate))
+                  .map(([jungmoId, { title, eventDate, apps }]) => {
+                    const totalPeople = apps.reduce((s, i) => s + (i.count || 0), 0)
+                    const paidCount = apps.filter(i => i.isPaid).reduce((s, i) => s + (i.count || 0), 0)
+                    const isCollapsed = collapsedJungmos.has(jungmoId)
+                    return (
+                      <div key={jungmoId} className="pay-date-group">
+                        <button
+                          className="pay-date-header"
+                          onClick={() => toggleJungmoCollapse(jungmoId)}
+                        >
+                          <div className="pay-date-left">
+                            <span className="pay-date-chevron">{isCollapsed ? '▶' : '▼'}</span>
+                            <div className="pay-date-title-wrap">
+                              <span className="pay-date">{title}</span>
+                              <span className="pay-jungmo-date">{eventDate}</span>
+                            </div>
+                          </div>
+                          <span className={`pay-date-stat ${paidCount === totalPeople && totalPeople > 0 ? 'all-paid' : ''}`}>
+                            {paidCount}/{totalPeople}명 입금
+                          </span>
+                        </button>
+
+                        {!isCollapsed && apps.map(item => (
+                          <div
+                            key={item.id}
+                            className={`pay-item ${item.isPaid ? 'paid' : ''}`}
+                            onClick={() => setJungmoConfirmTarget({ item, jungmoId, jungmoTitle: title, eventDate })}
+                          >
+                            <div className="pay-item-info">
+                              <span className="pay-item-name">{item.nickname}</span>
+                              <span className="pay-item-count">{item.count}명</span>
+                              {item.note && (
+                                <span className="pay-item-req">{item.note}</span>
+                              )}
+                            </div>
+                            <span className={`pay-badge ${item.isPaid ? 'paid' : 'unpaid'}`}>
+                              {item.isPaid ? '✓ 입금완료' : '미입금'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })
+              )
             )}
           </div>
         )}
@@ -593,6 +693,32 @@ export default function AdminPage({ onClose, onDangwanChange }) {
               <button
                 className={`confirm-btn ok ${confirmTarget.item.isPaid ? 'revert' : 'pay'}`}
                 onClick={confirmTogglePay}
+              >
+                변경
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 정모 입금 상태 변경 확인 모달 */}
+      {jungmoConfirmTarget && (
+        <div className="admin-confirm-overlay" onClick={() => setJungmoConfirmTarget(null)}>
+          <div className="admin-confirm-modal" onClick={e => e.stopPropagation()}>
+            <div className="confirm-icon">{jungmoConfirmTarget.item.isPaid ? '↩️' : '💳'}</div>
+            <h4 className="confirm-title">입금 상태 변경</h4>
+            <p className="confirm-desc">
+              <strong>{jungmoConfirmTarget.item.nickname}</strong>님을<br />
+              <strong className={jungmoConfirmTarget.item.isPaid ? 'status-unpaid' : 'status-paid'}>
+                {jungmoConfirmTarget.item.isPaid ? '미입금' : '입금완료'}
+              </strong>
+              으로 변경하시겠어요?
+            </p>
+            <div className="confirm-actions">
+              <button className="confirm-btn cancel" onClick={() => setJungmoConfirmTarget(null)}>취소</button>
+              <button
+                className={`confirm-btn ok ${jungmoConfirmTarget.item.isPaid ? 'revert' : 'pay'}`}
+                onClick={confirmToggleJungmoPay}
               >
                 변경
               </button>

@@ -229,6 +229,7 @@ function toJungmoApp(row) {
     count:     row.count || 1,
     note:      row.note || '',
     password:  row.password || '',
+    isPaid:    row.is_paid || false,
     createdAt: row.created_at,
   }
 }
@@ -264,6 +265,38 @@ export async function updateJungmoApplication(id, { nickname, count, note }) {
 export async function deleteJungmoApplication(id) {
   const { error } = await supabase.from('jungmo_applications').delete().eq('id', id)
   if (error) throw error
+}
+
+export async function updateJungmoPaymentStatus(id, isPaid) {
+  const { error } = await supabase
+    .from('jungmo_applications')
+    .update({ is_paid: isPaid })
+    .eq('id', id)
+  if (error) throw error
+}
+
+export async function getAllJungmoApplicationsWithInfo() {
+  const [{ data: apps, error: appError }, { data: jungmos, error: jungmoError }] = await Promise.all([
+    supabase.from('jungmo_applications').select('*').order('created_at', { ascending: true }),
+    supabase.from('jungmo').select('id, title, event_date'),
+  ])
+  if (appError) throw appError
+  if (jungmoError) throw jungmoError
+
+  const jungmoMap = Object.fromEntries((jungmos || []).map(j => [j.id, j]))
+  return (apps || []).map(row => {
+    const jungmo = jungmoMap[row.jungmo_id] || {}
+    return {
+      id:          row.id,
+      jungmoId:    row.jungmo_id,
+      nickname:    row.nickname,
+      count:       row.count || 1,
+      note:        row.note || '',
+      isPaid:      row.is_paid || false,
+      jungmoTitle: jungmo.title || '',
+      eventDate:   jungmo.event_date || '',
+    }
+  })
 }
 
 // ── 감사 로그 ──────────────────────────────────────────────────

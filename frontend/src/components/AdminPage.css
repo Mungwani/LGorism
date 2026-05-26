@@ -548,6 +548,43 @@
 
 .confirm-btn.ok.revert:hover { opacity: 0.85; }
 
+/* ── 입금 카테고리 전환 ──────────────────────────────────────── */
+.pay-cat-switch {
+  display: flex;
+  background: var(--white);
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  gap: 3px;
+}
+
+.pay-cat-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: calc(var(--radius-md) - 3px);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gray-500);
+  transition: all 0.15s;
+}
+
+.pay-cat-btn.active {
+  background: var(--black);
+  color: var(--white);
+}
+
+.pay-date-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.pay-jungmo-date {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
 /* ── 단관 관리 ───────────────────────────────────────────────── */
 .dangwan-open-trigger-btn {
   width: 100%;
