@@ -159,7 +159,8 @@
 }
 
 .jungmo-app-item.is-paid {
-  background: rgba(220, 252, 231, 0.5);
+  background: #f0fdf4;
+  border-bottom-color: #bbf7d0;
 }
 
 .app-num {
@@ -226,29 +227,31 @@
 }
 
 .app-pay-btn {
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 3px 7px;
-  border-radius: 6px;
+  padding: 5px 10px;
+  border-radius: 8px;
   background: #f0fdf4;
   color: #15803d;
-  border: 1px solid #bbf7d0;
-  transition: all 0.15s;
+  border: 1px solid #86efac;
+  transition: background 0.15s, color 0.15s;
   white-space: nowrap;
 }
 
 .app-pay-btn:hover {
-  background: #dcfce7;
+  background: #15803d;
+  color: var(--white);
 }
 
 .app-paid-badge {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  padding: 3px 7px;
-  border-radius: 6px;
+  padding: 5px 10px;
+  border-radius: 8px;
   background: #dcfce7;
   color: #15803d;
-  border: 1px solid #bbf7d0;
+  border: 1px solid #86efac;
+  cursor: default;
   white-space: nowrap;
 }
 
