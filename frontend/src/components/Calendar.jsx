@@ -27,8 +27,14 @@ export default function Calendar({
   dangwanOpenDates = new Set(),
 }) {
   const today = new Date();
-  const [viewYear, setViewYear] = useState(today.getFullYear());
-  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const [viewYear, setViewYear] = useState(() => {
+    if (selectedDate) return parseInt(selectedDate.split('-')[0], 10);
+    return today.getFullYear();
+  });
+  const [viewMonth, setViewMonth] = useState(() => {
+    if (selectedDate) return parseInt(selectedDate.split('-')[1], 10) - 1;
+    return today.getMonth();
+  });
 
   useEffect(() => {
     if (!selectedDate) return;
