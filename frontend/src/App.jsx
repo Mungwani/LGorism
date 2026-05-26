@@ -209,12 +209,13 @@ export default function App() {
   async function handlePay(id) {
     try {
       const target = applications.find(a => a.id === id);
-      await updatePaymentStatus(selectedDate, id, true);
-      logAudit('pay', 'dangwan', selectedDate, target?.name || '알 수 없음', '입금완료');
+      const newStatus = !target?.isPaid;
+      await updatePaymentStatus(selectedDate, id, newStatus);
+      logAudit('pay', 'dangwan', selectedDate, target?.name || '알 수 없음', newStatus ? '입금완료' : '입금취소');
       const apps = await getApplications(selectedDate);
       setApplications(apps);
       setTotalCount(getTotalCount(apps));
-      showToast("💳 입금 완료 처리됐어요!");
+      showToast(newStatus ? "💳 입금 완료 처리됐어요!" : "↩️ 입금이 취소됐어요.");
     } catch {
       showToast("❌ 처리에 실패했어요.");
     }

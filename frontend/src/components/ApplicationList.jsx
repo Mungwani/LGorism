@@ -38,7 +38,7 @@ export default function ApplicationList({
       onEdit(pwModal.item);
     } else if (pwModal.type === 'delete') {
       onDelete(pwModal.item.id);
-    } else if (pwModal.type === 'pay') {
+    } else if (pwModal.type === 'pay' || pwModal.type === 'unpay') {
       onPay(pwModal.item.id);
     }
     closePwModal();
@@ -91,7 +91,11 @@ export default function ApplicationList({
                   ) : (
                     <>
                       {item.isPaid ? (
-                        <span className="action-btn paid-badge">✓ 입금완료</span>
+                        <button
+                          className="action-btn paid-badge"
+                          onClick={() => openPwModal('unpay', item)}
+                          aria-label="입금취소"
+                        >✓ 입금완료</button>
                       ) : (
                         <button
                           className="action-btn pay"
@@ -142,12 +146,14 @@ export default function ApplicationList({
               {pwModal.type === 'pay' ? '💳' : '🔒'}
             </div>
             <h4 className="modal-title">
-              {pwModal.type === 'pay' ? '입금 확인' : '본인 확인'}
+              {pwModal.type === 'pay' ? '입금 확인' : pwModal.type === 'unpay' ? '입금 취소' : '본인 확인'}
             </h4>
             <p className="modal-desc">
               <strong>{pwModal.item.name}</strong>님,
               {pwModal.type === 'pay'
                 ? ' 신청 시 설정한 비밀번호로 입금완료 처리해요.'
+                : pwModal.type === 'unpay'
+                ? ' 신청 시 설정한 비밀번호를 입력하면 입금완료가 취소돼요.'
                 : ' 신청 시 설정한 비밀번호를 입력해주세요.'}
             </p>
             <input
@@ -165,10 +171,10 @@ export default function ApplicationList({
                 취소
               </button>
               <button
-                className={`modal-btn confirm ${pwModal.type === 'delete' ? 'red' : pwModal.type === 'pay' ? 'green' : 'blue'}`}
+                className={`modal-btn confirm ${pwModal.type === 'delete' ? 'red' : pwModal.type === 'pay' ? 'green' : pwModal.type === 'unpay' ? '' : 'blue'}`}
                 onClick={handlePwConfirm}
               >
-                {pwModal.type === 'edit' ? '수정하기' : pwModal.type === 'pay' ? '입금완료' : '삭제하기'}
+                {pwModal.type === 'edit' ? '수정하기' : pwModal.type === 'pay' ? '입금완료' : pwModal.type === 'unpay' ? '입금 취소' : '삭제하기'}
               </button>
             </div>
           </div>

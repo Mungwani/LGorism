@@ -132,10 +132,11 @@ function JungmoItem({ jungmo, onDelete }) {
       setPayPwError("비밀번호가 틀렸어요.");
       return;
     }
+    const newStatus = !payModal.app.isPaid;
     setPaying(true);
     try {
-      await updateJungmoPaymentStatus(payModal.app.id, true);
-      logAudit('pay', 'jungmo', jungmo.eventDate, payModal.app.nickname, '입금완료');
+      await updateJungmoPaymentStatus(payModal.app.id, newStatus);
+      logAudit('pay', 'jungmo', jungmo.eventDate, payModal.app.nickname, newStatus ? '입금완료' : '입금취소');
       setPayModal(null);
       loadApplications();
     } finally {
@@ -197,7 +198,9 @@ function JungmoItem({ jungmo, onDelete }) {
                           </div>
                           <div className="jungmo-item-actions">
                             {app.isPaid ? (
-                              <span className="jungmo-action-btn paid-badge">✓ 입금완료</span>
+                              <button className="jungmo-action-btn paid-badge" onClick={() => openPayModal(app)}>
+                                ✓ 입금완료
+                              </button>
                             ) : (
                               <button className="jungmo-action-btn pay" onClick={() => openPayModal(app)}>
                                 💳 입금
@@ -349,11 +352,13 @@ function JungmoItem({ jungmo, onDelete }) {
       {payModal && (
         <div className="jungmo-modal-overlay" onClick={() => { setPayModal(null); setPayPw(""); setPayPwError(""); }}>
           <div className="jungmo-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-icon">💳</div>
-            <h4 className="modal-title">입금 확인</h4>
+            <div className="modal-icon">{payModal.app.isPaid ? '↩️' : '💳'}</div>
+            <h4 className="modal-title">{payModal.app.isPaid ? '입금 취소' : '입금 확인'}</h4>
             <p className="modal-desc">
               <strong>{payModal.app.nickname}</strong>님,<br />
-              신청 시 설정한 비밀번호를 입력하면<br />입금완료로 처리돼요.
+              {payModal.app.isPaid
+                ? '비밀번호를 입력하면 입금완료가 취소돼요.'
+                : '비밀번호를 입력하면 입금완료로 처리돼요.'}
             </p>
             <input
               className="pw-input"
@@ -367,8 +372,12 @@ function JungmoItem({ jungmo, onDelete }) {
             {payPwError && <p className="pw-error">{payPwError}</p>}
             <div className="modal-actions">
               <button className="modal-btn cancel" onClick={() => { setPayModal(null); setPayPw(""); setPayPwError(""); }}>취소</button>
-              <button className="modal-btn confirm green" onClick={handlePayApp} disabled={paying}>
-                {paying ? "처리 중..." : "입금완료"}
+              <button
+                className={`modal-btn confirm ${payModal.app.isPaid ? '' : 'green'}`}
+                onClick={handlePayApp}
+                disabled={paying}
+              >
+                {paying ? "처리 중..." : payModal.app.isPaid ? "입금 취소" : "입금완료"}
               </button>
             </div>
           </div>

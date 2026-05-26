@@ -260,8 +260,12 @@
   background: #dcfce7;
   color: #15803d;
   border: 1px solid #86efac;
-  cursor: default;
-  opacity: 0.8;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.jungmo-action-btn.paid-badge:hover {
+  background: #bbf7d0;
 }
 
 .jungmo-item-request {
