@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { gameDateSet, allGameDateSet } from "../data/games";
 import "./Calendar.css";
 
@@ -29,6 +29,13 @@ export default function Calendar({
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
+
+  useEffect(() => {
+    if (!selectedDate) return;
+    const [y, m] = selectedDate.split('-').map(Number);
+    setViewYear(y);
+    setViewMonth(m - 1);
+  }, [selectedDate]);
 
   const todayStr = formatDate(today);
 

@@ -61,14 +61,30 @@
   background: #1565C0;
 }
 
-.ddl-jungmo-title {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--gray-600);
+.ddl-item-jungmo {
+  align-items: center;
+}
+
+.ddl-jungmo-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ddl-jungmo-name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--black);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 140px;
+  max-width: 180px;
+}
+
+.ddl-jungmo-sub {
+  font-size: 0.72rem;
+  color: var(--gray-500);
 }
 
 /* 빈 상태 */
