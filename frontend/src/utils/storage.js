@@ -231,6 +231,7 @@ function toJungmoApp(row) {
     password:  row.password || '',
     isPaid:    row.is_paid || false,
     createdAt: row.created_at,
+    updatedAt: row.updated_at || null,
   }
 }
 

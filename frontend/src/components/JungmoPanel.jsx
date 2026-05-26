@@ -180,34 +180,46 @@ function JungmoItem({ jungmo, onDelete }) {
           ) : (
             <>
               {applications.length > 0 ? (
-                <div className="jungmo-apps">
+                <>
                   <p className="apps-count">
                     총 {applications.reduce((s, a) => s + (a.count || 1), 0)}명 참석 예정
                   </p>
-                  {applications.map((app) => (
-                    <div key={app.id} className={`jungmo-app-item ${app.isPaid ? 'is-paid' : ''}`}>
-                      <span className="app-nickname">{app.nickname}</span>
-                      {app.count > 1 && (
-                        <span className="app-count-badge">+{app.count - 1}명</span>
-                      )}
-                      {app.note && (
-                        <span className="app-note">· {app.note}</span>
-                      )}
-                      <div className="app-item-actions">
-                        {app.isPaid ? (
-                          <span className="app-paid-badge">✓ 입금</span>
-                        ) : (
-                          <button className="app-pay-btn" onClick={() => openPayModal(app)}>💳 입금</button>
-                        )}
-                        <button className="app-edit-btn" onClick={() => openEditModal(app)}>수정</button>
-                        <button
-                          className="app-delete-btn"
-                          onClick={() => { setDeleteModal({ app }); setDeletePw(""); setDeletePwError(""); }}
-                        >✕</button>
+                  <div className="jungmo-application-list">
+                    {applications.map((app, index) => (
+                      <div key={app.id} className={`jungmo-application-item ${app.isPaid ? 'is-paid' : ''}`}>
+                        <div className="jungmo-item-header-row">
+                          <div className="jungmo-item-left">
+                            <span className="jungmo-item-num">{index + 1}</span>
+                            <div>
+                              <span className="jungmo-item-name">{app.nickname}</span>
+                              <span className="jungmo-item-count">{app.count}명</span>
+                            </div>
+                          </div>
+                          <div className="jungmo-item-actions">
+                            {app.isPaid ? (
+                              <span className="jungmo-action-btn paid-badge">✓ 입금완료</span>
+                            ) : (
+                              <button className="jungmo-action-btn pay" onClick={() => openPayModal(app)}>
+                                💳 입금
+                              </button>
+                            )}
+                            <button className="jungmo-action-btn edit" onClick={() => openEditModal(app)}>수정</button>
+                            <button
+                              className="jungmo-action-btn delete"
+                              onClick={() => { setDeleteModal({ app }); setDeletePw(""); setDeletePwError(""); }}
+                            >삭제</button>
+                          </div>
+                        </div>
+                        {app.note && <p className="jungmo-item-request">📌 {app.note}</p>}
+                        <p className="jungmo-item-time">
+                          {app.updatedAt
+                            ? `${formatJungmoTime(app.updatedAt)} 수정됨`
+                            : formatJungmoTime(app.createdAt)}
+                        </p>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </>
               ) : (
                 <p className="no-apps-text">아직 신청자가 없어요</p>
               )}
@@ -614,4 +626,14 @@ export default function JungmoPanel({
       )}
     </div>
   );
+}
+
+function formatJungmoTime(isoStr) {
+  if (!isoStr) return "";
+  const d = new Date(isoStr);
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const h = String(d.getHours()).padStart(2, "0");
+  const min = String(d.getMinutes()).padStart(2, "0");
+  return `${m}/${day} ${h}:${min}`;
 }

@@ -132,44 +132,59 @@
   padding: 10px 0;
 }
 
-/* 신청자 목록 */
-.jungmo-apps {
-  background: var(--gray-100);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-}
-
+/* 신청자 목록 — ApplicationList 동일 스타일 */
 .apps-count {
   font-size: 0.75rem;
   font-weight: 700;
   color: #1565C0;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
-.jungmo-app-item {
+.jungmo-application-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.jungmo-application-item {
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: box-shadow 0.15s;
+}
+
+.jungmo-application-item:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.jungmo-application-item.is-paid {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.jungmo-item-header-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 0;
-  border-bottom: 1px solid var(--gray-200);
+  justify-content: space-between;
 }
 
-.jungmo-app-item:last-child {
-  border-bottom: none;
+.jungmo-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.jungmo-app-item.is-paid {
-  background: #f0fdf4;
-  border-bottom-color: #bbf7d0;
-}
-
-.app-num {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #1565C0;
+.jungmo-item-num {
+  width: 24px;
+  height: 24px;
+  background: var(--red);
   color: var(--white);
-  font-size: 0.65rem;
+  border-radius: 50%;
+  font-size: 0.72rem;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -177,97 +192,90 @@
   flex-shrink: 0;
 }
 
-.app-nickname {
-  font-size: 0.82rem;
+.jungmo-item-name {
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--black);
+  margin-right: 6px;
 }
 
-.app-item-actions {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.app-edit-btn {
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 3px 7px;
-  border-radius: 6px;
-  background: #e3f2fd;
-  color: #1565C0;
-  border: 1px solid #90caf9;
-  transition: all 0.15s;
-}
-
-.app-edit-btn:hover {
-  background: #1565C0;
-  color: var(--white);
-}
-
-.app-delete-btn {
-  flex-shrink: 0;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--gray-400);
-  font-size: 0.65rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s;
-}
-
-.app-delete-btn:hover {
-  background: #fff5f7;
+.jungmo-item-count {
+  font-size: 0.8rem;
   color: var(--red);
+  font-weight: 700;
+  background: #fff0f3;
+  padding: 2px 8px;
+  border-radius: 10px;
 }
 
-.app-pay-btn {
+.jungmo-item-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.jungmo-action-btn {
   font-size: 0.75rem;
   font-weight: 700;
   padding: 5px 10px;
   border-radius: 8px;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+
+.jungmo-action-btn:active { transform: scale(0.93); }
+
+.jungmo-action-btn.edit {
+  background: #e8f4ff;
+  color: #1565C0;
+  border: 1px solid #90caf9;
+}
+
+.jungmo-action-btn.edit:hover {
+  background: #1565C0;
+  color: var(--white);
+}
+
+.jungmo-action-btn.delete {
+  background: #fff0f0;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+
+.jungmo-action-btn.delete:hover {
+  background: #c62828;
+  color: var(--white);
+}
+
+.jungmo-action-btn.pay {
   background: #f0fdf4;
   color: #15803d;
   border: 1px solid #86efac;
-  transition: background 0.15s, color 0.15s;
-  white-space: nowrap;
 }
 
-.app-pay-btn:hover {
+.jungmo-action-btn.pay:hover {
   background: #15803d;
   color: var(--white);
 }
 
-.app-paid-badge {
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 5px 10px;
-  border-radius: 8px;
+.jungmo-action-btn.paid-badge {
   background: #dcfce7;
   color: #15803d;
   border: 1px solid #86efac;
   cursor: default;
-  white-space: nowrap;
+  opacity: 0.8;
 }
 
-.app-count-badge {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: #1565C0;
-  background: #e8f0fe;
-  border-radius: 10px;
-  padding: 1px 7px;
-  flex-shrink: 0;
-}
-
-.app-note {
-  font-size: 0.76rem;
+.jungmo-item-request {
+  font-size: 0.78rem;
   color: var(--gray-500);
+  background: var(--gray-100);
+  border-radius: 6px;
+  padding: 5px 8px;
+}
+
+.jungmo-item-time {
+  font-size: 0.7rem;
+  color: var(--gray-400);
+  text-align: right;
 }
 
 .no-apps-text {
