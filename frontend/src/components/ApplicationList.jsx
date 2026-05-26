@@ -11,7 +11,7 @@ export default function ApplicationList({
   selectedDate,
   readOnly = false,
 }) {
-  const [pwModal, setPwModal] = useState(null); // { type: 'edit'|'delete'|'pay', item }
+  const [pwModal, setPwModal] = useState(null); // { type: 'edit'|'delete', item }
   const [pwInput, setPwInput] = useState('');
   const [pwError, setPwError] = useState('');
 
@@ -42,8 +42,6 @@ export default function ApplicationList({
       onEdit(pwModal.item);
     } else if (pwModal.type === 'delete') {
       onDelete(pwModal.item.id);
-    } else if (pwModal.type === 'pay' || pwModal.type === 'unpay') {
-      onPay(pwModal.item.id);
     }
     closePwModal();
   }
@@ -90,25 +88,11 @@ export default function ApplicationList({
                   </div>
                 </div>
                 <div className="item-actions">
-                  {readOnly ? (
-                    item.isPaid && <span className="action-btn paid-badge">✓ 입금완료</span>
-                  ) : (
+                  {item.isPaid && (
+                    <span className="action-btn paid-badge">✓ 입금완료</span>
+                  )}
+                  {!readOnly && (
                     <>
-                      {item.isPaid ? (
-                        <button
-                          className="action-btn paid-badge"
-                          onClick={() => openPwModal('unpay', item)}
-                          aria-label="입금취소"
-                        >✓ 입금완료</button>
-                      ) : (
-                        <button
-                          className="action-btn pay"
-                          onClick={() => openPwModal('pay', item)}
-                          aria-label="입금완료"
-                        >
-                          💳 입금
-                        </button>
-                      )}
                       <button
                         className="action-btn edit"
                         onClick={() => openPwModal('edit', item)}
@@ -146,19 +130,11 @@ export default function ApplicationList({
       {pwModal && (
         <div className="modal-overlay" onClick={closePwModal}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon">
-              {pwModal.type === 'pay' ? '💳' : '🔒'}
-            </div>
-            <h4 className="modal-title">
-              {pwModal.type === 'pay' ? '입금 확인' : pwModal.type === 'unpay' ? '입금 취소' : '본인 확인'}
-            </h4>
+            <div className="modal-icon">🔒</div>
+            <h4 className="modal-title">본인 확인</h4>
             <p className="modal-desc">
-              <strong>{pwModal.item.name}</strong>님,
-              {pwModal.type === 'pay'
-                ? ' 신청 시 설정한 비밀번호로 입금완료 처리해요.'
-                : pwModal.type === 'unpay'
-                ? ' 신청 시 설정한 비밀번호를 입력하면 입금완료가 취소돼요.'
-                : ' 신청 시 설정한 비밀번호를 입력해주세요.'}
+              <strong>{pwModal.item.name}</strong>님,<br />
+              신청 시 설정한 비밀번호를 입력해주세요.
             </p>
             <input
               className="pw-input"
@@ -175,10 +151,10 @@ export default function ApplicationList({
                 취소
               </button>
               <button
-                className={`modal-btn confirm ${pwModal.type === 'delete' ? 'red' : pwModal.type === 'pay' ? 'green' : pwModal.type === 'unpay' ? '' : 'blue'}`}
+                className={`modal-btn confirm ${pwModal.type === 'delete' ? 'red' : 'blue'}`}
                 onClick={handlePwConfirm}
               >
-                {pwModal.type === 'edit' ? '수정하기' : pwModal.type === 'pay' ? '입금완료' : pwModal.type === 'unpay' ? '입금 취소' : '삭제하기'}
+                {pwModal.type === 'edit' ? '수정하기' : '삭제하기'}
               </button>
             </div>
           </div>

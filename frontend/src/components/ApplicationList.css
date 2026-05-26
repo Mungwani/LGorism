@@ -192,18 +192,12 @@
   color: var(--white);
 }
 
-/* 입금완료 — 클릭 시 취소 가능 */
 .action-btn.paid-badge {
   background: #dcfce7;
   color: #15803d;
   border: 1px solid #86efac;
-  cursor: pointer;
+  cursor: default;
   font-size: 0.72rem;
-  transition: background 0.15s, color 0.15s;
-}
-
-.action-btn.paid-badge:hover {
-  background: #bbf7d0;
 }
 
 /* 입금완료된 아이템 행 배경 */
