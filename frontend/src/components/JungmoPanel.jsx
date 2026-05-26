@@ -154,9 +154,12 @@ function JungmoItem({ jungmo, onDelete }) {
           )}
         </div>
         <div className="jungmo-item-right">
-          {totalApplicants > 0 && (
-            <span className="jungmo-app-badge">{totalApplicants}명</span>
-          )}
+          <div className="jungmo-item-right-top">
+            {totalApplicants > 0 && (
+              <span className="jungmo-app-badge">{totalApplicants}명</span>
+            )}
+            <span className="expand-chevron">{expanded ? "▲" : "▼"}</span>
+          </div>
           <button
             className="jungmo-share-btn"
             onClick={e => {
@@ -170,7 +173,6 @@ function JungmoItem({ jungmo, onDelete }) {
           >
             공유하기
           </button>
-          <span className="expand-chevron">{expanded ? "▲" : "▼"}</span>
         </div>
       </div>
 
