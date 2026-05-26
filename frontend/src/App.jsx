@@ -362,6 +362,7 @@ export default function App() {
           {filterMode === "dangwan" && (
             <DangwanDateList
               dangwanSummary={dangwanSummary}
+              dangwanOpenDates={dangwanOpenDates}
               onSelectDate={handleDangwanDateSelect}
             />
           )}

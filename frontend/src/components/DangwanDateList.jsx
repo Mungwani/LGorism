@@ -1,8 +1,8 @@
 import "./DangwanDateList.css";
 
-export default function DangwanDateList({ dangwanSummary, onSelectDate }) {
+export default function DangwanDateList({ dangwanSummary, dangwanOpenDates, onSelectDate }) {
   const dates = Object.entries(dangwanSummary)
-    .filter(([, info]) => info.totalPeople > 0)
+    .filter(([date, info]) => info.totalPeople > 0 && dangwanOpenDates.has(date))
     .sort(([a], [b]) => a.localeCompare(b));
 
   if (dates.length === 0) {
