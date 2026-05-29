@@ -20,6 +20,7 @@ import {
   getApplicationSummary,
   getJikgwanList,
   addJikgwan,
+  updateJikgwan,
   deleteJikgwan,
   getJikgwanSummary,
   getJungmoList,
@@ -249,6 +250,17 @@ export default function App() {
     } catch (e) {
       const msg = e?.message || e?.details || JSON.stringify(e) || "알 수 없는 오류";
       showToast("❌ 직관 등록 실패: " + msg);
+    }
+  }
+
+  async function handleJikgwanUpdate(id, fields) {
+    try {
+      await updateJikgwan(id, fields);
+      const updated = await getJikgwanList(selectedDate);
+      setJikgwanList(updated);
+      showToast("✅ 수정됐어요!");
+    } catch {
+      showToast("❌ 수정에 실패했어요.");
     }
   }
 
@@ -489,6 +501,7 @@ export default function App() {
                       selectedDate={selectedDate}
                       jikgwanList={jikgwanList}
                       onAdd={handleJikgwanAdd}
+                      onUpdate={handleJikgwanUpdate}
                       onDelete={handleJikgwanDelete}
                     />
                   )}

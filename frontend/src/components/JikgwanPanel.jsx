@@ -1,19 +1,28 @@
 import { useState } from "react";
 import "./JikgwanPanel.css";
 
-export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelete }) {
+export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onUpdate, onDelete }) {
   const [showForm, setShowForm] = useState(false);
   const [nickname, setNickname] = useState("");
   const [section, setSection] = useState("");
   const [password, setPassword] = useState("");
   const [isTowelFairy, setIsTowelFairy] = useState(false);
+  const [towelMeetingArea, setTowelMeetingArea] = useState("");
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
   // 삭제 모달 상태
-  const [deleteTarget, setDeleteTarget] = useState(null); // jikgwan item
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [deletePw, setDeletePw] = useState("");
   const [deleteError, setDeleteError] = useState("");
+
+  // 수정 모달 상태
+  const [editTarget, setEditTarget] = useState(null);
+  const [editPw, setEditPw] = useState("");
+  const [editPwError, setEditPwError] = useState("");
+  const [editIsTowelFairy, setEditIsTowelFairy] = useState(false);
+  const [editMeetingArea, setEditMeetingArea] = useState("");
+  const [editSubmitting, setEditSubmitting] = useState(false);
 
   const towelFairies = jikgwanList.filter((p) => p.isTowelFairy);
 
@@ -26,11 +35,12 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
 
     setSubmitting(true);
     try {
-      await onAdd({ nickname: nickname.trim(), section: section.trim(), isTowelFairy, password });
+      await onAdd({ nickname: nickname.trim(), section: section.trim(), isTowelFairy, towelMeetingArea: towelMeetingArea.trim(), password });
       setNickname("");
       setSection("");
       setPassword("");
       setIsTowelFairy(false);
+      setTowelMeetingArea("");
       setErrors({});
       setShowForm(false);
     } finally {
@@ -38,6 +48,7 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
     }
   }
 
+  // 삭제 모달
   function openDeleteModal(person) {
     setDeleteTarget(person);
     setDeletePw("");
@@ -57,6 +68,37 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
     }
     onDelete(deleteTarget.id);
     closeDeleteModal();
+  }
+
+  // 수정 모달
+  function openEditModal(person) {
+    setEditTarget(person);
+    setEditPw("");
+    setEditPwError("");
+    setEditIsTowelFairy(person.isTowelFairy);
+    setEditMeetingArea(person.towelMeetingArea || "");
+    setEditSubmitting(false);
+  }
+
+  function closeEditModal() {
+    setEditTarget(null);
+    setEditPw("");
+    setEditPwError("");
+    setEditSubmitting(false);
+  }
+
+  async function handleEditConfirm() {
+    if (editPw !== editTarget.password && editPw !== import.meta.env.VITE_ADMIN_PASSWORD) {
+      setEditPwError("비밀번호가 틀렸어요");
+      return;
+    }
+    setEditSubmitting(true);
+    try {
+      await onUpdate(editTarget.id, { isTowelFairy: editIsTowelFairy, towelMeetingArea: editMeetingArea.trim() });
+      closeEditModal();
+    } finally {
+      setEditSubmitting(false);
+    }
   }
 
   return (
@@ -106,7 +148,7 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
 
         <div className={`field ${errors.password ? "error" : ""}`}>
           <label htmlFor="jk-password">
-            비밀번호 * <span className="label-hint">(삭제 시 필요)</span>
+            비밀번호 * <span className="label-hint">(삭제·수정 시 필요)</span>
           </label>
           <input
             id="jk-password"
@@ -122,24 +164,56 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
         <button
           type="button"
           className={`towel-fairy-btn ${isTowelFairy ? "active" : ""}`}
-          onClick={() => setIsTowelFairy((v) => !v)}
+          onClick={() => { setIsTowelFairy((v) => !v); setTowelMeetingArea(""); }}
         >
           🎽 {isTowelFairy ? "수건대장 신청됨! (취소하려면 클릭)" : "제가 수건대장할게요!"}
         </button>
+
+        {/* 수건대장 집합 장소 입력 */}
+        {isTowelFairy && (
+          <div className="field towel-meeting-field">
+            <label htmlFor="jk-meeting-area">
+              어느 구역에서 모일건가요? <span className="optional-tag">(선택)</span>
+            </label>
+            <input
+              id="jk-meeting-area"
+              type="text"
+              placeholder="예) 1루 응원석 계단 앞, 3루 입구"
+              value={towelMeetingArea}
+              onChange={(e) => setTowelMeetingArea(e.target.value)}
+              maxLength={50}
+              autoFocus
+            />
+          </div>
+        )}
 
         {towelFairies.length > 0 && !isTowelFairy && (
           <p className="fairy-notice">
             이미 수건대장이 있어요 — {towelFairies.map((p) => p.nickname).join(", ")}
           </p>
         )}
-        {isTowelFairy && (
-          <p className="fairy-notice active">5회말에 모여서 수건 샷 찍어요!</p>
-        )}
 
         <button type="submit" className="submit-btn" disabled={submitting}>
           {submitting ? "등록 중..." : "⚾ 직관 등록하기"}
         </button>
       </form>
+      )}
+
+      {/* 수건대장 집합 안내 배너 */}
+      {towelFairies.length > 0 && (
+        <div className="towel-callout">
+          <div className="towel-callout-header">🎽 수건대장</div>
+          {towelFairies.map((f) => (
+            <div key={f.id} className="towel-callout-row">
+              <span className="towel-callout-name">{f.nickname}</span>
+              {f.towelMeetingArea ? (
+                <span className="towel-callout-place">📍 {f.towelMeetingArea}</span>
+              ) : (
+                <span className="towel-callout-no-place">장소 미정</span>
+              )}
+            </div>
+          ))}
+        </div>
       )}
 
       {/* 직관 가는 사람 목록 */}
@@ -163,13 +237,22 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
                   )}
                 </div>
               </div>
-              <button
-                className="jk-delete-btn"
-                onClick={() => openDeleteModal(person)}
-                aria-label="삭제"
-              >
-                ✕
-              </button>
+              <div className="jk-actions">
+                <button
+                  className="jk-edit-btn"
+                  onClick={() => openEditModal(person)}
+                  aria-label="수정"
+                >
+                  ✏️
+                </button>
+                <button
+                  className="jk-delete-btn"
+                  onClick={() => openDeleteModal(person)}
+                  aria-label="삭제"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -207,6 +290,65 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onDelet
               </button>
               <button className="modal-btn confirm red" onClick={handleDeleteConfirm}>
                 삭제하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 수정 모달 */}
+      {editTarget && (
+        <div className="jk-modal-overlay" onClick={closeEditModal}>
+          <div className="jk-modal jk-edit-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-icon">✏️</div>
+            <h4 className="modal-title">{editTarget.nickname}님 수정</h4>
+            <p className="modal-desc">
+              비밀번호 확인 후 수정할 수 있어요
+            </p>
+            <input
+              className={`pw-input ${editPwError ? "error" : ""}`}
+              type="password"
+              placeholder="비밀번호 입력"
+              value={editPw}
+              onChange={(e) => { setEditPw(e.target.value); setEditPwError(""); }}
+              autoFocus
+            />
+            {editPwError && <p className="pw-error">{editPwError}</p>}
+
+            {/* 수건대장 토글 */}
+            <button
+              type="button"
+              className={`towel-fairy-btn edit-towel-btn ${editIsTowelFairy ? "active" : ""}`}
+              onClick={() => { setEditIsTowelFairy((v) => !v); if (editIsTowelFairy) setEditMeetingArea(""); }}
+            >
+              🎽 {editIsTowelFairy ? "수건대장 취소하기" : "수건대장 신청하기"}
+            </button>
+
+            {/* 집합 장소 수정 */}
+            {editIsTowelFairy && (
+              <div className="edit-meeting-field">
+                <label className="edit-meeting-label">어느 구역에서 모일건가요?</label>
+                <input
+                  className="edit-meeting-input"
+                  type="text"
+                  placeholder="예) 1루 응원석 계단 앞"
+                  value={editMeetingArea}
+                  onChange={(e) => setEditMeetingArea(e.target.value)}
+                  maxLength={50}
+                />
+              </div>
+            )}
+
+            <div className="modal-actions">
+              <button className="modal-btn cancel" onClick={closeEditModal}>
+                취소
+              </button>
+              <button
+                className="modal-btn confirm"
+                onClick={handleEditConfirm}
+                disabled={editSubmitting}
+              >
+                {editSubmitting ? "저장 중..." : "저장하기"}
               </button>
             </div>
           </div>

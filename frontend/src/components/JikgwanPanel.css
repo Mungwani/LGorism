@@ -231,6 +231,13 @@
   color: #1565C0;
 }
 
+.jk-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.jk-edit-btn,
 .jk-delete-btn {
   width: 26px;
   height: 26px;
@@ -245,9 +252,113 @@
   flex-shrink: 0;
 }
 
+.jk-edit-btn:hover {
+  background: #e8f0fe;
+  color: #1565C0;
+}
+
 .jk-delete-btn:hover {
   background: #ffe0e6;
   color: var(--red);
+}
+
+/* 수건대장 집합 안내 배너 */
+.towel-callout {
+  background: linear-gradient(135deg, #fff5ee, #fff0e6);
+  border: 1.5px solid #ffb380;
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.towel-callout-header {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #e65c00;
+  letter-spacing: 0.03em;
+}
+
+.towel-callout-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.towel-callout-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.towel-callout-place {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #e65c00;
+  background: #fff;
+  border: 1px solid #ffb380;
+  padding: 2px 9px;
+  border-radius: 20px;
+}
+
+.towel-callout-no-place {
+  font-size: 0.76rem;
+  color: var(--gray-400);
+}
+
+/* 수건대장 집합 장소 입력 (폼) */
+.towel-meeting-field {
+  background: #fff5ee;
+  border: 1.5px solid #ffb380;
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  margin-top: -6px;
+}
+
+.towel-meeting-field label {
+  color: #e65c00 !important;
+}
+
+/* 수정 모달 */
+.jk-edit-modal {
+  gap: 12px;
+}
+
+.edit-towel-btn {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.edit-meeting-field {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.edit-meeting-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e65c00;
+}
+
+.edit-meeting-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #ffb380;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  background: #fff5ee;
+  color: var(--black);
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.edit-meeting-input:focus {
+  border-color: #e65c00;
+  outline: none;
 }
 
 /* 빈 상태 */
