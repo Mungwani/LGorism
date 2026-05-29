@@ -293,6 +293,15 @@
   color: var(--black);
 }
 
+.towel-callout-inning {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #a84800;
+  background: #ffe8d0;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
 .towel-callout-place {
   font-size: 0.82rem;
   font-weight: 600;
@@ -315,9 +324,13 @@
   border-radius: var(--radius-md);
   padding: 10px 12px;
   margin-top: -6px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.towel-meeting-field label {
+.towel-meeting-field label,
+.towel-meeting-field .field label {
   color: #e65c00 !important;
 }
 

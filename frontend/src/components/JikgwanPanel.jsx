@@ -8,6 +8,7 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onUpdat
   const [password, setPassword] = useState("");
   const [isTowelFairy, setIsTowelFairy] = useState(false);
   const [towelMeetingArea, setTowelMeetingArea] = useState("");
+  const [towelInning, setTowelInning] = useState("5회말");
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -22,6 +23,7 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onUpdat
   const [editPwError, setEditPwError] = useState("");
   const [editIsTowelFairy, setEditIsTowelFairy] = useState(false);
   const [editMeetingArea, setEditMeetingArea] = useState("");
+  const [editInning, setEditInning] = useState("5회말");
   const [editSubmitting, setEditSubmitting] = useState(false);
 
   const towelFairies = jikgwanList.filter((p) => p.isTowelFairy);
@@ -35,12 +37,13 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onUpdat
 
     setSubmitting(true);
     try {
-      await onAdd({ nickname: nickname.trim(), section: section.trim(), isTowelFairy, towelMeetingArea: towelMeetingArea.trim(), password });
+      await onAdd({ nickname: nickname.trim(), section: section.trim(), isTowelFairy, towelMeetingArea: towelMeetingArea.trim(), towelInning: towelInning.trim(), password });
       setNickname("");
       setSection("");
       setPassword("");
       setIsTowelFairy(false);
       setTowelMeetingArea("");
+      setTowelInning("5회말");
       setErrors({});
       setShowForm(false);
     } finally {
@@ -77,6 +80,7 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onUpdat
     setEditPwError("");
     setEditIsTowelFairy(person.isTowelFairy);
     setEditMeetingArea(person.towelMeetingArea || "");
+    setEditInning(person.towelInning || "5회말");
     setEditSubmitting(false);
   }
 
@@ -94,7 +98,7 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onUpdat
     }
     setEditSubmitting(true);
     try {
-      await onUpdate(editTarget.id, { isTowelFairy: editIsTowelFairy, towelMeetingArea: editMeetingArea.trim() });
+      await onUpdate(editTarget.id, { isTowelFairy: editIsTowelFairy, towelMeetingArea: editMeetingArea.trim(), towelInning: editInning.trim() });
       closeEditModal();
     } finally {
       setEditSubmitting(false);
@@ -164,26 +168,38 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onUpdat
         <button
           type="button"
           className={`towel-fairy-btn ${isTowelFairy ? "active" : ""}`}
-          onClick={() => { setIsTowelFairy((v) => !v); setTowelMeetingArea(""); }}
+          onClick={() => { setIsTowelFairy((v) => !v); setTowelMeetingArea(""); setTowelInning("5회말"); }}
         >
           🎽 {isTowelFairy ? "수건대장 신청됨! (취소하려면 클릭)" : "제가 수건대장할게요!"}
         </button>
 
-        {/* 수건대장 집합 장소 입력 */}
+        {/* 수건대장 집합 정보 입력 */}
         {isTowelFairy && (
-          <div className="field towel-meeting-field">
-            <label htmlFor="jk-meeting-area">
-              어느 구역에서 모일건가요? <span className="optional-tag">(선택)</span>
-            </label>
-            <input
-              id="jk-meeting-area"
-              type="text"
-              placeholder="예) 1루 응원석 계단 앞, 3루 입구"
-              value={towelMeetingArea}
-              onChange={(e) => setTowelMeetingArea(e.target.value)}
-              maxLength={50}
-              autoFocus
-            />
+          <div className="towel-meeting-field">
+            <div className="field">
+              <label htmlFor="jk-inning">몇 회 끝나고 모이나요?</label>
+              <input
+                id="jk-inning"
+                type="text"
+                value={towelInning}
+                onChange={(e) => setTowelInning(e.target.value)}
+                maxLength={10}
+                autoFocus
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="jk-meeting-area">
+                어느 구역에서 모일건가요? <span className="optional-tag">(선택)</span>
+              </label>
+              <input
+                id="jk-meeting-area"
+                type="text"
+                placeholder="예) 1루 응원석 계단 앞, 3루 입구"
+                value={towelMeetingArea}
+                onChange={(e) => setTowelMeetingArea(e.target.value)}
+                maxLength={50}
+              />
+            </div>
           </div>
         )}
 
@@ -206,6 +222,7 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onUpdat
           {towelFairies.map((f) => (
             <div key={f.id} className="towel-callout-row">
               <span className="towel-callout-name">{f.nickname}</span>
+              <span className="towel-callout-inning">🕐 {f.towelInning || '5회말'} 이후</span>
               {f.towelMeetingArea ? (
                 <span className="towel-callout-place">📍 {f.towelMeetingArea}</span>
               ) : (
@@ -319,15 +336,23 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onUpdat
             <button
               type="button"
               className={`towel-fairy-btn edit-towel-btn ${editIsTowelFairy ? "active" : ""}`}
-              onClick={() => { setEditIsTowelFairy((v) => !v); if (editIsTowelFairy) setEditMeetingArea(""); }}
+              onClick={() => { setEditIsTowelFairy((v) => !v); if (editIsTowelFairy) { setEditMeetingArea(""); setEditInning("5회말"); } }}
             >
               🎽 {editIsTowelFairy ? "수건대장 취소하기" : "수건대장 신청하기"}
             </button>
 
-            {/* 집합 장소 수정 */}
+            {/* 집합 정보 수정 */}
             {editIsTowelFairy && (
               <div className="edit-meeting-field">
-                <label className="edit-meeting-label">어느 구역에서 모일건가요?</label>
+                <label className="edit-meeting-label">몇 회 끝나고 모이나요?</label>
+                <input
+                  className="edit-meeting-input"
+                  type="text"
+                  value={editInning}
+                  onChange={(e) => setEditInning(e.target.value)}
+                  maxLength={10}
+                />
+                <label className="edit-meeting-label" style={{ marginTop: 8 }}>어느 구역에서 모일건가요?</label>
                 <input
                   className="edit-meeting-input"
                   type="text"

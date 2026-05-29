@@ -132,6 +132,7 @@ function toJikgwan(row) {
     section:          row.section || '',
     isTowelFairy:     row.is_towel_fairy || false,
     towelMeetingArea: row.towel_meeting_area || '',
+    towelInning:      row.towel_inning || '5회말',
     password:         row.password || '',
     createdAt:        row.created_at,
   }
@@ -147,7 +148,7 @@ export async function getJikgwanList(date) {
   return (data || []).map(toJikgwan)
 }
 
-export async function addJikgwan(date, { nickname, section, isTowelFairy, towelMeetingArea, password }) {
+export async function addJikgwan(date, { nickname, section, isTowelFairy, towelMeetingArea, towelInning, password }) {
   const { data, error } = await supabase
     .from('jikgwan')
     .insert({
@@ -156,6 +157,7 @@ export async function addJikgwan(date, { nickname, section, isTowelFairy, towelM
       section: section || null,
       is_towel_fairy: isTowelFairy,
       towel_meeting_area: isTowelFairy ? (towelMeetingArea || null) : null,
+      towel_inning: isTowelFairy ? (towelInning || '5회말') : null,
       password: password || '',
     })
     .select()
@@ -164,12 +166,13 @@ export async function addJikgwan(date, { nickname, section, isTowelFairy, towelM
   return toJikgwan(data)
 }
 
-export async function updateJikgwan(id, { isTowelFairy, towelMeetingArea }) {
+export async function updateJikgwan(id, { isTowelFairy, towelMeetingArea, towelInning }) {
   const { error } = await supabase
     .from('jikgwan')
     .update({
       is_towel_fairy: isTowelFairy,
       towel_meeting_area: isTowelFairy ? (towelMeetingArea || null) : null,
+      towel_inning: isTowelFairy ? (towelInning || '5회말') : null,
     })
     .eq('id', id)
   if (error) throw error
