@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { shareContent, formatDateKo } from "../utils/kakao";
+import { verifyPassword, upgradeApplicationPassword } from "../utils/storage";
 import "./ApplicationList.css";
 
 export default function ApplicationList({
@@ -29,14 +30,18 @@ export default function ApplicationList({
     setPwError('');
   }
 
-  function handlePwConfirm() {
+  async function handlePwConfirm() {
     if (!pwInput.trim()) {
       setPwError('비밀번호를 입력해주세요.');
       return;
     }
-    if (pwInput !== pwModal.item.password && pwInput !== import.meta.env.VITE_ADMIN_PASSWORD) {
+    const result = await verifyPassword(pwInput, pwModal.item.password);
+    if (!result.valid) {
       setPwError('비밀번호가 틀렸어요.');
       return;
+    }
+    if (result.needsUpgrade) {
+      upgradeApplicationPassword(selectedDate, pwModal.item.id, result.hash).catch(() => {});
     }
     if (pwModal.type === 'edit') {
       onEdit(pwModal.item);

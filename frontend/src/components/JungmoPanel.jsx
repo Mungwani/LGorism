@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getJungmoApplications, addJungmoApplication, updateJungmoApplication, deleteJungmoApplication, logAudit } from "../utils/storage";
+import { getJungmoApplications, addJungmoApplication, updateJungmoApplication, deleteJungmoApplication, logAudit, verifyPassword, upgradeJungmoApplicationPassword, upgradeJungmoPassword } from "../utils/storage";
 import { shareContent, formatDateKo } from "../utils/kakao";
 import "./JungmoPanel.css";
 
@@ -83,9 +83,13 @@ function JungmoItem({ jungmo, onDelete }) {
     setEditNickname(app.nickname); setEditCount(app.count || 1); setEditNote(app.note || "");
   }
 
-  function handleEditPwConfirm() {
+  async function handleEditPwConfirm() {
     if (!editPw.trim()) { setEditPwError("비밀번호를 입력해주세요."); return; }
-    if (editPw !== editModal.app.password && editPw !== import.meta.env.VITE_ADMIN_PASSWORD) { setEditPwError("비밀번호가 틀렸어요."); return; }
+    const result = await verifyPassword(editPw, editModal.app.password);
+    if (!result.valid) { setEditPwError("비밀번호가 틀렸어요."); return; }
+    if (result.needsUpgrade) {
+      upgradeJungmoApplicationPassword(editModal.app.id, result.hash).catch(() => {});
+    }
     setEditStep("form");
   }
 
@@ -102,17 +106,25 @@ function JungmoItem({ jungmo, onDelete }) {
 
   async function handleDeleteApp() {
     if (!deletePw.trim()) { setDeletePwError("비밀번호를 입력해주세요."); return; }
-    if (deletePw !== deleteModal.app.password && deletePw !== import.meta.env.VITE_ADMIN_PASSWORD) { setDeletePwError("비밀번호가 틀렸어요."); return; }
+    const result = await verifyPassword(deletePw, deleteModal.app.password);
+    if (!result.valid) { setDeletePwError("비밀번호가 틀렸어요."); return; }
+    if (result.needsUpgrade) {
+      upgradeJungmoApplicationPassword(deleteModal.app.id, result.hash).catch(() => {});
+    }
     await deleteJungmoApplication(deleteModal.app.id);
     logAudit('delete', 'jungmo', jungmo.eventDate, deleteModal.app.nickname, null);
     setDeleteModal(null); setDeletePw(""); setDeletePwError("");
     loadApplications();
   }
 
-  function handleDeleteConfirm() {
-    if (jungmoDeletePw !== jungmo.password && jungmoDeletePw !== import.meta.env.VITE_ADMIN_PASSWORD) {
+  async function handleDeleteConfirm() {
+    const result = await verifyPassword(jungmoDeletePw, jungmo.password);
+    if (!result.valid) {
       setJungmoDeleteError("비밀번호가 틀렸어요");
       return;
+    }
+    if (result.needsUpgrade) {
+      upgradeJungmoPassword(jungmo.id, result.hash).catch(() => {});
     }
     onDelete(jungmo.id);
     setShowDeleteModal(false);

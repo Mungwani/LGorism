@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { verifyPassword, upgradeJikgwanPassword } from "../utils/storage";
 import "./JikgwanPanel.css";
 
 export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onUpdate, onDelete }) {
@@ -64,10 +65,14 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onUpdat
     setDeleteError("");
   }
 
-  function handleDeleteConfirm() {
-    if (deletePw !== deleteTarget.password && deletePw !== import.meta.env.VITE_ADMIN_PASSWORD) {
+  async function handleDeleteConfirm() {
+    const result = await verifyPassword(deletePw, deleteTarget.password);
+    if (!result.valid) {
       setDeleteError("비밀번호가 틀렸어요");
       return;
+    }
+    if (result.needsUpgrade) {
+      upgradeJikgwanPassword(deleteTarget.id, result.hash).catch(() => {});
     }
     onDelete(deleteTarget.id);
     closeDeleteModal();
@@ -92,9 +97,13 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onUpdat
   }
 
   async function handleEditConfirm() {
-    if (editPw !== editTarget.password && editPw !== import.meta.env.VITE_ADMIN_PASSWORD) {
+    const result = await verifyPassword(editPw, editTarget.password);
+    if (!result.valid) {
       setEditPwError("비밀번호가 틀렸어요");
       return;
+    }
+    if (result.needsUpgrade) {
+      upgradeJikgwanPassword(editTarget.id, result.hash).catch(() => {});
     }
     setEditSubmitting(true);
     try {

@@ -13,6 +13,21 @@
 
 import { supabase } from './supabase'
 
+export async function hashPassword(password) {
+  const data = new TextEncoder().encode(password);
+  const buf  = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// 비밀번호 검증 — 해시 비교 우선, 평문이면 valid + needsUpgrade 반환 (마이그레이션용)
+export async function verifyPassword(input, stored) {
+  if (input === import.meta.env.VITE_ADMIN_PASSWORD) return { valid: true, needsUpgrade: false };
+  const hashed = await hashPassword(input);
+  if (hashed === stored) return { valid: true, needsUpgrade: false };
+  if (input === stored)  return { valid: true, needsUpgrade: true, hash: hashed };
+  return { valid: false };
+}
+
 // DB row → 앱 내부 포맷 변환
 function toApp(row) {
   return {
@@ -50,7 +65,7 @@ export async function saveApplication(date, application) {
       name:      application.name,
       count:     Number(application.count),
       request:   application.request || null,
-      password:  application.password || '',
+      password:  await hashPassword(application.password || ''),
     })
     .select()
     .single()
@@ -158,7 +173,7 @@ export async function addJikgwan(date, { nickname, section, isTowelFairy, towelM
       is_towel_fairy: isTowelFairy,
       towel_meeting_area: isTowelFairy ? (towelMeetingArea || null) : null,
       towel_inning: isTowelFairy ? (towelInning || '5회말') : null,
-      password: password || '',
+      password: await hashPassword(password || ''),
     })
     .select()
     .single()
@@ -219,7 +234,7 @@ export async function getJungmoList(date) {
 export async function createJungmo(date, { title, description, password }) {
   const { data, error } = await supabase
     .from('jungmo')
-    .insert({ event_date: date, title, description: description || null, password })
+    .insert({ event_date: date, title, description: description || null, password: await hashPassword(password || '') })
     .select()
     .single()
   if (error) throw error
@@ -270,7 +285,7 @@ export async function getJungmoApplications(jungmoId) {
 export async function addJungmoApplication(jungmoId, { nickname, count, note, password }) {
   const { data, error } = await supabase
     .from('jungmo_applications')
-    .insert({ jungmo_id: jungmoId, nickname, count: Number(count) || 1, note: note || null, password: password || '' })
+    .insert({ jungmo_id: jungmoId, nickname, count: Number(count) || 1, note: note || null, password: await hashPassword(password || '') })
     .select()
     .single()
   if (error) throw error
@@ -482,4 +497,18 @@ export async function setGameResult(date, result) {
 export async function deleteGameResult(date) {
   const { error } = await supabase.from('game_results').delete().eq('game_date', date)
   if (error) throw error
+}
+
+// ── 비밀번호 해시 마이그레이션 (평문 → SHA-256) ────────────────
+export async function upgradeApplicationPassword(date, id, hash) {
+  await supabase.from('applications').update({ password: hash }).eq('id', id).eq('game_date', date);
+}
+export async function upgradeJikgwanPassword(id, hash) {
+  await supabase.from('jikgwan').update({ password: hash }).eq('id', id);
+}
+export async function upgradeJungmoPassword(id, hash) {
+  await supabase.from('jungmo').update({ password: hash }).eq('id', id);
+}
+export async function upgradeJungmoApplicationPassword(id, hash) {
+  await supabase.from('jungmo_applications').update({ password: hash }).eq('id', id);
 }
