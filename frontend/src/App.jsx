@@ -33,6 +33,7 @@ import {
   getDangwanOpenDates,
   getAllDangwanDates,
 } from "./utils/storage";
+import { GA } from "./utils/analytics";
 import "./App.css";
 
 const FILTER_LABELS = {
@@ -103,6 +104,7 @@ export default function App() {
   // ── 날짜 선택 ────────────────────────────────────────────────
 
   function handleSelectDate(dateStr) {
+    GA.dateSelect(dateStr);
     setSelectedDate(dateStr);
     setActiveTab(gameDateSet.has(dateStr) ? "dangwan" : "jikgwan");
     setDangwanSubTab("form");
@@ -185,11 +187,13 @@ export default function App() {
       if (editingItem) {
         await updateApplication(selectedDate, editingItem.id, formData);
         logAudit('update', 'dangwan', selectedDate, formData.name, `${formData.count}명`);
+        GA.dangwanEdit(selectedDate);
         showToast("✅ 신청 내용을 수정했어요!");
         setEditingItem(null);
       } else {
         await saveApplication(selectedDate, formData);
         logAudit('create', 'dangwan', selectedDate, formData.name, `${formData.count}명`);
+        GA.dangwanApply(selectedDate, formData.count);
         showToast("⚾ 단관 신청이 완료됐어요!");
       }
       const apps = await getApplications(selectedDate);
@@ -213,6 +217,7 @@ export default function App() {
       const newStatus = !target?.isPaid;
       await updatePaymentStatus(selectedDate, id, newStatus);
       logAudit('pay', 'dangwan', selectedDate, target?.name || '알 수 없음', newStatus ? '입금완료' : '입금취소');
+      GA.dangwanPay(selectedDate, newStatus);
       const apps = await getApplications(selectedDate);
       setApplications(apps);
       setTotalCount(getTotalCount(apps));
@@ -227,6 +232,7 @@ export default function App() {
       const target = applications.find(a => a.id === id);
       await deleteApplication(selectedDate, id);
       logAudit('delete', 'dangwan', selectedDate, target?.name || '알 수 없음', `${target?.count || 0}명`);
+      GA.dangwanDelete(selectedDate);
       const apps = await getApplications(selectedDate);
       setApplications(apps);
       setTotalCount(getTotalCount(apps));
@@ -243,6 +249,7 @@ export default function App() {
     try {
       await addJikgwan(selectedDate, data);
       logAudit('create', 'jikgwan', selectedDate, data.nickname, data.section || null);
+      GA.jikgwanRegister(selectedDate);
       const updated = await getJikgwanList(selectedDate);
       setJikgwanList(updated);
       await refreshSummary();
@@ -269,6 +276,7 @@ export default function App() {
       const target = jikgwanList.find(j => j.id === id);
       await deleteJikgwan(id);
       logAudit('delete', 'jikgwan', selectedDate, target?.nickname || '알 수 없음', null);
+      GA.jikgwanDelete(selectedDate);
       const updated = await getJikgwanList(selectedDate);
       setJikgwanList(updated);
       await refreshSummary();
@@ -284,6 +292,7 @@ export default function App() {
     try {
       await createJungmo(selectedDate, data);
       logAudit('create', 'jungmo', selectedDate, data.title, null);
+      GA.jungmoCreate(selectedDate);
       const updated = await getJungmoList(selectedDate);
       setJungmoList(updated);
       await refreshSummary();
@@ -298,6 +307,7 @@ export default function App() {
       const target = jungmoList.find(j => j.id === id);
       await deleteJungmo(id);
       logAudit('delete', 'jungmo', selectedDate, target?.title || '알 수 없음', null);
+      GA.jungmoDelete(selectedDate);
       const updated = await getJungmoList(selectedDate);
       setJungmoList(updated);
       await refreshSummary();
@@ -353,6 +363,7 @@ export default function App() {
                 key={mode}
                 className={`filter-chip ${filterMode === mode ? "active " + mode : ""}`}
                 onClick={() => {
+                  GA.filterChange(mode);
                   setFilterMode(mode);
                   if (mode !== "all") {
                     setSelectedDate(null);
@@ -403,7 +414,7 @@ export default function App() {
               {isHomeGame && (
                 <button
                   className={`tab-btn ${activeTab === "dangwan" ? "active" : ""} dangwan-tab`}
-                  onClick={() => setActiveTab("dangwan")}
+                  onClick={() => { GA.tabSwitch("dangwan"); setActiveTab("dangwan"); }}
                 >
                   📋 단관
                   {totalCount > 0 && <span className="tab-badge">{totalCount}</span>}
@@ -411,7 +422,7 @@ export default function App() {
               )}
               <button
                 className={`tab-btn ${activeTab === "jikgwan" ? "active" : ""} jikgwan-tab`}
-                onClick={() => setActiveTab("jikgwan")}
+                onClick={() => { GA.tabSwitch("jikgwan"); setActiveTab("jikgwan"); }}
               >
                 🏟 직관
                 {jikgwanList.length > 0 && (
@@ -420,7 +431,7 @@ export default function App() {
               </button>
               <button
                 className={`tab-btn ${activeTab === "jungmo" ? "active" : ""} jungmo-tab`}
-                onClick={() => setActiveTab("jungmo")}
+                onClick={() => { GA.tabSwitch("jungmo"); setActiveTab("jungmo"); }}
               >
                 🎮 정모
                 {jungmoList.length > 0 && (
