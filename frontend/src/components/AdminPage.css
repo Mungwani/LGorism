@@ -188,10 +188,28 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 14px 14px 32px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* 입금 탭 전용: 헤더/스위치 고정, 리스트만 스크롤 */
+.admin-body.admin-body-pay {
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+.pay-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 32px;
 }
 
 /* ── 로그 필터 바 ────────────────────────────────────────────── */
