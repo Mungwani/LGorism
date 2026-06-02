@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, getAllDangwanDates, openDangwanDate, closeDangwanDate, getAllNotices, createNotice, updateNotice, toggleNoticeActive, deleteNotice, getGameResults, setGameResult, deleteGameResult, getAllJungmoApplicationsWithInfo, updateJungmoPaymentStatus } from '../utils/storage'
 import { games } from '../data/games'
 
@@ -27,6 +27,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   const [pw, setPw] = useState('')
   const [pwError, setPwError] = useState('')
   const [tab, setTab] = useState('log')
+  const adminPageRef = useRef(null)
 
   const [logs, setLogs] = useState([])
   const [logFilter, setLogFilter] = useState('all')
@@ -171,6 +172,21 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     if (tab === 'result') { loadResults(); loadDangwan() }
   }, [tab, authed])
 
+  useEffect(() => {
+    const page = adminPageRef.current
+    if (!page) return
+    const setBodyHeight = () => {
+      const header = page.querySelector('.admin-header')
+      const tabNav = page.querySelector('.admin-tab-nav')
+      const body = page.querySelector('.admin-body')
+      if (!header || !tabNav || !body) return
+      body.style.height = (page.clientHeight - header.offsetHeight - tabNav.offsetHeight) + 'px'
+    }
+    setBodyHeight()
+    window.addEventListener('resize', setBodyHeight)
+    return () => window.removeEventListener('resize', setBodyHeight)
+  }, [tab, authed])
+
   async function loadResults() {
     setResultsLoading(true)
     try {
@@ -299,7 +315,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
 
   return (
     <div className="admin-overlay">
-      <div className="admin-page">
+      <div className="admin-page" ref={adminPageRef}>
         <div className="admin-header">
           <h2 className="admin-title">🛡 관리자</h2>
           <button className="admin-x-btn" onClick={onClose}>✕</button>

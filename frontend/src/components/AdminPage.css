@@ -110,8 +110,8 @@
   height: 92vh;
   height: 92svh;
   border-radius: 20px 20px 0 0;
-  display: grid;
-  grid-template-rows: auto auto 1fr;
+  display: flex;
+  flex-direction: column;
   animation: slideUp 0.3s ease;
   overflow: hidden;
 }
@@ -186,13 +186,15 @@
 
 /* ── 바디 (스크롤) ─────────────────────────────────────────── */
 .admin-body {
-  min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: 14px 14px 32px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 /* ── 로그 필터 바 ────────────────────────────────────────────── */
