@@ -186,6 +186,7 @@
 /* ── 바디 (스크롤) ─────────────────────────────────────────── */
 .admin-body {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 14px 14px 32px;
   display: flex;
