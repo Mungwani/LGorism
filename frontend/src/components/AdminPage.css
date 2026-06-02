@@ -346,6 +346,7 @@
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   margin-bottom: 4px;
+  flex-shrink: 0;
 }
 
 .pay-date-header {
