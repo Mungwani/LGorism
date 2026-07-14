@@ -1,0 +1,199 @@
+/* ── TransferCard ───────────────────────────────────────────── */
+.transfer-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  border: 2px solid var(--gray-200);
+  transition: border-color 0.15s;
+}
+
+.transfer-card.expanded {
+  border-color: #6a1b9a;
+}
+
+.transfer-card.sold {
+  opacity: 0.6;
+}
+
+.transfer-card.expired {
+  opacity: 0.55;
+}
+
+.transfer-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.transfer-card-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.transfer-card-game {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--black);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.transfer-sold-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: var(--gray-400);
+  color: var(--white);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
+.transfer-expired-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: #fff0f0;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
+.transfer-card-seat {
+  font-size: 0.82rem;
+  color: var(--gray-600);
+}
+
+.transfer-card-author {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #6a1b9a;
+}
+
+.transfer-card-qty {
+  margin-left: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6a1b9a;
+  background: #f3e5f5;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.transfer-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.transfer-card-price {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--red);
+  white-space: nowrap;
+}
+
+.transfer-card-unit-price {
+  font-size: 0.68rem;
+  color: var(--gray-400);
+  white-space: nowrap;
+}
+
+.transfer-card-body {
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--gray-100);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.transfer-card-meta {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+}
+
+.transfer-card-note {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+  background: var(--gray-100);
+  border-radius: 6px;
+  padding: 8px 10px;
+  white-space: pre-wrap;
+}
+
+.transfer-reservation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.transfer-reservation-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.transfer-owner-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.soldto-picker {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.soldto-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.soldto-option.active {
+  border-color: #6a1b9a;
+  background: #f3e5f5;
+}
+
+.soldto-option input[type="radio"] {
+  flex-shrink: 0;
+}
+
+.soldto-option select,
+.soldto-option input[type="text"] {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 0.88rem;
+  color: var(--black);
+  min-width: 0;
+}
+
+.soldto-option select:focus,
+.soldto-option input[type="text"]:focus {
+  outline: none;
+}
+
+.soldto-option span {
+  font-size: 0.88rem;
+  color: var(--gray-600);
+}

@@ -24,8 +24,15 @@ export const GA = {
   jungmoCreate:    (date)        => trackEvent('jungmo_create',    { game_date: date }),
   jungmoDelete:    (date)        => trackEvent('jungmo_delete',    { game_date: date }),
 
+  // 양도
+  transferPost:    (date)        => trackEvent('transfer_post',    { game_date: date }),
+  transferReserve: (date)        => trackEvent('transfer_reserve', { game_date: date }),
+  transferSold:    (date, sold)  => trackEvent('transfer_sold',    { game_date: date, status: sold ? 'sold' : 'reopened' }),
+  transferDelete:  (date)        => trackEvent('transfer_delete',  { game_date: date }),
+
   // UX
   tabSwitch:       (tab)         => trackEvent('tab_switch',       { tab_name: tab }),
   filterChange:    (mode)        => trackEvent('filter_change',    { filter_mode: mode }),
   dateSelect:      (date)        => trackEvent('date_select',      { game_date: date }),
+  mainViewSwitch:  (view)        => trackEvent('main_view_switch', { view_name: view }),
 };

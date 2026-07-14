@@ -499,6 +499,103 @@ export async function deleteGameResult(date) {
   if (error) throw error
 }
 
+// ── 양도게시판 CRUD ────────────────────────────────────────────
+
+function toTransfer(row) {
+  return {
+    id:          row.id,
+    gameDate:    row.game_date,
+    seatSection: row.seat_section,
+    seatRow:     row.seat_row || '',
+    seatNumber:  row.seat_number || '',
+    quantity:    row.quantity,
+    price:       row.price,
+    note:        row.note || '',
+    nickname:    row.nickname,
+    password:    row.password,
+    isSold:      row.is_sold || false,
+    soldTo:      row.sold_to || '',
+    createdAt:   row.created_at,
+  }
+}
+
+function toReservation(row) {
+  return {
+    id:         row.id,
+    transferId: row.transfer_id,
+    nickname:   row.nickname,
+    password:   row.password,
+    createdAt:  row.created_at,
+  }
+}
+
+export async function getTransfers() {
+  const { data, error } = await supabase
+    .from('transfers')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data || []).map(toTransfer)
+}
+
+export async function createTransfer({ gameDate, seatSection, seatRow, seatNumber, quantity, price, note, nickname, password }) {
+  const { data, error } = await supabase
+    .from('transfers')
+    .insert({
+      game_date:    gameDate,
+      seat_section: seatSection,
+      seat_row:     seatRow || null,
+      seat_number:  seatNumber || null,
+      quantity:     Number(quantity) || 1,
+      price:        Number(price),
+      note:         note || null,
+      nickname,
+      password:     await hashPassword(password || ''),
+    })
+    .select()
+    .single()
+  if (error) throw error
+  return toTransfer(data)
+}
+
+export async function deleteTransfer(id) {
+  const { error } = await supabase.from('transfers').delete().eq('id', id)
+  if (error) throw error
+}
+
+export async function toggleTransferSold(id, isSold, soldTo) {
+  const { error } = await supabase
+    .from('transfers')
+    .update({ is_sold: isSold, sold_to: isSold ? (soldTo || null) : null })
+    .eq('id', id)
+  if (error) throw error
+}
+
+export async function getTransferReservations(transferId) {
+  const { data, error } = await supabase
+    .from('transfer_reservations')
+    .select('*')
+    .eq('transfer_id', transferId)
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return (data || []).map(toReservation)
+}
+
+export async function addTransferReservation(transferId, { nickname, password }) {
+  const { data, error } = await supabase
+    .from('transfer_reservations')
+    .insert({ transfer_id: transferId, nickname, password: await hashPassword(password || '') })
+    .select()
+    .single()
+  if (error) throw error
+  return toReservation(data)
+}
+
+export async function deleteTransferReservation(id) {
+  const { error } = await supabase.from('transfer_reservations').delete().eq('id', id)
+  if (error) throw error
+}
+
 // ── 비밀번호 해시 마이그레이션 (평문 → SHA-256) ────────────────
 export async function upgradeApplicationPassword(date, id, hash) {
   await supabase.from('applications').update({ password: hash }).eq('id', id).eq('game_date', date);

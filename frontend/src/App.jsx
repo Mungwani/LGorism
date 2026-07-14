@@ -10,6 +10,7 @@ import DangwanDateList from "./components/DangwanDateList";
 import AdminPage from "./components/AdminPage";
 import NoticeBanner from "./components/NoticeBanner";
 import WinRate from "./components/WinRate";
+import TransferBoard from "./components/TransferBoard";
 import { getGameByDate, gameDateSet } from "./data/games";
 import {
   getApplications,
@@ -43,6 +44,7 @@ const FILTER_LABELS = {
 };
 
 export default function App() {
+  const [mainView, setMainView] = useState("home"); // 'home' | 'transfer'
   const [selectedDate, setSelectedDate] = useState(null);
   const [activeTab, setActiveTab] = useState("dangwan"); // 'dangwan' | 'jikgwan' | 'jungmo'
 
@@ -346,7 +348,28 @@ export default function App() {
 
       <NoticeBanner />
 
+      <nav className="main-nav">
+        <button
+          className={`main-nav-btn ${mainView === "home" ? "active" : ""}`}
+          onClick={() => { GA.mainViewSwitch("home"); setMainView("home"); }}
+        >
+          🏠 홈
+        </button>
+        <button
+          className={`main-nav-btn ${mainView === "transfer" ? "active" : ""}`}
+          onClick={() => { GA.mainViewSwitch("transfer"); setMainView("transfer"); }}
+        >
+          🎫 양도
+        </button>
+      </nav>
+
       <main className="app-main">
+        {mainView === "transfer" ? (
+          <section className="section">
+            <TransferBoard onToast={showToast} />
+          </section>
+        ) : (
+          <>
         {/* ── 승률 카드 ────────────────────────────────────── */}
         <section className="section" style={{ paddingTop: 0 }}>
           <WinRate dangwanDates={allDangwanDates} />
@@ -536,6 +559,8 @@ export default function App() {
             <p className="guide-text">날짜를 눌러보세요!</p>
             <p className="guide-sub">경기 관람, 직관 인증, 정모까지 한 곳에서!</p>
           </div>
+        )}
+          </>
         )}
       </main>
 

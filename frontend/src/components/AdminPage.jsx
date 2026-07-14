@@ -13,6 +13,7 @@ const CATEGORY_LABELS = {
   dangwan: '단관',
   jikgwan: '직관',
   jungmo: '정모',
+  transfer: '양도',
 }
 
 const ACTION_LABELS = {
@@ -342,7 +343,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
         {tab === 'log' && (
           <div className="admin-body">
             <div className="log-filter-bar">
-              {['all', 'dangwan', 'jikgwan', 'jungmo', 'pay'].map(f => (
+              {['all', 'dangwan', 'jikgwan', 'jungmo', 'transfer', 'pay'].map(f => (
                 <button
                   key={f}
                   className={`log-filter-chip ${logFilter === f ? 'active ' + f : ''}`}
