@@ -6,10 +6,10 @@ import slideTickets from "../assets/hero/slide-tickets.jpg";
 import "./HeroSlider.css";
 
 const SLIDES = [
-  { image: slideScoreboard, title: "잠실 전광판에 뜬 우리 이름", sub: "엘고리즘, 잠실에서 만나요 🏟️" },
-  { image: slideFans, title: "다같이 응원하는 그 순간", sub: "전광판에 잡힌 엘고리즘 응원석 📣" },
-  { image: slideTowels, title: "노란 물결, 우리의 자부심", sub: "끝까지 트윈스 💛" },
-  { image: slideTickets, title: "함께 본 경기, 쌓여가는 티켓", sub: "오늘도 직관 가실 분? 🎟️" },
+  { image: slideScoreboard, title: "전광판에 뜬 엘고리즘", sub: "오늘도 잠실, 엘고리즘" },
+  { image: slideFans, title: "다같이 응원하는 그 순간", sub: "전광판에 잡힌 엘고리즘" },
+  { image: slideTowels, title: "무적 LG, 끝까지 트윈스", sub: "엘고리즘 노란 물결" },
+  { image: slideTickets, title: "엘고리즘 첫 단관", sub: "승리요정 엘고리즘" },
 ];
 
 const AUTO_INTERVAL = 4000;
@@ -59,7 +59,6 @@ export default function HeroSlider() {
           <p className="hero-slide-title">{slide.title}</p>
           <p className="hero-slide-sub">{slide.sub}</p>
         </div>
-        <span className="hero-slide-count">{index + 1}/{SLIDES.length}</span>
       </div>
 
       <div className="hero-dots">

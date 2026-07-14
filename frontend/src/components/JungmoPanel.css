@@ -402,9 +402,15 @@
   gap: 8px;
 }
 
-/* 정모 삭제 */
-.jungmo-delete-btn {
-  align-self: flex-end;
+/* 정모 수정/삭제 */
+.jungmo-item-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.jungmo-delete-btn,
+.jungmo-edit-jungmo-btn {
   font-size: 0.72rem;
   color: var(--gray-400);
   padding: 4px 8px;
@@ -416,6 +422,11 @@
 .jungmo-delete-btn:hover {
   color: var(--red);
   background: #fff5f7;
+}
+
+.jungmo-edit-jungmo-btn:hover {
+  color: #1565C0;
+  background: #f0f5ff;
 }
 
 /* 빈 상태 */

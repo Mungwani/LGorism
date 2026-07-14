@@ -222,6 +222,7 @@
 .log-filter-chip.active.dangwan { background: #6a1b9a; }
 .log-filter-chip.active.jikgwan { background: #FF6B35; }
 .log-filter-chip.active.jungmo  { background: #1565C0; }
+.log-filter-chip.active.transfer { background: #d81b60; }
 .log-filter-chip.active.pay     { background: #15803d; }
 
 .log-refresh-btn {
@@ -286,9 +287,10 @@
   color: var(--white);
 }
 
-.log-cat.cat-dangwan { background: #6a1b9a; }
-.log-cat.cat-jikgwan { background: #FF6B35; }
-.log-cat.cat-jungmo  { background: #1565C0; }
+.log-cat.cat-dangwan  { background: #6a1b9a; }
+.log-cat.cat-jikgwan  { background: #FF6B35; }
+.log-cat.cat-jungmo   { background: #1565C0; }
+.log-cat.cat-transfer { background: #d81b60; }
 
 .log-action {
   font-size: 0.72rem;
@@ -347,6 +349,52 @@
   box-shadow: var(--shadow-sm);
   margin-bottom: 4px;
   flex-shrink: 0;
+}
+
+.pay-section-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 2px 4px;
+  color: var(--gray-400);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.pay-section-divider::before,
+.pay-section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--gray-300);
+}
+
+.pay-date-group.past {
+  opacity: 0.88;
+}
+
+.pay-date-group.past .pay-date-header {
+  background: var(--gray-300);
+}
+
+.pay-date-group.past .pay-date-header:hover {
+  background: var(--gray-400);
+}
+
+.pay-date-group.past .pay-date {
+  color: var(--gray-700);
+}
+
+.pay-date-group.past .pay-date-chevron {
+  color: var(--gray-600);
+}
+
+.pay-date-group.past .pay-date-stat {
+  color: var(--gray-600);
+}
+
+.pay-date-group.past .pay-jungmo-date {
+  color: var(--gray-600);
 }
 
 .pay-date-header {

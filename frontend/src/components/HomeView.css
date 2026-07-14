@@ -14,7 +14,34 @@
   margin-bottom: 10px;
 }
 
-.home-today-section {}
+.home-game-section {}
+
+.home-next-game-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.home-next-game-empty {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gray-500);
+}
+
+.home-next-game-info {
+  font-size: 0.92rem;
+  color: var(--black);
+}
+
+.home-next-game-info strong {
+  color: var(--red);
+}
 
 .home-actions {
   display: grid;
@@ -49,9 +76,9 @@
   font-size: 1.4rem;
 }
 
-.home-action-btn.purple .home-action-icon { background: #f3e5f5; }
-.home-action-btn.blue .home-action-icon   { background: #e8f0fe; }
-.home-action-btn.red .home-action-icon    { background: #fff0f0; }
+.home-action-btn.purple .home-action-icon { background: #f3e5f5; color: #6a1b9a; }
+.home-action-btn.blue .home-action-icon   { background: #e8f0fe; color: #1565C0; }
+.home-action-btn.red .home-action-icon    { background: #fff0f0; color: var(--red); }
 
 .home-action-label {
   font-size: 0.82rem;

@@ -1,19 +1,17 @@
 .notice-banner-wrap {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 10px 16px 0;
+  gap: 8px;
 }
 
 .notice-banner {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  background: #fffbea;
-  border: 1.5px solid #fbbf24;
-  border-left: 4px solid #C8102E;
-  border-radius: 10px;
-  padding: 10px 12px;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 2px 6px rgba(200,16,46,0.18);
+  padding: 12px 14px;
   animation: noticeSlide 0.25s ease;
 }
 
@@ -23,36 +21,41 @@
 }
 
 .notice-icon {
-  font-size: 0.88rem;
   flex-shrink: 0;
-  margin-top: 1px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
 }
 
 .notice-content {
-  font-size: 0.82rem;
-  color: #1a1a1a;
-  font-weight: 600;
-  line-height: 1.55;
+  font-size: 0.83rem;
+  color: var(--white);
+  font-weight: 700;
+  line-height: 1.5;
   flex: 1;
   white-space: pre-wrap;
 }
 
 .notice-dismiss {
   flex-shrink: 0;
-  font-size: 0.65rem;
-  color: #aaa;
-  width: 20px;
-  height: 20px;
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.75);
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(255,255,255,0.18);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s;
-  margin-top: 1px;
+  transition: background 0.15s, color 0.15s;
 }
 
 .notice-dismiss:hover {
-  background: rgba(0, 0, 0, 0.14);
-  color: #555;
+  background: rgba(255,255,255,0.3);
+  color: var(--white);
 }

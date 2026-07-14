@@ -3,15 +3,14 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin: -16px -14px 0; /* .app-main 상/좌우 패딩 상쇄 → 헤더 바로 아래까지 풀블리드 */
 }
 
 .hero-slide {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
-  border-radius: var(--radius-xl);
+  aspect-ratio: 16 / 9;
   overflow: hidden;
-  box-shadow: var(--shadow-md);
   background: var(--gray-200);
 }
 
@@ -49,18 +48,6 @@
   color: rgba(255,255,255,0.85);
 }
 
-.hero-slide-count {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--white);
-  background: rgba(0,0,0,0.45);
-  padding: 3px 9px;
-  border-radius: 20px;
-  backdrop-filter: blur(4px);
-}
 
 .hero-dots {
   display: flex;

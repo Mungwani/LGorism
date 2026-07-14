@@ -8,7 +8,6 @@ import JungmoPanel from "./components/JungmoPanel";
 import AllJungmoList from "./components/AllJungmoList";
 import DangwanDateList from "./components/DangwanDateList";
 import AdminPage from "./components/AdminPage";
-import NoticeBanner from "./components/NoticeBanner";
 import HomeView from "./components/HomeView";
 import BottomNav from "./components/BottomNav";
 import TransferBoard from "./components/TransferBoard";
@@ -27,9 +26,11 @@ import {
   getJikgwanSummary,
   getJungmoList,
   createJungmo,
+  updateJungmo,
   deleteJungmo,
   getJungmoSummary,
   getAllJungmo,
+  getJungmoParticipantCounts,
   logAudit,
   updatePaymentStatus,
   getDangwanOpenDates,
@@ -51,6 +52,7 @@ export default function App() {
   // 직관 / 정모
   const [jikgwanList, setJikgwanList] = useState([]);
   const [jungmoList, setJungmoList] = useState([]);
+  const [jungmoFocusId, setJungmoFocusId] = useState(null);
 
   // 달력 요약
   const [dangwanSummary, setDangwanSummary] = useState({});
@@ -59,6 +61,7 @@ export default function App() {
 
   // 정모 전체 리스트 (정모 탭 목록)
   const [allJungmoList, setAllJungmoList] = useState([]);
+  const [jungmoParticipantCounts, setJungmoParticipantCounts] = useState({});
 
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
@@ -103,6 +106,7 @@ export default function App() {
     setMainView(view);
     setSelectedDate(null);
     setEditingItem(null);
+    setJungmoFocusId(null);
   }
 
   // ── 날짜 선택 (캘린더 탭) ────────────────────────────────────
@@ -166,7 +170,12 @@ export default function App() {
 
   useEffect(() => {
     if (mainView !== "jungmo") return;
-    getAllJungmo().then(setAllJungmoList).catch(() => {});
+    Promise.all([getAllJungmo(), getJungmoParticipantCounts()])
+      .then(([list, counts]) => {
+        setAllJungmoList(list);
+        setJungmoParticipantCounts(counts);
+      })
+      .catch(() => {});
   }, [mainView]);
 
   function handleDangwanDateSelect(dateStr) {
@@ -176,8 +185,9 @@ export default function App() {
     setEditingItem(null);
   }
 
-  function handleJungmoDateSelect(dateStr) {
-    setSelectedDate(dateStr);
+  function handleJungmoSelect(jungmo) {
+    setSelectedDate(jungmo.eventDate);
+    setJungmoFocusId(jungmo.id);
     setActiveTab("jungmo");
     setEditingItem(null);
   }
@@ -290,13 +300,18 @@ export default function App() {
 
   // ── 정모 핸들러 ──────────────────────────────────────────────
 
-  async function handleCreateJungmo(data) {
+  async function handleCreateJungmo(eventDate, data) {
     try {
-      await createJungmo(selectedDate, data);
-      logAudit('create', 'jungmo', selectedDate, data.title, null);
-      GA.jungmoCreate(selectedDate);
-      const updated = await getJungmoList(selectedDate);
-      setJungmoList(updated);
+      await createJungmo(eventDate, data);
+      logAudit('create', 'jungmo', eventDate, data.title, null);
+      GA.jungmoCreate(eventDate);
+      if (selectedDate === eventDate) {
+        const updated = await getJungmoList(eventDate);
+        setJungmoList(updated);
+      }
+      const [list, counts] = await Promise.all([getAllJungmo(), getJungmoParticipantCounts()]);
+      setAllJungmoList(list);
+      setJungmoParticipantCounts(counts);
       await refreshSummary();
       showToast("🎮 정모가 열렸어요!");
     } catch (e) {
@@ -304,15 +319,40 @@ export default function App() {
     }
   }
 
+  async function handleUpdateJungmo(id, data) {
+    try {
+      await updateJungmo(id, data);
+      logAudit('update', 'jungmo', selectedDate, data.title, null);
+      if (selectedDate) {
+        const updated = await getJungmoList(selectedDate);
+        setJungmoList(updated);
+      }
+      const list = await getAllJungmo();
+      setAllJungmoList(list);
+      showToast("✅ 정모 내용을 수정했어요!");
+    } catch {
+      showToast("❌ 수정에 실패했어요.");
+    }
+  }
+
   async function handleDeleteJungmo(id) {
     try {
-      const target = jungmoList.find(j => j.id === id);
+      const target = jungmoList.find(j => j.id === id) || allJungmoList.find(j => j.id === id);
       await deleteJungmo(id);
       logAudit('delete', 'jungmo', selectedDate, target?.title || '알 수 없음', null);
       GA.jungmoDelete(selectedDate);
-      const updated = await getJungmoList(selectedDate);
-      setJungmoList(updated);
+      if (selectedDate) {
+        const updated = await getJungmoList(selectedDate);
+        setJungmoList(updated);
+      }
+      const [list, counts] = await Promise.all([getAllJungmo(), getJungmoParticipantCounts()]);
+      setAllJungmoList(list);
+      setJungmoParticipantCounts(counts);
       await refreshSummary();
+      if (jungmoFocusId === id) {
+        setJungmoFocusId(null);
+        setSelectedDate(null);
+      }
       showToast("🗑️ 정모가 삭제됐어요.");
     } catch {
       showToast("❌ 삭제에 실패했어요.");
@@ -337,16 +377,11 @@ export default function App() {
             <span className="logo-twins">TWINS</span>
           </div>
           <div className="header-text">
-            <div className="header-brand-wrap">
-              <span className="header-brand-ko">엘고리즘</span>
-              <span className="header-brand-en">LGorism</span>
-            </div>
-            <p className="header-sub">무적엘지와 함께 ⚾</p>
+            <span className="header-brand-ko">엘고리즘</span>
+            <span className="header-brand-en">LGORISM</span>
           </div>
         </div>
       </header>
-
-      <NoticeBanner />
 
       <main className="app-main">
         {/* ── 홈 ───────────────────────────────────────────── */}
@@ -447,6 +482,7 @@ export default function App() {
                           jungmoList={jungmoList}
                           onCreateJungmo={handleCreateJungmo}
                           onDeleteJungmo={handleDeleteJungmo}
+                          onUpdateJungmo={handleUpdateJungmo}
                         />
                       )}
                     </>
@@ -512,16 +548,26 @@ export default function App() {
         {mainView === "jungmo" && (
           <section className="section" style={{ paddingTop: 0 }}>
             {!selectedDate ? (
-              <AllJungmoList jungmoList={allJungmoList} onSelectDate={handleJungmoDateSelect} />
+              <AllJungmoList
+                jungmoList={allJungmoList}
+                participantCounts={jungmoParticipantCounts}
+                onSelectJungmo={handleJungmoSelect}
+                onCreateJungmo={handleCreateJungmo}
+              />
             ) : (
               <>
-                <button className="back-to-list-btn" onClick={() => setSelectedDate(null)}>← 목록으로</button>
+                <button
+                  className="back-to-list-btn"
+                  onClick={() => { setSelectedDate(null); setJungmoFocusId(null); }}
+                >← 목록으로</button>
                 <div style={{ marginTop: 12 }}>
                   <JungmoPanel
                     selectedDate={selectedDate}
                     jungmoList={jungmoList}
+                    focusId={jungmoFocusId}
                     onCreateJungmo={handleCreateJungmo}
                     onDeleteJungmo={handleDeleteJungmo}
+                    onUpdateJungmo={handleUpdateJungmo}
                   />
                 </div>
               </>

@@ -40,7 +40,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   const [jungmoApps, setJungmoApps] = useState([])
   const [jungmoPayLoading, setJungmoPayLoading] = useState(false)
   const [jungmoConfirmTarget, setJungmoConfirmTarget] = useState(null) // { item, jungmoId, jungmoTitle, eventDate }
-  const [collapsedJungmos, setCollapsedJungmos] = useState(new Set())
+  const [expandedJungmos, setExpandedJungmos] = useState(new Set())
 
   // 공지 관리
   const [notices, setNotices] = useState([])
@@ -64,7 +64,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   const [showDangwanInput, setShowDangwanInput] = useState(false)
 
   // 날짜별 접기/펼치기 (기본: 전부 펼침)
-  const [collapsedDates, setCollapsedDates] = useState(new Set())
+  const [expandedDates, setExpandedDates] = useState(new Set())
 
   // 입금 변경 확인 모달
   const [confirmTarget, setConfirmTarget] = useState(null) // { item, gameDate }
@@ -232,7 +232,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   }
 
   function toggleDateCollapse(date) {
-    setCollapsedDates(prev => {
+    setExpandedDates(prev => {
       const next = new Set(prev)
       next.has(date) ? next.delete(date) : next.add(date)
       return next
@@ -240,7 +240,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   }
 
   function toggleJungmoCollapse(jungmoId) {
-    setCollapsedJungmos(prev => {
+    setExpandedJungmos(prev => {
       const next = new Set(prev)
       next.has(jungmoId) ? next.delete(jungmoId) : next.add(jungmoId)
       return next
@@ -282,6 +282,93 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     acc[key].apps.push(app)
     return acc
   }, {})
+
+  const dangwanDateEntries = Object.entries(appsByDate).sort(([a], [b]) => b.localeCompare(a))
+  const dangwanUpcoming = dangwanDateEntries.filter(([date]) => date >= today)
+  const dangwanPast = dangwanDateEntries.filter(([date]) => date < today)
+
+  const jungmoEntries = Object.entries(jungmoAppsByJungmo).sort(([, a], [, b]) => b.eventDate.localeCompare(a.eventDate))
+  const jungmoUpcoming = jungmoEntries.filter(([, v]) => v.eventDate >= today)
+  const jungmoPast = jungmoEntries.filter(([, v]) => v.eventDate < today)
+
+  function renderDangwanGroup([date, items], isPast) {
+    const totalPeople = items.reduce((s, i) => s + (i.count || 0), 0)
+    const paidCount = items.filter(i => i.isPaid).reduce((s, i) => s + (i.count || 0), 0)
+    const isCollapsed = !expandedDates.has(date)
+    return (
+      <div key={date} className={`pay-date-group ${isPast ? 'past' : ''}`}>
+        <button className="pay-date-header" onClick={() => toggleDateCollapse(date)}>
+          <div className="pay-date-left">
+            <span className="pay-date-chevron">{isCollapsed ? '▶' : '▼'}</span>
+            <span className="pay-date">{date}</span>
+          </div>
+          <span className={`pay-date-stat ${paidCount === totalPeople ? 'all-paid' : ''}`}>
+            {paidCount}/{totalPeople}명 입금
+          </span>
+        </button>
+
+        {!isCollapsed && items.map(item => (
+          <div
+            key={item.id}
+            className={`pay-item ${item.isPaid ? 'paid' : ''}`}
+            onClick={() => handlePayClick(item, date)}
+          >
+            <div className="pay-item-info">
+              <span className="pay-item-name">{item.name}</span>
+              <span className="pay-item-count">{item.count}명</span>
+              {item.request && (
+                <span className="pay-item-req">{item.request}</span>
+              )}
+            </div>
+            <span className={`pay-badge ${item.isPaid ? 'paid' : 'unpaid'}`}>
+              {item.isPaid ? '✓ 입금완료' : '미입금'}
+            </span>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  function renderJungmoGroup([jungmoId, { title, eventDate, apps }], isPast) {
+    const totalPeople = apps.reduce((s, i) => s + (i.count || 0), 0)
+    const paidCount = apps.filter(i => i.isPaid).reduce((s, i) => s + (i.count || 0), 0)
+    const isCollapsed = !expandedJungmos.has(jungmoId)
+    return (
+      <div key={jungmoId} className={`pay-date-group ${isPast ? 'past' : ''}`}>
+        <button className="pay-date-header" onClick={() => toggleJungmoCollapse(jungmoId)}>
+          <div className="pay-date-left">
+            <span className="pay-date-chevron">{isCollapsed ? '▶' : '▼'}</span>
+            <div className="pay-date-title-wrap">
+              <span className="pay-date">{title}</span>
+              <span className="pay-jungmo-date">{eventDate}</span>
+            </div>
+          </div>
+          <span className={`pay-date-stat ${paidCount === totalPeople && totalPeople > 0 ? 'all-paid' : ''}`}>
+            {paidCount}/{totalPeople}명 입금
+          </span>
+        </button>
+
+        {!isCollapsed && apps.map(item => (
+          <div
+            key={item.id}
+            className={`pay-item ${item.isPaid ? 'paid' : ''}`}
+            onClick={() => setJungmoConfirmTarget({ item, jungmoId, jungmoTitle: title, eventDate })}
+          >
+            <div className="pay-item-info">
+              <span className="pay-item-name">{item.nickname}</span>
+              <span className="pay-item-count">{item.count}명</span>
+              {item.note && (
+                <span className="pay-item-req">{item.note}</span>
+              )}
+            </div>
+            <span className={`pay-badge ${item.isPaid ? 'paid' : 'unpaid'}`}>
+              {item.isPaid ? '✓ 입금완료' : '미입금'}
+            </span>
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   const filteredLogs = logFilter === 'all'
     ? logs
@@ -399,105 +486,44 @@ export default function AdminPage({ onClose, onDangwanChange }) {
             {payCategory === 'dangwan' && (
               payLoading ? (
                 <div className="admin-state">불러오는 중...</div>
-              ) : Object.keys(appsByDate).length === 0 ? (
+              ) : dangwanDateEntries.length === 0 ? (
                 <div className="admin-state">신청 내역이 없어요</div>
               ) : (
-                Object.entries(appsByDate)
-                  .sort(([a], [b]) => b.localeCompare(a))
-                  .map(([date, items]) => {
-                    const totalPeople = items.reduce((s, i) => s + (i.count || 0), 0)
-                    const paidCount = items.filter(i => i.isPaid).reduce((s, i) => s + (i.count || 0), 0)
-                    const isCollapsed = collapsedDates.has(date)
-                    return (
-                      <div key={date} className="pay-date-group">
-                        <button
-                          className="pay-date-header"
-                          onClick={() => toggleDateCollapse(date)}
-                        >
-                          <div className="pay-date-left">
-                            <span className="pay-date-chevron">{isCollapsed ? '▶' : '▼'}</span>
-                            <span className="pay-date">{date}</span>
-                          </div>
-                          <span className={`pay-date-stat ${paidCount === totalPeople ? 'all-paid' : ''}`}>
-                            {paidCount}/{totalPeople}명 입금
-                          </span>
-                        </button>
-
-                        {!isCollapsed && items.map(item => (
-                          <div
-                            key={item.id}
-                            className={`pay-item ${item.isPaid ? 'paid' : ''}`}
-                            onClick={() => handlePayClick(item, date)}
-                          >
-                            <div className="pay-item-info">
-                              <span className="pay-item-name">{item.name}</span>
-                              <span className="pay-item-count">{item.count}명</span>
-                              {item.request && (
-                                <span className="pay-item-req">{item.request}</span>
-                              )}
-                            </div>
-                            <span className={`pay-badge ${item.isPaid ? 'paid' : 'unpaid'}`}>
-                              {item.isPaid ? '✓ 입금완료' : '미입금'}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )
-                  })
+                <>
+                  {dangwanUpcoming.length === 0 ? (
+                    <div className="admin-state">진행 예정인 단관이 없어요</div>
+                  ) : (
+                    dangwanUpcoming.map(entry => renderDangwanGroup(entry, false))
+                  )}
+                  {dangwanPast.length > 0 && (
+                    <>
+                      <div className="pay-section-divider"><span>지난 단관</span></div>
+                      {dangwanPast.map(entry => renderDangwanGroup(entry, true))}
+                    </>
+                  )}
+                </>
               )
             )}
 
             {payCategory === 'jungmo' && (
               jungmoPayLoading ? (
                 <div className="admin-state">불러오는 중...</div>
-              ) : Object.keys(jungmoAppsByJungmo).length === 0 ? (
+              ) : jungmoEntries.length === 0 ? (
                 <div className="admin-state">정모 신청 내역이 없어요</div>
               ) : (
-                Object.entries(jungmoAppsByJungmo)
-                  .sort(([, a], [, b]) => b.eventDate.localeCompare(a.eventDate))
-                  .map(([jungmoId, { title, eventDate, apps }]) => {
-                    const totalPeople = apps.reduce((s, i) => s + (i.count || 0), 0)
-                    const paidCount = apps.filter(i => i.isPaid).reduce((s, i) => s + (i.count || 0), 0)
-                    const isCollapsed = collapsedJungmos.has(jungmoId)
-                    return (
-                      <div key={jungmoId} className="pay-date-group">
-                        <button
-                          className="pay-date-header"
-                          onClick={() => toggleJungmoCollapse(jungmoId)}
-                        >
-                          <div className="pay-date-left">
-                            <span className="pay-date-chevron">{isCollapsed ? '▶' : '▼'}</span>
-                            <div className="pay-date-title-wrap">
-                              <span className="pay-date">{title}</span>
-                              <span className="pay-jungmo-date">{eventDate}</span>
-                            </div>
-                          </div>
-                          <span className={`pay-date-stat ${paidCount === totalPeople && totalPeople > 0 ? 'all-paid' : ''}`}>
-                            {paidCount}/{totalPeople}명 입금
-                          </span>
-                        </button>
-
-                        {!isCollapsed && apps.map(item => (
-                          <div
-                            key={item.id}
-                            className={`pay-item ${item.isPaid ? 'paid' : ''}`}
-                            onClick={() => setJungmoConfirmTarget({ item, jungmoId, jungmoTitle: title, eventDate })}
-                          >
-                            <div className="pay-item-info">
-                              <span className="pay-item-name">{item.nickname}</span>
-                              <span className="pay-item-count">{item.count}명</span>
-                              {item.note && (
-                                <span className="pay-item-req">{item.note}</span>
-                              )}
-                            </div>
-                            <span className={`pay-badge ${item.isPaid ? 'paid' : 'unpaid'}`}>
-                              {item.isPaid ? '✓ 입금완료' : '미입금'}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    )
-                  })
+                <>
+                  {jungmoUpcoming.length === 0 ? (
+                    <div className="admin-state">진행 예정인 정모가 없어요</div>
+                  ) : (
+                    jungmoUpcoming.map(entry => renderJungmoGroup(entry, false))
+                  )}
+                  {jungmoPast.length > 0 && (
+                    <>
+                      <div className="pay-section-divider"><span>지난 정모</span></div>
+                      {jungmoPast.map(entry => renderJungmoGroup(entry, true))}
+                    </>
+                  )}
+                </>
               )
             )}
           </div>

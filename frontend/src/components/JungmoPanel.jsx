@@ -3,8 +3,8 @@ import { getJungmoApplications, addJungmoApplication, updateJungmoApplication, d
 import { shareContent, formatDateKo } from "../utils/kakao";
 import "./JungmoPanel.css";
 
-function JungmoItem({ jungmo, onDelete }) {
-  const [expanded, setExpanded] = useState(false);
+function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
+  const [expanded, setExpanded] = useState(!!defaultExpanded);
   const [applications, setApplications] = useState([]);
   const [loadingApps, setLoadingApps] = useState(false);
   const [totalApplicants, setTotalApplicants] = useState(0);
@@ -37,6 +37,15 @@ function JungmoItem({ jungmo, onDelete }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [jungmoDeletePw, setJungmoDeletePw] = useState("");
   const [jungmoDeleteError, setJungmoDeleteError] = useState("");
+
+  // 정모 내용(제목/설명) 수정 모달
+  const [showEditJungmoModal, setShowEditJungmoModal] = useState(false);
+  const [editJungmoStep, setEditJungmoStep] = useState("pw"); // 'pw' | 'form'
+  const [editJungmoPw, setEditJungmoPw] = useState("");
+  const [editJungmoPwError, setEditJungmoPwError] = useState("");
+  const [editJungmoTitle, setEditJungmoTitle] = useState(jungmo.title);
+  const [editJungmoDesc, setEditJungmoDesc] = useState(jungmo.description || "");
+  const [savingJungmo, setSavingJungmo] = useState(false);
 
 
   async function loadApplications() {
@@ -128,6 +137,36 @@ function JungmoItem({ jungmo, onDelete }) {
     }
     onDelete(jungmo.id);
     setShowDeleteModal(false);
+  }
+
+  function openEditJungmoModal() {
+    setShowEditJungmoModal(true);
+    setEditJungmoStep("pw");
+    setEditJungmoPw(""); setEditJungmoPwError("");
+    setEditJungmoTitle(jungmo.title);
+    setEditJungmoDesc(jungmo.description || "");
+  }
+
+  async function handleEditJungmoPwConfirm() {
+    if (!editJungmoPw.trim()) { setEditJungmoPwError("비밀번호를 입력해주세요."); return; }
+    const result = await verifyPassword(editJungmoPw, jungmo.password);
+    if (!result.valid) { setEditJungmoPwError("비밀번호가 틀렸어요."); return; }
+    if (result.needsUpgrade) {
+      upgradeJungmoPassword(jungmo.id, result.hash).catch(() => {});
+    }
+    setEditJungmoStep("form");
+  }
+
+  async function handleEditJungmoSubmit(e) {
+    e.preventDefault();
+    if (!editJungmoTitle.trim()) return;
+    setSavingJungmo(true);
+    try {
+      await onUpdate(jungmo.id, { title: editJungmoTitle.trim(), description: editJungmoDesc.trim() });
+      setShowEditJungmoModal(false);
+    } finally {
+      setSavingJungmo(false);
+    }
   }
 
 
@@ -290,16 +329,24 @@ function JungmoItem({ jungmo, onDelete }) {
                 </form>
               )}
 
-              <button
-                className="jungmo-delete-btn"
-                onClick={() => {
-                  setShowDeleteModal(true);
-                  setJungmoDeletePw("");
-                  setJungmoDeleteError("");
-                }}
-              >
-                정모 삭제
-              </button>
+              <div className="jungmo-item-footer-actions">
+                <button
+                  className="jungmo-edit-jungmo-btn"
+                  onClick={openEditJungmoModal}
+                >
+                  정모 수정
+                </button>
+                <button
+                  className="jungmo-delete-btn"
+                  onClick={() => {
+                    setShowDeleteModal(true);
+                    setJungmoDeletePw("");
+                    setJungmoDeleteError("");
+                  }}
+                >
+                  정모 삭제
+                </button>
+              </div>
             </>
           )}
         </div>
@@ -378,6 +425,46 @@ function JungmoItem({ jungmo, onDelete }) {
         </div>
       )}
 
+      {showEditJungmoModal && (
+        <div className="jungmo-modal-overlay" onClick={() => setShowEditJungmoModal(false)}>
+          <div className="jungmo-modal" onClick={e => e.stopPropagation()}>
+            {editJungmoStep === "pw" ? (
+              <>
+                <div className="modal-icon">🔒</div>
+                <h4 className="modal-title">정모 수정</h4>
+                <p className="modal-desc">관리 비밀번호를 입력해주세요</p>
+                <input className="pw-input" type="password" placeholder="비밀번호 입력"
+                  value={editJungmoPw} onChange={e => { setEditJungmoPw(e.target.value); setEditJungmoPwError(""); }}
+                  onKeyDown={e => e.key === "Enter" && handleEditJungmoPwConfirm()} autoFocus />
+                {editJungmoPwError && <p className="pw-error">{editJungmoPwError}</p>}
+                <div className="modal-actions">
+                  <button className="modal-btn cancel" onClick={() => setShowEditJungmoModal(false)}>취소</button>
+                  <button className="modal-btn confirm blue" onClick={handleEditJungmoPwConfirm}>확인</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="modal-icon">✏️</div>
+                <h4 className="modal-title">정모 내용 수정</h4>
+                <form onSubmit={handleEditJungmoSubmit} style={{ width: "100%", display: "flex", flexDirection: "column", gap: 8 }}>
+                  <input className="pw-input" type="text" placeholder="정모 제목"
+                    value={editJungmoTitle} onChange={e => setEditJungmoTitle(e.target.value)} maxLength={50} autoFocus />
+                  <textarea className="pw-input" placeholder="내용 (선택)" rows={3}
+                    value={editJungmoDesc} onChange={e => setEditJungmoDesc(e.target.value)} maxLength={200}
+                    style={{ textAlign: "left", resize: "vertical" }} />
+                  <div className="modal-actions">
+                    <button type="button" className="modal-btn cancel" onClick={() => setShowEditJungmoModal(false)}>취소</button>
+                    <button type="submit" className="modal-btn confirm blue" disabled={savingJungmo}>
+                      {savingJungmo ? "저장 중..." : "저장하기"}
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {showDeleteModal && (
         <div
           className="jungmo-modal-overlay"
@@ -433,6 +520,9 @@ export default function JungmoPanel({
   jungmoList,
   onCreateJungmo,
   onDeleteJungmo,
+  onUpdateJungmo,
+  focusId,
+  hideCreate,
 }) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [title, setTitle] = useState("");
@@ -441,6 +531,9 @@ export default function JungmoPanel({
   const [titleError, setTitleError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  const displayList = focusId ? jungmoList.filter((j) => j.id === focusId) : jungmoList;
+  const canCreate = !focusId && !hideCreate;
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -457,7 +550,7 @@ export default function JungmoPanel({
 
     setSubmitting(true);
     try {
-      await onCreateJungmo({
+      await onCreateJungmo(selectedDate, {
         title: title.trim(),
         description: description.trim(),
         password,
@@ -473,26 +566,30 @@ export default function JungmoPanel({
 
   return (
     <div className="jungmo-panel">
-      <div className="jungmo-panel-header">
-        <h3 className="jungmo-panel-title">🎮 정모</h3>
-        <p className="jungmo-panel-sub">
-          스크린야구, 뒷풀이 등 다양한 모임을 열어보세요!
-        </p>
-      </div>
+      {!focusId && (
+        <div className="jungmo-panel-header">
+          <h3 className="jungmo-panel-title">🎮 정모</h3>
+          <p className="jungmo-panel-sub">
+            스크린야구, 뒷풀이 등 다양한 모임을 열어보세요!
+          </p>
+        </div>
+      )}
 
-      {jungmoList.length > 0 && (
+      {displayList.length > 0 && (
         <div className="jungmo-list">
-          {jungmoList.map((jungmo) => (
+          {displayList.map((jungmo) => (
             <JungmoItem
               key={jungmo.id}
               jungmo={jungmo}
               onDelete={onDeleteJungmo}
+              onUpdate={onUpdateJungmo}
+              defaultExpanded={!!focusId}
             />
           ))}
         </div>
       )}
 
-      {jungmoList.length === 0 && !showCreateForm && (
+      {displayList.length === 0 && !showCreateForm && (
         <div className="jungmo-empty">
           <span>🎮</span>
           <p>이 날 열린 정모가 없어요</p>
@@ -500,7 +597,7 @@ export default function JungmoPanel({
         </div>
       )}
 
-      {!showCreateForm ? (
+      {canCreate && (!showCreateForm ? (
         <button
           className="create-jungmo-btn"
           onClick={() => setShowCreateForm(true)}
@@ -581,7 +678,7 @@ export default function JungmoPanel({
             </button>
           </div>
         </form>
-      )}
+      ))}
     </div>
   );
 }

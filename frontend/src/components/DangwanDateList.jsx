@@ -9,7 +9,7 @@ export default function DangwanDateList({ dangwanSummary, dangwanOpenDates, onSe
     return (
       <div className="ddl-empty">
         <span>📋</span>
-        <p>단관 신청 날짜가 없어요</p>
+        <p>단관 일정이 없어요</p>
       </div>
     );
   }

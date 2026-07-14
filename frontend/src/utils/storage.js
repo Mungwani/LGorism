@@ -241,6 +241,14 @@ export async function createJungmo(date, { title, description, password }) {
   return toJungmo(data)
 }
 
+export async function updateJungmo(id, { title, description }) {
+  const { error } = await supabase
+    .from('jungmo')
+    .update({ title, description: description || null })
+    .eq('id', id)
+  if (error) throw error
+}
+
 export async function deleteJungmo(id) {
   const { error } = await supabase.from('jungmo').delete().eq('id', id)
   if (error) throw error
@@ -413,6 +421,19 @@ export async function getAllJungmo() {
     .order('event_date', { ascending: true })
   if (error) throw error
   return (data || []).map(toJungmo)
+}
+
+/** 정모별 참여 인원 합계 { jungmoId: count } */
+export async function getJungmoParticipantCounts() {
+  const { data, error } = await supabase
+    .from('jungmo_applications')
+    .select('jungmo_id, count')
+  if (error) throw error
+  const counts = {}
+  ;(data || []).forEach(row => {
+    counts[row.jungmo_id] = (counts[row.jungmo_id] || 0) + (Number(row.count) || 1)
+  })
+  return counts
 }
 
 // ── 공지 CRUD ──────────────────────────────────────────────────
