@@ -515,6 +515,7 @@ function toTransfer(row) {
     password:    row.password,
     isSold:      row.is_sold || false,
     soldTo:      row.sold_to || '',
+    isDeleted:   row.is_deleted || false,
     createdAt:   row.created_at,
   }
 }
@@ -533,6 +534,7 @@ export async function getTransfers() {
   const { data, error } = await supabase
     .from('transfers')
     .select('*')
+    .eq('is_deleted', false)
     .order('created_at', { ascending: false })
   if (error) throw error
   return (data || []).map(toTransfer)
@@ -559,7 +561,10 @@ export async function createTransfer({ gameDate, seatSection, seatRow, seatNumbe
 }
 
 export async function deleteTransfer(id) {
-  const { error } = await supabase.from('transfers').delete().eq('id', id)
+  const { error } = await supabase
+    .from('transfers')
+    .update({ is_deleted: true })
+    .eq('id', id)
   if (error) throw error
 }
 
