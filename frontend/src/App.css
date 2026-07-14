@@ -8,31 +8,6 @@
   margin: 0 auto;
 }
 
-/* ── 메인 내비게이션 (홈 / 양도) ──────────────────────────── */
-.main-nav {
-  display: flex;
-  gap: 8px;
-  padding: 12px 16px 0;
-}
-
-.main-nav-btn {
-  flex: 1;
-  padding: 11px;
-  border-radius: var(--radius-md);
-  background: var(--white);
-  color: var(--gray-600);
-  border: 1.5px solid var(--gray-200);
-  font-size: 0.88rem;
-  font-weight: 700;
-  transition: all 0.15s;
-}
-
-.main-nav-btn.active {
-  background: var(--black);
-  color: var(--white);
-  border-color: var(--black);
-}
-
 /* ── 헤더 ─────────────────────────────────────────────────── */
 .app-header {
   background: var(--black);
@@ -113,10 +88,26 @@
 /* ── 메인 ─────────────────────────────────────────────────── */
 .app-main {
   flex: 1;
-  padding: 16px 14px 32px;
+  padding: 16px 14px calc(80px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   gap: 18px;
+}
+
+/* ── 목록으로 돌아가기 (단관/정모 탭 드릴다운) ────────────── */
+.back-to-list-btn {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gray-600);
+  background: var(--white);
+  border: 1.5px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  transition: all 0.15s;
+}
+
+.back-to-list-btn:hover {
+  background: var(--gray-100);
 }
 
 /* ── 섹션 ─────────────────────────────────────────────────── */
@@ -293,17 +284,6 @@
   color: var(--gray-500);
 }
 
-/* ── 푸터 ─────────────────────────────────────────────────── */
-.app-footer {
-  background: var(--black);
-  padding: 14px 20px;
-  text-align: center;
-}
-
-.app-footer p {
-  font-size: 0.72rem;
-  color: rgba(255,255,255,0.45);
-}
 
 /* ── 토스트 메시지 ──────────────────────────────────────────── */
 .toast {
