@@ -119,6 +119,18 @@ export default function App() {
     setEditingItem(null);
   }
 
+  // 홈 화면 "오늘 직관 가요!" 버튼 — 오늘 날짜의 직관 탭으로 바로 이동
+  function handleGoToTodayJikgwan() {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    GA.mainViewSwitch("calendar");
+    GA.dateSelect(todayStr);
+    setSelectedDate(todayStr);
+    setActiveTab("jikgwan");
+    setDangwanSubTab("form");
+    setEditingItem(null);
+    setMainView("calendar");
+  }
+
   useEffect(() => {
     if (!selectedDate) return;
     let cancelled = false;
@@ -386,7 +398,7 @@ export default function App() {
       <main className="app-main">
         {/* ── 홈 ───────────────────────────────────────────── */}
         {mainView === "home" && (
-          <HomeView allDangwanDates={allDangwanDates} onNavigate={handleNavChange} />
+          <HomeView allDangwanDates={allDangwanDates} onNavigate={handleNavChange} onGoToJikgwan={handleGoToTodayJikgwan} />
         )}
 
         {/* ── 캘린더 ───────────────────────────────────────── */}

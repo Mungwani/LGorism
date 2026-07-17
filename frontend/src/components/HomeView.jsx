@@ -19,7 +19,7 @@ function formatShortDate(dateStr) {
   return `${parseInt(m)}월 ${parseInt(d)}일`;
 }
 
-export default function HomeView({ allDangwanDates, onNavigate }) {
+export default function HomeView({ allDangwanDates, onNavigate, onGoToJikgwan }) {
   const todayGame = getGameByDate(today);
   const nextGame = !todayGame
     ? games.find((g) => g.date > today && !g.isClosed)
@@ -52,7 +52,12 @@ export default function HomeView({ allDangwanDates, onNavigate }) {
       <div className="home-game-section">
         <h2 className="home-section-heading">⚾ 경기 일정</h2>
         {todayGame ? (
-          <GameCard game={todayGame} date={today} />
+          <>
+            <GameCard game={todayGame} date={today} />
+            <button className="home-jikgwan-cta" onClick={onGoToJikgwan}>
+              🏟 오늘 직관 가요!
+            </button>
+          </>
         ) : (
           <div className="home-next-game-card">
             <p className="home-next-game-empty">오늘은 경기가 없어요</p>
