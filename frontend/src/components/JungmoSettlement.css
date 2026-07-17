@@ -1,0 +1,473 @@
+/* ── 정산하기 모달 ──────────────────────────────────────────── */
+.settlement-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,15,15,0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.settlement-modal {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 22px 20px 24px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 86vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+
+.settlement-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 4px;
+}
+
+.settlement-header h4 {
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--black);
+  letter-spacing: -0.01em;
+}
+
+.settlement-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gray-400);
+  font-size: 0.95rem;
+  transition: background 0.15s;
+}
+
+.settlement-close:hover {
+  background: var(--gray-100);
+}
+
+/* 섹션 카드 */
+.settlement-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #f7f8fa;
+  border-radius: 18px;
+  padding: 16px 16px 18px;
+}
+
+.settlement-section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--gray-600);
+  letter-spacing: -0.01em;
+}
+
+.settlement-empty-hint {
+  font-size: 0.8rem;
+  color: var(--gray-400);
+}
+
+/* 참여자 칩 (커스텀 체크 인디케이터) */
+.settlement-participant-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.settlement-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px 8px 8px;
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--gray-500);
+  font-size: 0.83rem;
+  font-weight: 600;
+  transition: background 0.15s, color 0.15s;
+}
+
+.settlement-chip::before {
+  content: "";
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gray-300);
+  background: var(--white);
+  flex-shrink: 0;
+  transition: all 0.15s;
+  box-sizing: border-box;
+}
+
+.settlement-chip.on {
+  background: #eaf2fd;
+  color: #1565C0;
+}
+
+.settlement-chip.on::before {
+  content: "✓";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-color: #1565C0;
+  background: #1565C0;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.settlement-chip input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.settlement-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--gray-400);
+  font-size: 0.78rem;
+  line-height: 1;
+  transition: background 0.15s, color 0.15s;
+}
+
+.settlement-chip-remove:hover {
+  background: rgba(200,16,46,0.1);
+  color: var(--red);
+}
+
+.settlement-add-participant {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.settlement-add-participant input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 13px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  background: var(--white);
+}
+
+.settlement-add-participant input:focus {
+  outline: 1.5px solid #1565C0;
+}
+
+.settlement-add-participant button {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--white);
+  color: #1565C0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.settlement-add-participant button:hover {
+  background: #eaf2fd;
+}
+
+/* 비음주 할인 (접이식) */
+.settlement-collapse-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  background: transparent;
+  padding: 0;
+}
+
+.settlement-collapse-chevron {
+  width: 14px;
+  height: 14px;
+  color: var(--gray-400);
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+
+.settlement-collapse-chevron.open {
+  transform: rotate(180deg);
+}
+
+.settlement-discount-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  font-weight: 600;
+}
+
+.settlement-discount-input.standalone {
+  justify-content: space-between;
+  background: var(--white);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.settlement-discount-input input {
+  width: 80px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: #f2f3f5;
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+.settlement-discount-input.standalone input {
+  background: var(--white);
+  outline: 1.5px solid var(--gray-200);
+}
+
+.settlement-discount-input input:focus {
+  outline: 1.5px solid #1565C0;
+}
+
+.settlement-chip.drink.on {
+  background: #fdece0;
+  color: #c2410c;
+}
+
+.settlement-chip.drink.on::before {
+  border-color: #c2410c;
+  background: #c2410c;
+}
+
+.settlement-nodrink-tag {
+  margin-left: 6px;
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 700;
+  color: #c2410c;
+  background: #fdece0;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+/* 항목 */
+.settlement-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settlement-item {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settlement-item-row {
+  display: flex;
+  gap: 6px;
+}
+
+.settlement-item-row input[type="text"] {
+  flex: 1.2;
+  min-width: 0;
+}
+
+.settlement-item-row input[type="number"] {
+  flex: 1;
+  min-width: 0;
+}
+
+.settlement-item-row input {
+  padding: 9px 11px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  background: #f2f3f5;
+}
+
+.settlement-item-row input:focus {
+  outline: 1.5px solid #1565C0;
+}
+
+.settlement-item-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.76rem;
+  color: var(--gray-400);
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.settlement-item-remove:hover {
+  background: rgba(200,16,46,0.08);
+  color: var(--red);
+}
+
+.settlement-item-participants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.settlement-mini-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #f2f3f5;
+  color: var(--gray-400);
+  font-size: 0.72rem;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+
+.settlement-mini-chip.on {
+  background: #eaf2fd;
+  color: #1565C0;
+}
+
+.settlement-mini-chip input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.settlement-add-item {
+  width: 100%;
+  padding: 11px;
+  border-radius: var(--radius-md);
+  background: var(--white);
+  color: var(--gray-500);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.settlement-add-item:hover {
+  background: #eaf2fd;
+  color: #1565C0;
+}
+
+/* 경고 */
+.settlement-warnings {
+  background: #fff8e1;
+  border-radius: 14px;
+  padding: 10px 14px;
+}
+
+.settlement-warnings p {
+  font-size: 0.76rem;
+  color: #b45309;
+  line-height: 1.5;
+}
+
+/* 결과 */
+.settlement-result {
+  display: flex;
+  flex-direction: column;
+}
+
+.settlement-result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 2px;
+  font-size: 0.86rem;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.settlement-result-row:last-of-type {
+  border-bottom: none;
+}
+
+.settlement-result-row span {
+  color: var(--gray-600);
+  font-weight: 600;
+}
+
+.settlement-result-row strong {
+  color: var(--black);
+  font-weight: 700;
+}
+
+.settlement-result-row.total {
+  margin-top: 6px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #eaf2fd;
+  border-bottom: none;
+}
+
+.settlement-result-row.total span,
+.settlement-result-row.total strong {
+  color: #1565C0;
+  font-weight: 800;
+}
+
+/* 계좌 안내 + 복사 CTA */
+.settlement-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settlement-account-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: #f2f3f5;
+  font-size: 0.85rem;
+}
+
+.settlement-account-input:focus {
+  outline: 1.5px solid #1565C0;
+}
+
+.settlement-copy-btn {
+  width: 100%;
+  padding: 15px;
+  border-radius: 16px;
+  background: #1565C0;
+  color: var(--white);
+  font-size: 0.92rem;
+  font-weight: 700;
+  box-shadow: 0 6px 16px rgba(21,101,192,0.25);
+  transition: opacity 0.15s;
+}
+
+.settlement-copy-btn:hover {
+  opacity: 0.92;
+}

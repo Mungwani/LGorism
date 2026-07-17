@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getJungmoApplications, addJungmoApplication, updateJungmoApplication, deleteJungmoApplication, logAudit, verifyPassword, upgradeJungmoApplicationPassword, upgradeJungmoPassword } from "../utils/storage";
 import { shareContent, formatDateKo } from "../utils/kakao";
+import JungmoSettlementModal from "./JungmoSettlement";
 import "./JungmoPanel.css";
 
 function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
@@ -39,6 +40,8 @@ function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
   const [jungmoDeleteError, setJungmoDeleteError] = useState("");
 
   // 정모 내용(제목/설명) 수정 모달
+  const [showSettlement, setShowSettlement] = useState(false);
+
   const [showEditJungmoModal, setShowEditJungmoModal] = useState(false);
   const [editJungmoStep, setEditJungmoStep] = useState("pw"); // 'pw' | 'form'
   const [editJungmoPw, setEditJungmoPw] = useState("");
@@ -332,6 +335,12 @@ function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
               <div className="jungmo-item-footer-actions">
                 <button
                   className="jungmo-edit-jungmo-btn"
+                  onClick={() => setShowSettlement(true)}
+                >
+                  💰 정산하기
+                </button>
+                <button
+                  className="jungmo-edit-jungmo-btn"
                   onClick={openEditJungmoModal}
                 >
                   정모 수정
@@ -350,6 +359,14 @@ function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
             </>
           )}
         </div>
+      )}
+
+      {showSettlement && (
+        <JungmoSettlementModal
+          applications={applications}
+          jungmoTitle={jungmo.title}
+          onClose={() => setShowSettlement(false)}
+        />
       )}
 
       {deleteModal && (
