@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { FaBinoculars } from "react-icons/fa";
 import { getTransfers, createTransfer, logAudit } from "../utils/storage";
 import { games } from "../data/games";
 import { GA } from "../utils/analytics";
@@ -139,7 +140,7 @@ export default function TransferBoard({ onToast }) {
           rel="noopener noreferrer"
           onClick={() => GA.transferSeatView()}
         >
-          🔭 잠실야구장 좌석 시야 보기
+          <FaBinoculars /> 잠실야구장 좌석 시야 보기
         </a>
       </div>
 

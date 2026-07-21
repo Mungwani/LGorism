@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FaUser, FaThumbtack, FaHandPaper, FaLock, FaHandshake } from "react-icons/fa";
 import {
   getTransferReservations,
   addTransferReservation,
@@ -73,9 +74,9 @@ export default function TransferCard({ transfer, onChanged, onToast }) {
       setReserveNickname(""); setReservePassword(""); setReserveError("");
       setShowReserveForm(false);
       await loadReservations();
-      onToast?.("🙋 예약이 등록됐어요!");
+      onToast?.("예약이 등록됐어요!");
     } catch {
-      onToast?.("❌ 예약에 실패했어요.");
+      onToast?.("예약에 실패했어요.");
     } finally {
       setReserving(false);
     }
@@ -89,7 +90,7 @@ export default function TransferCard({ transfer, onChanged, onToast }) {
     logAudit('delete', 'transfer', transfer.gameDate, cancelTarget.reservation.nickname, '예약취소');
     setCancelTarget(null); setCancelPw(""); setCancelPwError("");
     await loadReservations();
-    onToast?.("🗑️ 예약이 취소됐어요.");
+    onToast?.("예약이 취소됐어요.");
   }
 
   function openOwnerModal(kind) {
@@ -123,12 +124,12 @@ export default function TransferCard({ transfer, onChanged, onToast }) {
       await toggleTransferSold(transfer.id, nextSold, soldTo);
       logAudit('update', 'transfer', transfer.gameDate, transfer.nickname, nextSold ? `양도완료${soldTo ? ' → ' + soldTo : ''}` : '양도중 전환');
       GA.transferSold(transfer.gameDate, nextSold);
-      onToast?.(nextSold ? "✅ 양도완료 처리했어요!" : "↩️ 양도중으로 되돌렸어요.");
+      onToast?.(nextSold ? "양도완료 처리했어요!" : "양도중으로 되돌렸어요.");
     } else {
       await deleteTransfer(transfer.id);
       logAudit('delete', 'transfer', transfer.gameDate, transfer.nickname, `${transfer.quantity}매`);
       GA.transferDelete(transfer.gameDate);
-      onToast?.("🗑️ 양도글이 삭제됐어요.");
+      onToast?.("양도글이 삭제됐어요.");
     }
     setOwnerModal(null); setOwnerPw(""); setOwnerPwError("");
     onChanged();
@@ -154,7 +155,7 @@ export default function TransferCard({ transfer, onChanged, onToast }) {
             {transfer.seatNumber && ` · ${transfer.seatNumber}번`}
             <span className="transfer-card-qty">{transfer.quantity}매</span>
           </div>
-          <div className="transfer-card-author">👤 {transfer.nickname}</div>
+          <div className="transfer-card-author"><FaUser /> {transfer.nickname}</div>
         </div>
         <div className="transfer-card-right">
           <span className="transfer-card-price">{totalPrice.toLocaleString()}원</span>
@@ -165,7 +166,7 @@ export default function TransferCard({ transfer, onChanged, onToast }) {
 
       {expanded && (
         <div className="transfer-card-body">
-          {transfer.note && <p className="transfer-card-note">📌 {transfer.note}</p>}
+          {transfer.note && <p className="transfer-card-note"><FaThumbtack /> {transfer.note}</p>}
 
           {loadingReservations ? (
             <p className="loading-text">로딩 중...</p>
@@ -194,7 +195,7 @@ export default function TransferCard({ transfer, onChanged, onToast }) {
                 <p className="no-apps-text">경기가 지나 더 이상 예약할 수 없어요</p>
               ) : !showReserveForm ? (
                 <button className="jungmo-apply-btn" onClick={() => setShowReserveForm(true)}>
-                  🙋 예약하기
+                  <FaHandPaper /> 예약하기
                 </button>
               ) : (
                 <form className="jungmo-apply-form" onSubmit={handleReserve}>
@@ -245,7 +246,7 @@ export default function TransferCard({ transfer, onChanged, onToast }) {
       {cancelTarget && (
         <div className="jungmo-modal-overlay" onClick={() => setCancelTarget(null)}>
           <div className="jungmo-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon">🔒</div>
+            <div className="modal-icon"><FaLock /></div>
             <h4 className="modal-title">예약 취소</h4>
             <p className="modal-desc">
               <strong>{cancelTarget.reservation.nickname}</strong>님,<br />
@@ -272,7 +273,7 @@ export default function TransferCard({ transfer, onChanged, onToast }) {
       {ownerModal && ownerStep === 'buyer' && (
         <div className="jungmo-modal-overlay" onClick={() => setOwnerModal(null)}>
           <div className="jungmo-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon">🤝</div>
+            <div className="modal-icon"><FaHandshake /></div>
             <h4 className="modal-title">누구에게 양도했나요?</h4>
             <div className="soldto-picker">
               {reservations.length > 0 && (
@@ -312,7 +313,7 @@ export default function TransferCard({ transfer, onChanged, onToast }) {
       {ownerModal && ownerStep === 'pw' && (
         <div className="jungmo-modal-overlay" onClick={() => setOwnerModal(null)}>
           <div className="jungmo-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-icon">🔒</div>
+            <div className="modal-icon"><FaLock /></div>
             <h4 className="modal-title">{ownerModal === 'sold' ? '양도 상태 변경' : '양도글 삭제'}</h4>
             <p className="modal-desc">
               <strong>{transfer.nickname}</strong>님,<br />

@@ -42,21 +42,24 @@
 }
 
 .transfer-seatview-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   margin-top: 10px;
   text-align: center;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--gray-500);
-  background: #f5f5f5;
-  border: 1.5px solid var(--gray-200);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--white);
+  background: var(--red);
   border-radius: var(--radius-md);
-  padding: 9px 12px;
+  padding: 11px 12px;
   text-decoration: none;
+  box-shadow: var(--shadow-md);
 }
 
 .transfer-seatview-link:active {
-  opacity: 0.7;
+  background: var(--red-dark);
 }
 
 .transfer-total-preview {
