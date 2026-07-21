@@ -63,6 +63,7 @@ export const GA = {
   transferReserve: (date)        => trackEvent('transfer_reserve', { game_date: date }),
   transferSold:    (date, sold)  => trackEvent('transfer_sold',    { game_date: date, status: sold ? 'sold' : 'reopened' }),
   transferDelete:  (date)        => trackEvent('transfer_delete',  { game_date: date }),
+  transferSeatView: ()           => trackEvent('transfer_seatview_click', {}),
 
   // UX
   tabSwitch:       (tab)         => trackEvent('tab_switch',       { tab_name: tab }),

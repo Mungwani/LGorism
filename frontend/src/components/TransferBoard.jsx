@@ -132,6 +132,15 @@ export default function TransferBoard({ onToast }) {
           <p>⚠️ 웃돈 거래 절대 금지</p>
           <p>⚠️ 정가 이하만 양도 가능</p>
         </div>
+        <a
+          className="transfer-seatview-link"
+          href="https://myseatcheck.com/서울-잠실야구장/"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => GA.transferSeatView()}
+        >
+          🔭 잠실야구장 좌석 시야 보기
+        </a>
       </div>
 
       <div className="transfer-board-filter">
