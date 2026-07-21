@@ -137,11 +137,11 @@ export default function TransferBoard({ onToast }) {
       <div className="transfer-board-filter">
         <button
           className={`transfer-filter-chip ${statusFilter === "open" ? "active" : ""}`}
-          onClick={() => setStatusFilter("open")}
+          onClick={() => { GA.filterChange("open"); setStatusFilter("open"); }}
         >양도중</button>
         <button
           className={`transfer-filter-chip ${statusFilter === "sold" ? "active" : ""}`}
-          onClick={() => setStatusFilter("sold")}
+          onClick={() => { GA.filterChange("sold"); setStatusFilter("sold"); }}
         >양도완료</button>
       </div>
 

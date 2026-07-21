@@ -76,6 +76,7 @@ export default function App() {
     const params = new URLSearchParams(window.location.search)
     const date = params.get('date')
     const tab = params.get('tab')
+    GA.pageView(date ? 'calendar' : 'home')
     if (!date) return
     setSelectedDate(date)
     setDangwanSubTab('list')
@@ -103,6 +104,7 @@ export default function App() {
 
   function handleNavChange(view) {
     GA.mainViewSwitch(view);
+    GA.pageView(view);
     setMainView(view);
     setSelectedDate(null);
     setEditingItem(null);
@@ -123,6 +125,7 @@ export default function App() {
   function handleGoToTodayJikgwan() {
     const todayStr = new Date().toISOString().slice(0, 10);
     GA.mainViewSwitch("calendar");
+    GA.pageView("calendar");
     GA.dateSelect(todayStr);
     setSelectedDate(todayStr);
     setActiveTab("jikgwan");

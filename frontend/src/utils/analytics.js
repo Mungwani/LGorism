@@ -21,7 +21,26 @@ function gtag(...args) {
 }
 
 export function trackEvent(eventName, params = {}) {
-  gtag('event', eventName, { send_to: GA_ID, ...params });
+  gtag('event', eventName, params);
+}
+
+// SPA라 라우팅이 없어서, 화면(탭)이 바뀔 때마다 가상 page_view를 보내야
+// GA4 "페이지 및 화면" 리포트에 화면별로 잡힘 (안 그러면 전부 첫 로드 타이틀 하나로만 집계됨)
+const PAGE_TITLES = {
+  home: '홈',
+  calendar: '캘린더',
+  dangwan: '단관',
+  jungmo: '정모',
+  transfer: '양도게시판',
+};
+
+export function trackPageView(view) {
+  const title = `엘고리즘 - ${PAGE_TITLES[view] || view}`;
+  trackEvent('page_view', {
+    page_title: title,
+    page_location: `${window.location.origin}${window.location.pathname}#${view}`,
+    page_path: `/${view}`,
+  });
 }
 
 // 단관
@@ -50,4 +69,5 @@ export const GA = {
   filterChange:    (mode)        => trackEvent('filter_change',    { filter_mode: mode }),
   dateSelect:      (date)        => trackEvent('date_select',      { game_date: date }),
   mainViewSwitch:  (view)        => trackEvent('main_view_switch', { view_name: view }),
+  pageView:        (view)        => trackPageView(view),
 };
