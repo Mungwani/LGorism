@@ -1,5 +1,20 @@
 const GA_ID = 'G-BQV6DNR670';
 
+// 프로덕션 빌드에서만 GA를 로드해서, 로컬 개발 트래픽이 실제 통계에 섞이지 않게 함
+export function initGA() {
+  if (!import.meta.env.PROD || typeof window === 'undefined' || window.gtag) return;
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function gtag() { window.dataLayer.push(arguments); };
+  window.gtag('js', new Date());
+  window.gtag('config', GA_ID);
+
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+  document.head.appendChild(script);
+}
+
 function gtag(...args) {
   if (typeof window === 'undefined' || !window.gtag) return;
   window.gtag(...args);

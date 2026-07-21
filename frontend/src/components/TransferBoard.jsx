@@ -55,7 +55,11 @@ export default function TransferBoard({ onToast }) {
     if (statusFilter === "open" && selectedGameDates.size > 0) {
       list = list.filter((t) => selectedGameDates.has(t.gameDate));
     }
-    return list.sort((a, b) => a.gameDate.localeCompare(b.gameDate));
+    return list.sort((a, b) =>
+      statusFilter === "sold"
+        ? b.gameDate.localeCompare(a.gameDate)
+        : a.gameDate.localeCompare(b.gameDate)
+    );
   }, [transfers, statusFilter, selectedGameDates]);
 
   useEffect(() => { setPage(1); }, [statusFilter, selectedGameDates]);
