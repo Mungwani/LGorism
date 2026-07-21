@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import slideBirthday from "../assets/hero/slide-birthday-dojanim.webp";
 import slideScoreboard from "../assets/hero/slide-scoreboard-welcome.jpg";
 import slideFans from "../assets/hero/slide-fans-cheer.jpg";
 import slideTowels from "../assets/hero/slide-towels.jpg";
@@ -6,6 +7,7 @@ import slideTickets from "../assets/hero/slide-tickets.jpg";
 import "./HeroSlider.css";
 
 const SLIDES = [
+  { image: slideBirthday, title: "", sub: "" },
   { image: slideScoreboard, title: "전광판에 뜬 엘고리즘", sub: "오늘도 잠실, 엘고리즘" },
   { image: slideFans, title: "다같이 응원하는 그 순간", sub: "전광판에 잡힌 엘고리즘" },
   { image: slideTowels, title: "무적 LG, 끝까지 트윈스", sub: "엘고리즘 노란 물결" },
@@ -54,11 +56,13 @@ export default function HeroSlider() {
       onTouchEnd={handleTouchEnd}
     >
       <div className="hero-slide">
-        <img src={slide.image} alt={slide.title} className="hero-slide-img" />
-        <div className="hero-slide-overlay">
-          <p className="hero-slide-title">{slide.title}</p>
-          <p className="hero-slide-sub">{slide.sub}</p>
-        </div>
+        <img src={slide.image} alt={slide.title || "슬라이드 이미지"} className="hero-slide-img" />
+        {slide.title && (
+          <div className="hero-slide-overlay">
+            <p className="hero-slide-title">{slide.title}</p>
+            <p className="hero-slide-sub">{slide.sub}</p>
+          </div>
+        )}
       </div>
 
       <div className="hero-dots">
