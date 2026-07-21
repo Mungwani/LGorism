@@ -48,18 +48,18 @@
   gap: 7px;
   margin-top: 10px;
   text-align: center;
-  font-size: 0.9rem;
-  font-weight: 800;
-  color: var(--white);
-  background: var(--red);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--red);
+  background: #fff5f5;
+  border: 1.5px solid #ffcdd2;
   border-radius: var(--radius-md);
-  padding: 11px 12px;
+  padding: 9px 12px;
   text-decoration: none;
-  box-shadow: var(--shadow-md);
 }
 
 .transfer-seatview-link:active {
-  background: var(--red-dark);
+  background: #ffe5e5;
 }
 
 .transfer-total-preview {
