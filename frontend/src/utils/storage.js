@@ -506,6 +506,7 @@ function toBanner(row) {
     title:       row.title || '',
     description: row.description || '',
     isActive:    row.is_active,
+    sortOrder:   row.sort_order,
     createdAt:   row.created_at,
   }
 }
@@ -515,7 +516,7 @@ export async function getActiveBanners() {
     .from('banners')
     .select('*')
     .eq('is_active', true)
-    .order('created_at', { ascending: true })
+    .order('sort_order', { ascending: true })
   if (error) throw error
   return (data || []).map(toBanner)
 }
@@ -524,19 +525,32 @@ export async function getAllBanners() {
   const { data, error } = await supabase
     .from('banners')
     .select('*')
-    .order('created_at', { ascending: false })
+    .order('sort_order', { ascending: true })
   if (error) throw error
   return (data || []).map(toBanner)
 }
 
 export async function createBanner({ imageBase64, title, description }) {
+  const { data: maxRow } = await supabase
+    .from('banners')
+    .select('sort_order')
+    .order('sort_order', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const nextOrder = (maxRow?.sort_order ?? -1) + 1
+
   const { data, error } = await supabase
     .from('banners')
-    .insert({ image_base64: imageBase64, title, description })
+    .insert({ image_base64: imageBase64, title, description, sort_order: nextOrder })
     .select()
     .single()
   if (error) throw error
   return toBanner(data)
+}
+
+export async function updateBannerSortOrder(id, sortOrder) {
+  const { error } = await supabase.from('banners').update({ sort_order: sortOrder }).eq('id', id)
+  if (error) throw error
 }
 
 export async function updateBanner(id, { title, description }) {

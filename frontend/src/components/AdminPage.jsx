@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { FaImage, FaTrash, FaShieldAlt, FaClipboardList, FaCreditCard, FaTicketAlt, FaBullhorn, FaTrophy, FaCircle, FaUndo } from 'react-icons/fa'
-import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, getAllDangwanDates, openDangwanDate, closeDangwanDate, getAllNotices, createNotice, updateNotice, toggleNoticeActive, deleteNotice, getGameResults, setGameResult, deleteGameResult, getAllJungmoApplicationsWithInfo, updateJungmoPaymentStatus, getAllBanners, createBanner, updateBanner, toggleBannerActive, deleteBanner } from '../utils/storage'
+import { FaImage, FaTrash, FaShieldAlt, FaClipboardList, FaCreditCard, FaTicketAlt, FaBullhorn, FaTrophy, FaCircle, FaUndo, FaGripLines } from 'react-icons/fa'
+import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, getAllDangwanDates, openDangwanDate, closeDangwanDate, getAllNotices, createNotice, updateNotice, toggleNoticeActive, deleteNotice, getGameResults, setGameResult, deleteGameResult, getAllJungmoApplicationsWithInfo, updateJungmoPaymentStatus, getAllBanners, createBanner, updateBanner, toggleBannerActive, deleteBanner, updateBannerSortOrder } from '../utils/storage'
 import { fileToWebpBase64 } from '../utils/image'
 import { games } from '../data/games'
 
@@ -69,6 +69,8 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   const [editingBannerId, setEditingBannerId] = useState(null)
   const [editBannerTitle, setEditBannerTitle] = useState('')
   const [editBannerDescription, setEditBannerDescription] = useState('')
+  const [expandedBanners, setExpandedBanners] = useState(new Set())
+  const [draggedBannerIndex, setDraggedBannerIndex] = useState(null)
   const bannerFileInputRef = useRef(null)
 
   // 단관 관리
@@ -244,6 +246,37 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     await updateBanner(id, { title, description })
     setBanners(prev => prev.map(b => b.id === id ? { ...b, title, description } : b))
     setEditingBannerId(null)
+  }
+
+  function toggleBannerCollapse(id) {
+    setExpandedBanners(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  function handleBannerDragStart(index) {
+    setDraggedBannerIndex(index)
+  }
+
+  function handleBannerDragEnd() {
+    setDraggedBannerIndex(null)
+  }
+
+  async function handleBannerDrop(dropIndex) {
+    const fromIndex = draggedBannerIndex
+    setDraggedBannerIndex(null)
+    if (fromIndex === null || fromIndex === dropIndex) return
+
+    const reordered = [...banners]
+    const [moved] = reordered.splice(fromIndex, 1)
+    reordered.splice(dropIndex, 0, moved)
+    setBanners(reordered)
+
+    const changed = reordered.filter((b, i) => b.sortOrder !== i)
+    await Promise.all(changed.map(b => updateBannerSortOrder(b.id, reordered.indexOf(b))))
+    await loadBanners()
   }
 
   async function confirmDeleteBanner() {
@@ -834,64 +867,93 @@ export default function AdminPage({ onClose, onDangwanChange }) {
               <div className="admin-state">등록된 배너가 없어요</div>
             ) : (
               <div className="notice-list">
-                {banners.map(b => (
-                  <div key={b.id} className={`notice-admin-item ${b.isActive ? 'active' : 'inactive'}`}>
-                    {!b.isActive && <span className="notice-paused-badge">게시 중단</span>}
-                    <img src={b.imageBase64} alt={b.title || '배너'} className="preview-img" style={{ marginBottom: 8 }} />
-                    {editingBannerId === b.id ? (
-                      <form onSubmit={e => handleEditBannerSubmit(e, b.id)} className="notice-edit-form">
-                        <input
-                          type="text"
-                          className="notice-textarea"
-                          placeholder="제목 (선택)"
-                          value={editBannerTitle}
-                          onChange={e => setEditBannerTitle(e.target.value)}
-                          maxLength={40}
-                          autoFocus
-                        />
-                        <textarea
-                          className="notice-textarea"
-                          placeholder="설명 (선택)"
-                          value={editBannerDescription}
-                          onChange={e => setEditBannerDescription(e.target.value)}
-                          rows={2}
-                          maxLength={80}
-                        />
-                        <div className="notice-edit-actions">
-                          <button type="button" className="notice-action-btn cancel" onClick={() => setEditingBannerId(null)}>취소</button>
-                          <button type="submit" className="notice-action-btn save">저장</button>
+                {banners.map((b, i) => {
+                  const isOpen = expandedBanners.has(b.id)
+                  return (
+                    <div
+                      key={b.id}
+                      className={`banner-row ${draggedBannerIndex === i ? 'dragging' : ''}`}
+                      draggable
+                      onDragStart={() => handleBannerDragStart(i)}
+                      onDragOver={e => e.preventDefault()}
+                      onDrop={() => handleBannerDrop(i)}
+                      onDragEnd={handleBannerDragEnd}
+                    >
+                      <span className="banner-row-number">{i + 1}</span>
+                      <div className={`notice-admin-item banner-item ${b.isActive ? 'active' : 'inactive'}`}>
+                        {!b.isActive && <span className="notice-paused-badge">게시 중단</span>}
+
+                        <div className="banner-row-header">
+                          <button type="button" className="banner-row-toggle" onClick={() => toggleBannerCollapse(b.id)}>
+                            <span className="pay-date-chevron">{isOpen ? '▼' : '▶'}</span>
+                            <span className="banner-row-title">{b.title || '(제목 없음)'}</span>
+                          </button>
+                          <span className="banner-drag-handle" title="드래그해서 순서 변경">
+                            <FaGripLines />
+                          </span>
                         </div>
-                      </form>
-                    ) : (
-                      <>
-                        {(b.title || b.description) && (
-                          <p className="notice-admin-content">
-                            {b.title && <strong>{b.title}</strong>}
-                            {b.title && b.description && ' — '}
-                            {b.description}
-                          </p>
+
+                        {isOpen && (
+                        <div className="banner-row-body">
+                          <img src={b.imageBase64} alt={b.title || '배너'} className="preview-img" style={{ marginBottom: 8 }} />
+                          {editingBannerId === b.id ? (
+                            <form onSubmit={e => handleEditBannerSubmit(e, b.id)} className="notice-edit-form">
+                              <input
+                                type="text"
+                                className="notice-textarea"
+                                placeholder="제목 (선택)"
+                                value={editBannerTitle}
+                                onChange={e => setEditBannerTitle(e.target.value)}
+                                maxLength={40}
+                                autoFocus
+                              />
+                              <textarea
+                                className="notice-textarea"
+                                placeholder="설명 (선택)"
+                                value={editBannerDescription}
+                                onChange={e => setEditBannerDescription(e.target.value)}
+                                rows={2}
+                                maxLength={80}
+                              />
+                              <div className="notice-edit-actions">
+                                <button type="button" className="notice-action-btn cancel" onClick={() => setEditingBannerId(null)}>취소</button>
+                                <button type="submit" className="notice-action-btn save">저장</button>
+                              </div>
+                            </form>
+                          ) : (
+                            <>
+                              {(b.title || b.description) && (
+                                <p className="notice-admin-content">
+                                  {b.title && <strong>{b.title}</strong>}
+                                  {b.title && b.description && ' — '}
+                                  {b.description}
+                                </p>
+                              )}
+                              <div className="notice-admin-footer">
+                                <span className="notice-admin-time">{formatLogTime(b.createdAt)}</span>
+                                <div className="notice-admin-actions">
+                                  <button
+                                    className="notice-action-btn edit"
+                                    onClick={() => startEditBanner(b)}
+                                  >수정</button>
+                                  <button
+                                    className={`notice-action-btn ${b.isActive ? 'pause' : 'resume'}`}
+                                    onClick={() => handleToggleBanner(b.id, !b.isActive)}
+                                  >{b.isActive ? '게시 멈춤' : '다시 게시'}</button>
+                                  <button
+                                    className="notice-action-btn delete"
+                                    onClick={() => setDeleteBannerTarget(b.id)}
+                                  >삭제</button>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
                         )}
-                        <div className="notice-admin-footer">
-                          <span className="notice-admin-time">{formatLogTime(b.createdAt)}</span>
-                          <div className="notice-admin-actions">
-                            <button
-                              className="notice-action-btn edit"
-                              onClick={() => startEditBanner(b)}
-                            >수정</button>
-                            <button
-                              className={`notice-action-btn ${b.isActive ? 'pause' : 'resume'}`}
-                              onClick={() => handleToggleBanner(b.id, !b.isActive)}
-                            >{b.isActive ? '게시 멈춤' : '다시 게시'}</button>
-                            <button
-                              className="notice-action-btn delete"
-                              onClick={() => setDeleteBannerTarget(b.id)}
-                            >삭제</button>
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             )}
           </div>
