@@ -256,8 +256,6 @@ main  ← 바로 커밋 (1인 개발, 기능 단위로 작게 커밋)
 <!-- FOOTER -->
 <div align="center">
 
-오늘도 엘지 화이팅! 🔴⚾
-
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:1E1E1E,100:C8102E&height=120&section=footer" width="100%" />
 
 </div>
