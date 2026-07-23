@@ -32,7 +32,6 @@ import {
   getAllJungmo,
   getJungmoParticipantCounts,
   logAudit,
-  updatePaymentStatus,
   getDangwanOpenDates,
   getAllDangwanDates,
 } from "./utils/storage";
@@ -212,7 +211,8 @@ export default function App() {
   async function handleDangwanSubmit(formData) {
     try {
       if (editingItem) {
-        await updateApplication(selectedDate, editingItem.id, formData);
+        const ok = await updateApplication(selectedDate, editingItem.id, editingItem._password, formData);
+        if (!ok) { showToast("❌ 비밀번호가 틀렸어요."); return; }
         logAudit('update', 'dangwan', selectedDate, formData.name, `${formData.count}명`);
         GA.dangwanEdit(selectedDate);
         showToast("✅ 신청 내용을 수정했어요!");
@@ -238,26 +238,11 @@ export default function App() {
     setDangwanSubTab("form");
   }
 
-  async function handlePay(id) {
+  async function handleDelete(id, password) {
     try {
       const target = applications.find(a => a.id === id);
-      const newStatus = !target?.isPaid;
-      await updatePaymentStatus(selectedDate, id, newStatus);
-      logAudit('pay', 'dangwan', selectedDate, target?.name || '알 수 없음', newStatus ? '입금완료' : '입금취소');
-      GA.dangwanPay(selectedDate, newStatus);
-      const apps = await getApplications(selectedDate);
-      setApplications(apps);
-      setTotalCount(getTotalCount(apps));
-      showToast(newStatus ? "💳 입금 완료 처리됐어요!" : "↩️ 입금이 취소됐어요.");
-    } catch {
-      showToast("❌ 처리에 실패했어요.");
-    }
-  }
-
-  async function handleDelete(id) {
-    try {
-      const target = applications.find(a => a.id === id);
-      await deleteApplication(selectedDate, id);
+      const ok = await deleteApplication(selectedDate, id, password);
+      if (!ok) return false;
       logAudit('delete', 'dangwan', selectedDate, target?.name || '알 수 없음', `${target?.count || 0}명`);
       GA.dangwanDelete(selectedDate);
       const apps = await getApplications(selectedDate);
@@ -265,8 +250,10 @@ export default function App() {
       setTotalCount(getTotalCount(apps));
       await refreshSummary();
       showToast("🗑️ 신청이 삭제됐어요.");
+      return true;
     } catch {
       showToast("❌ 삭제에 실패했어요. 다시 시도해주세요.");
+      return false;
     }
   }
 
@@ -287,29 +274,35 @@ export default function App() {
     }
   }
 
-  async function handleJikgwanUpdate(id, fields) {
+  async function handleJikgwanUpdate(id, password, fields) {
     try {
-      await updateJikgwan(id, fields);
+      const ok = await updateJikgwan(id, password, fields);
+      if (!ok) return false;
       const updated = await getJikgwanList(selectedDate);
       setJikgwanList(updated);
       showToast("✅ 수정됐어요!");
+      return true;
     } catch {
       showToast("❌ 수정에 실패했어요.");
+      return false;
     }
   }
 
-  async function handleJikgwanDelete(id) {
+  async function handleJikgwanDelete(id, password) {
     try {
       const target = jikgwanList.find(j => j.id === id);
-      await deleteJikgwan(id);
+      const ok = await deleteJikgwan(id, password);
+      if (!ok) return false;
       logAudit('delete', 'jikgwan', selectedDate, target?.nickname || '알 수 없음', null);
       GA.jikgwanDelete(selectedDate);
       const updated = await getJikgwanList(selectedDate);
       setJikgwanList(updated);
       await refreshSummary();
       showToast("🗑️ 직관 등록이 삭제됐어요.");
+      return true;
     } catch {
       showToast("❌ 삭제에 실패했어요.");
+      return false;
     }
   }
 
@@ -334,9 +327,10 @@ export default function App() {
     }
   }
 
-  async function handleUpdateJungmo(id, data) {
+  async function handleUpdateJungmo(id, password, data) {
     try {
-      await updateJungmo(id, data);
+      const ok = await updateJungmo(id, password, data);
+      if (!ok) return false;
       logAudit('update', 'jungmo', selectedDate, data.title, null);
       if (selectedDate) {
         const updated = await getJungmoList(selectedDate);
@@ -345,15 +339,18 @@ export default function App() {
       const list = await getAllJungmo();
       setAllJungmoList(list);
       showToast("✅ 정모 내용을 수정했어요!");
+      return true;
     } catch {
       showToast("❌ 수정에 실패했어요.");
+      return false;
     }
   }
 
-  async function handleDeleteJungmo(id) {
+  async function handleDeleteJungmo(id, password) {
     try {
       const target = jungmoList.find(j => j.id === id) || allJungmoList.find(j => j.id === id);
-      await deleteJungmo(id);
+      const ok = await deleteJungmo(id, password);
+      if (!ok) return false;
       logAudit('delete', 'jungmo', selectedDate, target?.title || '알 수 없음', null);
       GA.jungmoDelete(selectedDate);
       if (selectedDate) {
@@ -369,8 +366,10 @@ export default function App() {
         setSelectedDate(null);
       }
       showToast("🗑️ 정모가 삭제됐어요.");
+      return true;
     } catch {
       showToast("❌ 삭제에 실패했어요.");
+      return false;
     }
   }
 
@@ -479,7 +478,6 @@ export default function App() {
                           onSubmit={handleDangwanSubmit}
                           onEdit={handleEdit}
                           onDelete={handleDelete}
-                          onPay={handlePay}
                         />
                       )}
                       {activeTab === "jikgwan" && (
@@ -551,7 +549,6 @@ export default function App() {
                     onSubmit={handleDangwanSubmit}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
-                    onPay={handlePay}
                   />
                 )}
               </>
@@ -631,7 +628,6 @@ function DangwanApplyBlock({
   onSubmit,
   onEdit,
   onDelete,
-  onPay,
 }) {
   const selectedGame = getGameByDate(selectedDate);
   return (
@@ -685,7 +681,6 @@ function DangwanApplyBlock({
               totalCount={totalCount}
               onEdit={onEdit}
               onDelete={onDelete}
-              onPay={onPay}
               selectedDate={selectedDate}
             />
           )}

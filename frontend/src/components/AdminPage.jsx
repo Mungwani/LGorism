@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { FaImage, FaTrash, FaShieldAlt, FaClipboardList, FaCreditCard, FaTicketAlt, FaBullhorn, FaTrophy, FaCircle, FaUndo, FaGripLines } from 'react-icons/fa'
-import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, getAllDangwanDates, openDangwanDate, closeDangwanDate, getAllNotices, createNotice, updateNotice, toggleNoticeActive, deleteNotice, getGameResults, setGameResult, deleteGameResult, getAllJungmoApplicationsWithInfo, updateJungmoPaymentStatus, getAllBanners, createBanner, updateBanner, toggleBannerActive, deleteBanner, updateBannerSortOrder } from '../utils/storage'
+import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, getAllDangwanDates, openDangwanDate, closeDangwanDate, getAllNotices, createNotice, updateNotice, toggleNoticeActive, deleteNotice, getGameResults, setGameResult, deleteGameResult, getAllJungmoApplicationsWithInfo, updateJungmoPaymentStatus, getAllBanners, createBanner, updateBanner, toggleBannerActive, deleteBanner, updateBannerSortOrder, verifyAdminPassword } from '../utils/storage'
 import { fileToWebpBase64 } from '../utils/image'
 import { games } from '../data/games'
 
@@ -8,8 +8,6 @@ const today = new Date().toISOString().slice(0, 10)
 const homeGames = games.filter(g => g.isHome && g.date >= today).map(g => g.date)
 const allHomeGames = games.filter(g => g.isHome).map(g => g.date).sort().reverse()
 import './AdminPage.css'
-
-const ADMIN_PW = import.meta.env.VITE_ADMIN_PASSWORD
 
 const CATEGORY_LABELS = {
   dangwan: '단관',
@@ -29,6 +27,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   const [authed, setAuthed] = useState(false)
   const [pw, setPw] = useState('')
   const [pwError, setPwError] = useState('')
+  const [loggingIn, setLoggingIn] = useState(false)
   const [tab, setTab] = useState('log')
   const adminPageRef = useRef(null)
 
@@ -87,12 +86,20 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   // 입금 변경 확인 모달
   const [confirmTarget, setConfirmTarget] = useState(null) // { item, gameDate }
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault()
-    if (pw === ADMIN_PW) {
-      setAuthed(true)
-    } else {
-      setPwError('비밀번호가 틀렸어요.')
+    setLoggingIn(true)
+    try {
+      const ok = await verifyAdminPassword(pw)
+      if (ok) {
+        setAuthed(true)
+      } else {
+        setPwError('비밀번호가 틀렸어요.')
+      }
+    } catch {
+      setPwError('확인 중 오류가 발생했어요.')
+    } finally {
+      setLoggingIn(false)
     }
   }
 
@@ -155,7 +162,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     if (!noticeInput.trim()) return
     setNoticeSaving(true)
     try {
-      await createNotice(noticeInput.trim())
+      await createNotice(noticeInput.trim(), pw)
       setNoticeInput('')
       await loadNotices()
     } finally {
@@ -166,18 +173,18 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   async function handleEditNoticeSubmit(e, id) {
     e.preventDefault()
     if (!editNoticeContent.trim()) return
-    await updateNotice(id, editNoticeContent.trim())
+    await updateNotice(id, editNoticeContent.trim(), pw)
     setNotices(prev => prev.map(n => n.id === id ? { ...n, content: editNoticeContent.trim() } : n))
     setEditingNoticeId(null)
   }
 
   async function handleToggleNotice(id, isActive) {
-    await toggleNoticeActive(id, isActive)
+    await toggleNoticeActive(id, isActive, pw)
     setNotices(prev => prev.map(n => n.id === id ? { ...n, isActive } : n))
   }
 
   async function confirmDeleteNotice() {
-    await deleteNotice(deleteNoticeTarget)
+    await deleteNotice(deleteNoticeTarget, pw)
     setNotices(prev => prev.filter(n => n.id !== deleteNoticeTarget))
     setDeleteNoticeTarget(null)
   }
@@ -218,7 +225,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     if (!bannerPreview) { setBannerFileError('이미지를 선택해주세요.'); return }
     setBannerSaving(true)
     try {
-      await createBanner({ imageBase64: bannerPreview, title: bannerTitle.trim(), description: bannerDescription.trim() })
+      await createBanner({ imageBase64: bannerPreview, title: bannerTitle.trim(), description: bannerDescription.trim() }, pw)
       setBannerTitle('')
       setBannerDescription('')
       cancelBannerPreview()
@@ -229,7 +236,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   }
 
   async function handleToggleBanner(id, isActive) {
-    await toggleBannerActive(id, isActive)
+    await toggleBannerActive(id, isActive, pw)
     setBanners(prev => prev.map(b => b.id === id ? { ...b, isActive } : b))
   }
 
@@ -243,7 +250,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     e.preventDefault()
     const title = editBannerTitle.trim()
     const description = editBannerDescription.trim()
-    await updateBanner(id, { title, description })
+    await updateBanner(id, { title, description }, pw)
     setBanners(prev => prev.map(b => b.id === id ? { ...b, title, description } : b))
     setEditingBannerId(null)
   }
@@ -275,12 +282,12 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     setBanners(reordered)
 
     const changed = reordered.filter((b, i) => b.sortOrder !== i)
-    await Promise.all(changed.map(b => updateBannerSortOrder(b.id, reordered.indexOf(b))))
+    await Promise.all(changed.map(b => updateBannerSortOrder(b.id, reordered.indexOf(b), pw)))
     await loadBanners()
   }
 
   async function confirmDeleteBanner() {
-    await deleteBanner(deleteBannerTarget)
+    await deleteBanner(deleteBannerTarget, pw)
     setBanners(prev => prev.filter(b => b.id !== deleteBannerTarget))
     setDeleteBannerTarget(null)
   }
@@ -324,10 +331,10 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     try {
       const current = gameResults[date]
       if (current === result) {
-        await deleteGameResult(date)
+        await deleteGameResult(date, pw)
         setGameResults(prev => { const n = { ...prev }; delete n[date]; return n })
       } else {
-        await setGameResult(date, result)
+        await setGameResult(date, result, pw)
         setGameResults(prev => ({ ...prev, [date]: result }))
       }
     } catch (e) {
@@ -340,9 +347,9 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     setDangwanConfirm(null)
     try {
       if (willOpen) {
-        await openDangwanDate(date)
+        await openDangwanDate(date, pw)
       } else {
-        await closeDangwanDate(date)
+        await closeDangwanDate(date, pw)
       }
       const [openDates, allDates] = await Promise.all([getDangwanOpenDates(), getAllDangwanDates()])
       setDangwanOpen(openDates)
@@ -373,7 +380,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     const { item, jungmoTitle, eventDate } = jungmoConfirmTarget
     const newStatus = !item.isPaid
     setJungmoConfirmTarget(null)
-    await updateJungmoPaymentStatus(item.id, newStatus)
+    await updateJungmoPaymentStatus(item.id, newStatus, pw)
     logAudit('pay', 'jungmo', eventDate, item.nickname, newStatus ? '입금완료' : '입금취소')
     setJungmoApps(prev => prev.map(a => a.id === item.id ? { ...a, isPaid: newStatus } : a))
   }
@@ -386,7 +393,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     const { item, gameDate } = confirmTarget
     const newStatus = !item.isPaid
     setConfirmTarget(null)
-    await updatePaymentStatus(gameDate, item.id, newStatus)
+    await updatePaymentStatus(gameDate, item.id, newStatus, pw)
     logAudit('pay', 'dangwan', gameDate, item.name, newStatus ? '입금완료' : '입금취소')
     setApps(prev => prev.map(a => a.id === item.id ? { ...a, isPaid: newStatus } : a))
   }
@@ -516,7 +523,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
               autoFocus
             />
             {pwError && <p className="admin-pw-error">{pwError}</p>}
-            <button type="submit" className="admin-login-btn">입장</button>
+            <button type="submit" className="admin-login-btn" disabled={loggingIn}>{loggingIn ? '확인 중...' : '입장'}</button>
           </form>
         </div>
       </div>
@@ -958,6 +965,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
             )}
           </div>
         )}
+
       </div>
 
       {/* 단관 열기/닫기 확인 모달 */}
@@ -1066,6 +1074,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
           </div>
         </div>
       )}
+
     </div>
   )
 }

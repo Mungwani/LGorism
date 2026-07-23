@@ -13,19 +13,25 @@
 
 import { supabase } from './supabase'
 
+// password 컬럼은 select 권한에서 빠져있어서, 반드시 아래 컬럼 목록으로만 select 해야 함 ('*' 사용 불가)
+const APPLICATION_COLS = 'id, game_date, name, count, request, created_at, updated_at, is_paid'
+const JIKGWAN_COLS = 'id, game_date, nickname, section, is_towel_fairy, created_at, towel_meeting_area, towel_inning'
+const JUNGMO_COLS = 'id, event_date, title, description, created_at'
+const JUNGMO_APPLICATION_COLS = 'id, jungmo_id, nickname, note, created_at, count, is_paid'
+const TRANSFER_COLS = 'id, game_date, seat_section, seat_row, seat_number, quantity, price, note, nickname, is_sold, created_at, sold_to, is_deleted'
+const TRANSFER_RESERVATION_COLS = 'id, transfer_id, nickname, created_at'
+
 export async function hashPassword(password) {
   const data = new TextEncoder().encode(password);
   const buf  = await crypto.subtle.digest('SHA-256', data);
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// 비밀번호 검증 — 해시 비교 우선, 평문이면 valid + needsUpgrade 반환 (마이그레이션용)
-export async function verifyPassword(input, stored) {
-  if (input === import.meta.env.VITE_ADMIN_PASSWORD) return { valid: true, needsUpgrade: false };
-  const hashed = await hashPassword(input);
-  if (hashed === stored) return { valid: true, needsUpgrade: false };
-  if (input === stored)  return { valid: true, needsUpgrade: true, hash: hashed };
-  return { valid: false };
+// 관리자 비밀번호 검증 — 실제 값은 DB에만 있고 클라이언트에는 절대 내려오지 않음
+export async function verifyAdminPassword(password) {
+  const { data, error } = await supabase.rpc('verify_admin_password', { p_password: password })
+  if (error) throw error
+  return data === true
 }
 
 // DB row → 앱 내부 포맷 변환
@@ -35,7 +41,6 @@ function toApp(row) {
     name:      row.name,
     count:     row.count,
     request:   row.request || '',
-    password:  row.password || '',
     isPaid:    row.is_paid || false,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -48,7 +53,7 @@ function toApp(row) {
 export async function getApplications(date) {
   const { data, error } = await supabase
     .from('applications')
-    .select('*')
+    .select(APPLICATION_COLS)
     .eq('game_date', date)
     .order('created_at', { ascending: true })
 
@@ -67,49 +72,48 @@ export async function saveApplication(date, application) {
       request:   application.request || null,
       password:  await hashPassword(application.password || ''),
     })
-    .select()
+    .select(APPLICATION_COLS)
     .single()
 
   if (error) throw error
   return toApp(data)
 }
 
-/** 신청 수정 */
-export async function updateApplication(date, id, updatedFields) {
-  const { error } = await supabase
-    .from('applications')
-    .update({
-      name:       updatedFields.name,
-      count:      Number(updatedFields.count),
-      request:    updatedFields.request || null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', id)
-    .eq('game_date', date)
-
+/** 신청 수정 — 비밀번호는 서버(RPC)에서 검증 */
+export async function updateApplication(date, id, password, updatedFields) {
+  const { data, error } = await supabase.rpc('rpc_update_application', {
+    p_id: id,
+    p_game_date: date,
+    p_password: password,
+    p_name: updatedFields.name,
+    p_count: Number(updatedFields.count),
+    p_request: updatedFields.request || null,
+  })
   if (error) throw error
+  return data === true
 }
 
-/** 신청 삭제 */
-export async function deleteApplication(date, id) {
-  const { error } = await supabase
-    .from('applications')
-    .delete()
-    .eq('id', id)
-    .eq('game_date', date)
-
+/** 신청 삭제 — 비밀번호는 서버(RPC)에서 검증 */
+export async function deleteApplication(date, id, password) {
+  const { data, error } = await supabase.rpc('rpc_delete_application', {
+    p_id: id,
+    p_game_date: date,
+    p_password: password,
+  })
   if (error) throw error
+  return data === true
 }
 
-/** 입금 여부 토글 */
-export async function updatePaymentStatus(date, id, isPaid) {
-  const { error } = await supabase
-    .from('applications')
-    .update({ is_paid: isPaid, updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .eq('game_date', date)
-
+/** 입금 여부 토글 — 관리자 비밀번호는 서버(RPC)에서 검증 */
+export async function updatePaymentStatus(date, id, isPaid, adminPassword) {
+  const { data, error } = await supabase.rpc('rpc_admin_update_payment', {
+    p_id: id,
+    p_game_date: date,
+    p_is_paid: isPaid,
+    p_admin_password: adminPassword,
+  })
   if (error) throw error
+  return data === true
 }
 
 // ── 통계 ───────────────────────────────────────────────────────
@@ -148,7 +152,6 @@ function toJikgwan(row) {
     isTowelFairy:     row.is_towel_fairy || false,
     towelMeetingArea: row.towel_meeting_area || '',
     towelInning:      row.towel_inning || '5회말',
-    password:         row.password || '',
     createdAt:        row.created_at,
   }
 }
@@ -156,7 +159,7 @@ function toJikgwan(row) {
 export async function getJikgwanList(date) {
   const { data, error } = await supabase
     .from('jikgwan')
-    .select('*')
+    .select(JIKGWAN_COLS)
     .eq('game_date', date)
     .order('created_at', { ascending: true })
   if (error) throw error
@@ -175,27 +178,28 @@ export async function addJikgwan(date, { nickname, section, isTowelFairy, towelM
       towel_inning: isTowelFairy ? (towelInning || '5회말') : null,
       password: await hashPassword(password || ''),
     })
-    .select()
+    .select(JIKGWAN_COLS)
     .single()
   if (error) throw error
   return toJikgwan(data)
 }
 
-export async function updateJikgwan(id, { isTowelFairy, towelMeetingArea, towelInning }) {
-  const { error } = await supabase
-    .from('jikgwan')
-    .update({
-      is_towel_fairy: isTowelFairy,
-      towel_meeting_area: isTowelFairy ? (towelMeetingArea || null) : null,
-      towel_inning: isTowelFairy ? (towelInning || '5회말') : null,
-    })
-    .eq('id', id)
+export async function updateJikgwan(id, password, { isTowelFairy, towelMeetingArea, towelInning }) {
+  const { data, error } = await supabase.rpc('rpc_update_jikgwan', {
+    p_id: id,
+    p_password: password,
+    p_is_towel_fairy: isTowelFairy,
+    p_towel_meeting_area: isTowelFairy ? (towelMeetingArea || null) : null,
+    p_towel_inning: isTowelFairy ? (towelInning || '5회말') : null,
+  })
   if (error) throw error
+  return data === true
 }
 
-export async function deleteJikgwan(id) {
-  const { error } = await supabase.from('jikgwan').delete().eq('id', id)
+export async function deleteJikgwan(id, password) {
+  const { data, error } = await supabase.rpc('rpc_delete_jikgwan', { p_id: id, p_password: password })
   if (error) throw error
+  return data === true
 }
 
 export async function getJikgwanSummary() {
@@ -215,7 +219,6 @@ function toJungmo(row) {
     id:          row.id,
     title:       row.title,
     description: row.description || '',
-    password:    row.password,
     eventDate:   row.event_date,
     createdAt:   row.created_at,
   }
@@ -224,7 +227,7 @@ function toJungmo(row) {
 export async function getJungmoList(date) {
   const { data, error } = await supabase
     .from('jungmo')
-    .select('*')
+    .select(JUNGMO_COLS)
     .eq('event_date', date)
     .order('created_at', { ascending: true })
   if (error) throw error
@@ -235,23 +238,24 @@ export async function createJungmo(date, { title, description, password }) {
   const { data, error } = await supabase
     .from('jungmo')
     .insert({ event_date: date, title, description: description || null, password: await hashPassword(password || '') })
-    .select()
+    .select(JUNGMO_COLS)
     .single()
   if (error) throw error
   return toJungmo(data)
 }
 
-export async function updateJungmo(id, { title, description }) {
-  const { error } = await supabase
-    .from('jungmo')
-    .update({ title, description: description || null })
-    .eq('id', id)
+export async function updateJungmo(id, password, { title, description }) {
+  const { data, error } = await supabase.rpc('rpc_update_jungmo', {
+    p_id: id, p_password: password, p_title: title, p_description: description || null,
+  })
   if (error) throw error
+  return data === true
 }
 
-export async function deleteJungmo(id) {
-  const { error } = await supabase.from('jungmo').delete().eq('id', id)
+export async function deleteJungmo(id, password) {
+  const { data, error } = await supabase.rpc('rpc_delete_jungmo', { p_id: id, p_password: password })
   if (error) throw error
+  return data === true
 }
 
 export async function getJungmoSummary() {
@@ -273,7 +277,6 @@ function toJungmoApp(row) {
     nickname:  row.nickname,
     count:     row.count || 1,
     note:      row.note || '',
-    password:  row.password || '',
     isPaid:    row.is_paid || false,
     createdAt: row.created_at,
     updatedAt: row.updated_at || null,
@@ -283,7 +286,7 @@ function toJungmoApp(row) {
 export async function getJungmoApplications(jungmoId) {
   const { data, error } = await supabase
     .from('jungmo_applications')
-    .select('*')
+    .select(JUNGMO_APPLICATION_COLS)
     .eq('jungmo_id', jungmoId)
     .order('created_at', { ascending: true })
   if (error) throw error
@@ -294,36 +297,37 @@ export async function addJungmoApplication(jungmoId, { nickname, count, note, pa
   const { data, error } = await supabase
     .from('jungmo_applications')
     .insert({ jungmo_id: jungmoId, nickname, count: Number(count) || 1, note: note || null, password: await hashPassword(password || '') })
-    .select()
+    .select(JUNGMO_APPLICATION_COLS)
     .single()
   if (error) throw error
   return toJungmoApp(data)
 }
 
-export async function updateJungmoApplication(id, { nickname, count, note }) {
-  const { error } = await supabase
-    .from('jungmo_applications')
-    .update({ nickname, count: Number(count) || 1, note: note || null })
-    .eq('id', id)
+export async function updateJungmoApplication(id, password, { nickname, count, note }) {
+  const { data, error } = await supabase.rpc('rpc_update_jungmo_application', {
+    p_id: id, p_password: password, p_nickname: nickname, p_count: Number(count) || 1, p_note: note || null,
+  })
   if (error) throw error
+  return data === true
 }
 
-export async function deleteJungmoApplication(id) {
-  const { error } = await supabase.from('jungmo_applications').delete().eq('id', id)
+export async function deleteJungmoApplication(id, password) {
+  const { data, error } = await supabase.rpc('rpc_delete_jungmo_application', { p_id: id, p_password: password })
   if (error) throw error
+  return data === true
 }
 
-export async function updateJungmoPaymentStatus(id, isPaid) {
-  const { error } = await supabase
-    .from('jungmo_applications')
-    .update({ is_paid: isPaid })
-    .eq('id', id)
+export async function updateJungmoPaymentStatus(id, isPaid, adminPassword) {
+  const { data, error } = await supabase.rpc('rpc_admin_update_jungmo_payment', {
+    p_id: id, p_is_paid: isPaid, p_admin_password: adminPassword,
+  })
   if (error) throw error
+  return data === true
 }
 
 export async function getAllJungmoApplicationsWithInfo() {
   const [{ data: apps, error: appError }, { data: jungmos, error: jungmoError }] = await Promise.all([
-    supabase.from('jungmo_applications').select('*').order('created_at', { ascending: true }),
+    supabase.from('jungmo_applications').select(JUNGMO_APPLICATION_COLS).order('created_at', { ascending: true }),
     supabase.from('jungmo').select('id, title, event_date'),
   ])
   if (appError) throw appError
@@ -387,25 +391,26 @@ export async function getAllDangwanDates() {
   return data || []
 }
 
-export async function openDangwanDate(date) {
-  const { error } = await supabase
-    .from('dangwan_open_dates')
-    .upsert({ game_date: date, is_open: true })
+export async function openDangwanDate(date, adminPassword) {
+  const { data, error } = await supabase.rpc('rpc_admin_open_dangwan_date', {
+    p_game_date: date, p_admin_password: adminPassword,
+  })
   if (error) throw error
+  return data === true
 }
 
-export async function closeDangwanDate(date) {
-  const { error } = await supabase
-    .from('dangwan_open_dates')
-    .update({ is_open: false })
-    .eq('game_date', date)
+export async function closeDangwanDate(date, adminPassword) {
+  const { data, error } = await supabase.rpc('rpc_admin_close_dangwan_date', {
+    p_game_date: date, p_admin_password: adminPassword,
+  })
   if (error) throw error
+  return data === true
 }
 
 export async function getAllApplications() {
   const { data, error } = await supabase
     .from('applications')
-    .select('*')
+    .select(APPLICATION_COLS)
     .order('game_date', { ascending: false })
     .order('created_at', { ascending: true })
   if (error) throw error
@@ -416,7 +421,7 @@ export async function getAllJungmo() {
   const today = new Date().toISOString().slice(0, 10)
   const { data, error } = await supabase
     .from('jungmo')
-    .select('*')
+    .select(JUNGMO_COLS)
     .gte('event_date', today)
     .order('event_date', { ascending: true })
   if (error) throw error
@@ -466,35 +471,36 @@ export async function getAllNotices() {
   return (data || []).map(toNotice)
 }
 
-export async function createNotice(content) {
-  const { data, error } = await supabase
-    .from('notices')
-    .insert({ content })
-    .select()
-    .single()
+export async function createNotice(content, adminPassword) {
+  const { data, error } = await supabase.rpc('rpc_admin_create_notice', {
+    p_content: content, p_admin_password: adminPassword,
+  })
   if (error) throw error
   return toNotice(data)
 }
 
-export async function updateNotice(id, content) {
-  const { error } = await supabase
-    .from('notices')
-    .update({ content })
-    .eq('id', id)
+export async function updateNotice(id, content, adminPassword) {
+  const { data, error } = await supabase.rpc('rpc_admin_update_notice', {
+    p_id: id, p_content: content, p_admin_password: adminPassword,
+  })
   if (error) throw error
+  return data === true
 }
 
-export async function toggleNoticeActive(id, isActive) {
-  const { error } = await supabase
-    .from('notices')
-    .update({ is_active: isActive })
-    .eq('id', id)
+export async function toggleNoticeActive(id, isActive, adminPassword) {
+  const { data, error } = await supabase.rpc('rpc_admin_toggle_notice', {
+    p_id: id, p_is_active: isActive, p_admin_password: adminPassword,
+  })
   if (error) throw error
+  return data === true
 }
 
-export async function deleteNotice(id) {
-  const { error } = await supabase.from('notices').delete().eq('id', id)
+export async function deleteNotice(id, adminPassword) {
+  const { data, error } = await supabase.rpc('rpc_admin_delete_notice', {
+    p_id: id, p_admin_password: adminPassword,
+  })
   if (error) throw error
+  return data === true
 }
 
 // ── 배너 CRUD ─────────────────────────────────────────────────
@@ -530,48 +536,44 @@ export async function getAllBanners() {
   return (data || []).map(toBanner)
 }
 
-export async function createBanner({ imageBase64, title, description }) {
-  const { data: maxRow } = await supabase
-    .from('banners')
-    .select('sort_order')
-    .order('sort_order', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  const nextOrder = (maxRow?.sort_order ?? -1) + 1
-
-  const { data, error } = await supabase
-    .from('banners')
-    .insert({ image_base64: imageBase64, title, description, sort_order: nextOrder })
-    .select()
-    .single()
+export async function createBanner({ imageBase64, title, description }, adminPassword) {
+  const { data, error } = await supabase.rpc('rpc_admin_create_banner', {
+    p_image_base64: imageBase64, p_title: title, p_description: description, p_admin_password: adminPassword,
+  })
   if (error) throw error
   return toBanner(data)
 }
 
-export async function updateBannerSortOrder(id, sortOrder) {
-  const { error } = await supabase.from('banners').update({ sort_order: sortOrder }).eq('id', id)
+export async function updateBannerSortOrder(id, sortOrder, adminPassword) {
+  const { data, error } = await supabase.rpc('rpc_admin_set_banner_sort_order', {
+    p_id: id, p_sort_order: sortOrder, p_admin_password: adminPassword,
+  })
   if (error) throw error
+  return data === true
 }
 
-export async function updateBanner(id, { title, description }) {
-  const { error } = await supabase
-    .from('banners')
-    .update({ title, description })
-    .eq('id', id)
+export async function updateBanner(id, { title, description }, adminPassword) {
+  const { data, error } = await supabase.rpc('rpc_admin_update_banner', {
+    p_id: id, p_title: title, p_description: description, p_admin_password: adminPassword,
+  })
   if (error) throw error
+  return data === true
 }
 
-export async function toggleBannerActive(id, isActive) {
-  const { error } = await supabase
-    .from('banners')
-    .update({ is_active: isActive })
-    .eq('id', id)
+export async function toggleBannerActive(id, isActive, adminPassword) {
+  const { data, error } = await supabase.rpc('rpc_admin_toggle_banner', {
+    p_id: id, p_is_active: isActive, p_admin_password: adminPassword,
+  })
   if (error) throw error
+  return data === true
 }
 
-export async function deleteBanner(id) {
-  const { error } = await supabase.from('banners').delete().eq('id', id)
+export async function deleteBanner(id, adminPassword) {
+  const { data, error } = await supabase.rpc('rpc_admin_delete_banner', {
+    p_id: id, p_admin_password: adminPassword,
+  })
   if (error) throw error
+  return data === true
 }
 
 // ── 경기 결과 CRUD ─────────────────────────────────────────────
@@ -585,16 +587,20 @@ export async function getGameResults() {
   return data || []
 }
 
-export async function setGameResult(date, result) {
-  const { error } = await supabase
-    .from('game_results')
-    .upsert({ game_date: date, result })
+export async function setGameResult(date, result, adminPassword) {
+  const { data, error } = await supabase.rpc('rpc_admin_set_game_result', {
+    p_game_date: date, p_result: result, p_admin_password: adminPassword,
+  })
   if (error) throw error
+  return data === true
 }
 
-export async function deleteGameResult(date) {
-  const { error } = await supabase.from('game_results').delete().eq('game_date', date)
+export async function deleteGameResult(date, adminPassword) {
+  const { data, error } = await supabase.rpc('rpc_admin_delete_game_result', {
+    p_game_date: date, p_admin_password: adminPassword,
+  })
   if (error) throw error
+  return data === true
 }
 
 // ── 양도게시판 CRUD ────────────────────────────────────────────
@@ -610,7 +616,6 @@ function toTransfer(row) {
     price:       row.price,
     note:        row.note || '',
     nickname:    row.nickname,
-    password:    row.password,
     isSold:      row.is_sold || false,
     soldTo:      row.sold_to || '',
     isDeleted:   row.is_deleted || false,
@@ -623,7 +628,6 @@ function toReservation(row) {
     id:         row.id,
     transferId: row.transfer_id,
     nickname:   row.nickname,
-    password:   row.password,
     createdAt:  row.created_at,
   }
 }
@@ -631,7 +635,7 @@ function toReservation(row) {
 export async function getTransfers() {
   const { data, error } = await supabase
     .from('transfers')
-    .select('*')
+    .select(TRANSFER_COLS)
     .eq('is_deleted', false)
     .order('created_at', { ascending: false })
   if (error) throw error
@@ -652,32 +656,30 @@ export async function createTransfer({ gameDate, seatSection, seatRow, seatNumbe
       nickname,
       password:     await hashPassword(password || ''),
     })
-    .select()
+    .select(TRANSFER_COLS)
     .single()
   if (error) throw error
   return toTransfer(data)
 }
 
-export async function deleteTransfer(id) {
-  const { error } = await supabase
-    .from('transfers')
-    .update({ is_deleted: true })
-    .eq('id', id)
+export async function deleteTransfer(id, password) {
+  const { data, error } = await supabase.rpc('rpc_delete_transfer', { p_id: id, p_password: password })
   if (error) throw error
+  return data === true
 }
 
-export async function toggleTransferSold(id, isSold, soldTo) {
-  const { error } = await supabase
-    .from('transfers')
-    .update({ is_sold: isSold, sold_to: isSold ? (soldTo || null) : null })
-    .eq('id', id)
+export async function toggleTransferSold(id, password, isSold, soldTo) {
+  const { data, error } = await supabase.rpc('rpc_toggle_transfer_sold', {
+    p_id: id, p_password: password, p_is_sold: isSold, p_sold_to: isSold ? (soldTo || null) : null,
+  })
   if (error) throw error
+  return data === true
 }
 
 export async function getTransferReservations(transferId) {
   const { data, error } = await supabase
     .from('transfer_reservations')
-    .select('*')
+    .select(TRANSFER_RESERVATION_COLS)
     .eq('transfer_id', transferId)
     .order('created_at', { ascending: true })
   if (error) throw error
@@ -688,27 +690,15 @@ export async function addTransferReservation(transferId, { nickname, password })
   const { data, error } = await supabase
     .from('transfer_reservations')
     .insert({ transfer_id: transferId, nickname, password: await hashPassword(password || '') })
-    .select()
+    .select(TRANSFER_RESERVATION_COLS)
     .single()
   if (error) throw error
   return toReservation(data)
 }
 
-export async function deleteTransferReservation(id) {
-  const { error } = await supabase.from('transfer_reservations').delete().eq('id', id)
+export async function deleteTransferReservation(id, password) {
+  const { data, error } = await supabase.rpc('rpc_delete_transfer_reservation', { p_id: id, p_password: password })
   if (error) throw error
+  return data === true
 }
 
-// ── 비밀번호 해시 마이그레이션 (평문 → SHA-256) ────────────────
-export async function upgradeApplicationPassword(date, id, hash) {
-  await supabase.from('applications').update({ password: hash }).eq('id', id).eq('game_date', date);
-}
-export async function upgradeJikgwanPassword(id, hash) {
-  await supabase.from('jikgwan').update({ password: hash }).eq('id', id);
-}
-export async function upgradeJungmoPassword(id, hash) {
-  await supabase.from('jungmo').update({ password: hash }).eq('id', id);
-}
-export async function upgradeJungmoApplicationPassword(id, hash) {
-  await supabase.from('jungmo_applications').update({ password: hash }).eq('id', id);
-}

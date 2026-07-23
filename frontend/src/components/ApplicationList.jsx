@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { shareContent, formatDateKo } from "../utils/kakao";
-import { verifyPassword, upgradeApplicationPassword } from "../utils/storage";
 import "./ApplicationList.css";
 
 export default function ApplicationList({
@@ -8,13 +7,13 @@ export default function ApplicationList({
   totalCount,
   onEdit,
   onDelete,
-  onPay,
   selectedDate,
   readOnly = false,
 }) {
   const [pwModal, setPwModal] = useState(null); // { type: 'edit'|'delete', item }
   const [pwInput, setPwInput] = useState('');
   const [pwError, setPwError] = useState('');
+  const [confirming, setConfirming] = useState(false);
 
   if (!selectedDate) return null;
 
@@ -35,20 +34,19 @@ export default function ApplicationList({
       setPwError('비밀번호를 입력해주세요.');
       return;
     }
-    const result = await verifyPassword(pwInput, pwModal.item.password);
-    if (!result.valid) {
-      setPwError('비밀번호가 틀렸어요.');
-      return;
+    setConfirming(true);
+    try {
+      if (pwModal.type === 'edit') {
+        onEdit({ ...pwModal.item, _password: pwInput });
+        closePwModal();
+      } else if (pwModal.type === 'delete') {
+        const ok = await onDelete(pwModal.item.id, pwInput);
+        if (!ok) { setPwError('비밀번호가 틀렸어요.'); return; }
+        closePwModal();
+      }
+    } finally {
+      setConfirming(false);
     }
-    if (result.needsUpgrade) {
-      upgradeApplicationPassword(selectedDate, pwModal.item.id, result.hash).catch(() => {});
-    }
-    if (pwModal.type === 'edit') {
-      onEdit(pwModal.item);
-    } else if (pwModal.type === 'delete') {
-      onDelete(pwModal.item.id);
-    }
-    closePwModal();
   }
 
   return (
@@ -158,6 +156,7 @@ export default function ApplicationList({
               <button
                 className={`modal-btn confirm ${pwModal.type === 'delete' ? 'red' : 'blue'}`}
                 onClick={handlePwConfirm}
+                disabled={confirming}
               >
                 {pwModal.type === 'edit' ? '수정하기' : '삭제하기'}
               </button>

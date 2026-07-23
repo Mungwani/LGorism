@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getJungmoApplications, addJungmoApplication, updateJungmoApplication, deleteJungmoApplication, logAudit, verifyPassword, upgradeJungmoApplicationPassword, upgradeJungmoPassword } from "../utils/storage";
+import { getJungmoApplications, addJungmoApplication, updateJungmoApplication, deleteJungmoApplication, logAudit } from "../utils/storage";
 import { shareContent, formatDateKo } from "../utils/kakao";
 import JungmoSettlementModal from "./JungmoSettlement";
 import "./JungmoPanel.css";
@@ -95,22 +95,23 @@ function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
     setEditNickname(app.nickname); setEditCount(app.count || 1); setEditNote(app.note || "");
   }
 
-  async function handleEditPwConfirm() {
+  function handleEditPwConfirm() {
     if (!editPw.trim()) { setEditPwError("비밀번호를 입력해주세요."); return; }
-    const result = await verifyPassword(editPw, editModal.app.password);
-    if (!result.valid) { setEditPwError("비밀번호가 틀렸어요."); return; }
-    if (result.needsUpgrade) {
-      upgradeJungmoApplicationPassword(editModal.app.id, result.hash).catch(() => {});
-    }
+    setEditPwError("");
     setEditStep("form");
   }
 
   async function handleEditSubmit(e) {
     e.preventDefault();
     if (!editNickname.trim()) return;
-    await updateJungmoApplication(editModal.app.id, {
+    const ok = await updateJungmoApplication(editModal.app.id, editPw, {
       nickname: editNickname.trim(), count: editCount, note: editNote.trim(),
     });
+    if (!ok) {
+      setEditStep("pw");
+      setEditPwError("비밀번호가 틀렸어요.");
+      return;
+    }
     logAudit('update', 'jungmo', jungmo.eventDate, editNickname.trim(), `${editCount}명`);
     setEditModal(null);
     loadApplications();
@@ -118,27 +119,20 @@ function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
 
   async function handleDeleteApp() {
     if (!deletePw.trim()) { setDeletePwError("비밀번호를 입력해주세요."); return; }
-    const result = await verifyPassword(deletePw, deleteModal.app.password);
-    if (!result.valid) { setDeletePwError("비밀번호가 틀렸어요."); return; }
-    if (result.needsUpgrade) {
-      upgradeJungmoApplicationPassword(deleteModal.app.id, result.hash).catch(() => {});
-    }
-    await deleteJungmoApplication(deleteModal.app.id);
+    const ok = await deleteJungmoApplication(deleteModal.app.id, deletePw);
+    if (!ok) { setDeletePwError("비밀번호가 틀렸어요."); return; }
     logAudit('delete', 'jungmo', jungmo.eventDate, deleteModal.app.nickname, null);
     setDeleteModal(null); setDeletePw(""); setDeletePwError("");
     loadApplications();
   }
 
   async function handleDeleteConfirm() {
-    const result = await verifyPassword(jungmoDeletePw, jungmo.password);
-    if (!result.valid) {
+    if (!jungmoDeletePw.trim()) { setJungmoDeleteError("비밀번호를 입력해주세요."); return; }
+    const ok = await onDelete(jungmo.id, jungmoDeletePw);
+    if (!ok) {
       setJungmoDeleteError("비밀번호가 틀렸어요");
       return;
     }
-    if (result.needsUpgrade) {
-      upgradeJungmoPassword(jungmo.id, result.hash).catch(() => {});
-    }
-    onDelete(jungmo.id);
     setShowDeleteModal(false);
   }
 
@@ -150,13 +144,9 @@ function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
     setEditJungmoDesc(jungmo.description || "");
   }
 
-  async function handleEditJungmoPwConfirm() {
+  function handleEditJungmoPwConfirm() {
     if (!editJungmoPw.trim()) { setEditJungmoPwError("비밀번호를 입력해주세요."); return; }
-    const result = await verifyPassword(editJungmoPw, jungmo.password);
-    if (!result.valid) { setEditJungmoPwError("비밀번호가 틀렸어요."); return; }
-    if (result.needsUpgrade) {
-      upgradeJungmoPassword(jungmo.id, result.hash).catch(() => {});
-    }
+    setEditJungmoPwError("");
     setEditJungmoStep("form");
   }
 
@@ -165,7 +155,12 @@ function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
     if (!editJungmoTitle.trim()) return;
     setSavingJungmo(true);
     try {
-      await onUpdate(jungmo.id, { title: editJungmoTitle.trim(), description: editJungmoDesc.trim() });
+      const ok = await onUpdate(jungmo.id, editJungmoPw, { title: editJungmoTitle.trim(), description: editJungmoDesc.trim() });
+      if (!ok) {
+        setEditJungmoStep("pw");
+        setEditJungmoPwError("비밀번호가 틀렸어요.");
+        return;
+      }
       setShowEditJungmoModal(false);
     } finally {
       setSavingJungmo(false);

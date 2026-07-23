@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { verifyPassword, upgradeJikgwanPassword } from "../utils/storage";
 import "./JikgwanPanel.css";
 
 export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onUpdate, onDelete }) {
@@ -66,15 +65,11 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onUpdat
   }
 
   async function handleDeleteConfirm() {
-    const result = await verifyPassword(deletePw, deleteTarget.password);
-    if (!result.valid) {
+    const ok = await onDelete(deleteTarget.id, deletePw);
+    if (!ok) {
       setDeleteError("비밀번호가 틀렸어요");
       return;
     }
-    if (result.needsUpgrade) {
-      upgradeJikgwanPassword(deleteTarget.id, result.hash).catch(() => {});
-    }
-    onDelete(deleteTarget.id);
     closeDeleteModal();
   }
 
@@ -97,17 +92,13 @@ export default function JikgwanPanel({ selectedDate, jikgwanList, onAdd, onUpdat
   }
 
   async function handleEditConfirm() {
-    const result = await verifyPassword(editPw, editTarget.password);
-    if (!result.valid) {
-      setEditPwError("비밀번호가 틀렸어요");
-      return;
-    }
-    if (result.needsUpgrade) {
-      upgradeJikgwanPassword(editTarget.id, result.hash).catch(() => {});
-    }
     setEditSubmitting(true);
     try {
-      await onUpdate(editTarget.id, { isTowelFairy: editIsTowelFairy, towelMeetingArea: editMeetingArea.trim(), towelInning: editInning.trim() });
+      const ok = await onUpdate(editTarget.id, editPw, { isTowelFairy: editIsTowelFairy, towelMeetingArea: editMeetingArea.trim(), towelInning: editInning.trim() });
+      if (!ok) {
+        setEditPwError("비밀번호가 틀렸어요");
+        return;
+      }
       closeEditModal();
     } finally {
       setEditSubmitting(false);

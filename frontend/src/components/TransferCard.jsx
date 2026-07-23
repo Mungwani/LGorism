@@ -6,7 +6,6 @@ import {
   deleteTransferReservation,
   toggleTransferSold,
   deleteTransfer,
-  verifyPassword,
   logAudit,
 } from "../utils/storage";
 import { formatDateKo } from "../utils/kakao";
@@ -84,9 +83,8 @@ export default function TransferCard({ transfer, onChanged, onToast }) {
 
   async function handleCancelReservation() {
     if (!cancelPw.trim()) { setCancelPwError("비밀번호를 입력해주세요."); return; }
-    const result = await verifyPassword(cancelPw, cancelTarget.reservation.password);
-    if (!result.valid) { setCancelPwError("비밀번호가 틀렸어요."); return; }
-    await deleteTransferReservation(cancelTarget.reservation.id);
+    const ok = await deleteTransferReservation(cancelTarget.reservation.id, cancelPw);
+    if (!ok) { setCancelPwError("비밀번호가 틀렸어요."); return; }
     logAudit('delete', 'transfer', transfer.gameDate, cancelTarget.reservation.nickname, '예약취소');
     setCancelTarget(null); setCancelPw(""); setCancelPwError("");
     await loadReservations();
@@ -112,8 +110,6 @@ export default function TransferCard({ transfer, onChanged, onToast }) {
 
   async function handleOwnerConfirm() {
     if (!ownerPw.trim()) { setOwnerPwError("비밀번호를 입력해주세요."); return; }
-    const result = await verifyPassword(ownerPw, transfer.password);
-    if (!result.valid) { setOwnerPwError("비밀번호가 틀렸어요."); return; }
 
     if (ownerModal === 'sold') {
       const nextSold = !transfer.isSold;
@@ -121,12 +117,14 @@ export default function TransferCard({ transfer, onChanged, onToast }) {
       if (nextSold && soldToMode === "reservation") {
         soldTo = reservations.find(r => r.id === soldToReservationId)?.nickname || "";
       }
-      await toggleTransferSold(transfer.id, nextSold, soldTo);
+      const ok = await toggleTransferSold(transfer.id, ownerPw, nextSold, soldTo);
+      if (!ok) { setOwnerPwError("비밀번호가 틀렸어요."); return; }
       logAudit('update', 'transfer', transfer.gameDate, transfer.nickname, nextSold ? `양도완료${soldTo ? ' → ' + soldTo : ''}` : '양도중 전환');
       GA.transferSold(transfer.gameDate, nextSold);
       onToast?.(nextSold ? "양도완료 처리했어요!" : "양도중으로 되돌렸어요.");
     } else {
-      await deleteTransfer(transfer.id);
+      const ok = await deleteTransfer(transfer.id, ownerPw);
+      if (!ok) { setOwnerPwError("비밀번호가 틀렸어요."); return; }
       logAudit('delete', 'transfer', transfer.gameDate, transfer.nickname, `${transfer.quantity}매`);
       GA.transferDelete(transfer.gameDate);
       onToast?.("양도글이 삭제됐어요.");
