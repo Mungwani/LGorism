@@ -74,6 +74,23 @@
 
 <br/>
 
+| 테이블 | 용도 |
+|--------|------|
+| `applications` | 단관 신청 |
+| `jikgwan` | 직관 인증 |
+| `jungmo` / `jungmo_applications` | 정모 / 정모 참가 신청 |
+| `transfers` / `transfer_reservations` | 양도글 / 양도 예약 |
+| `notices` | 공지사항 |
+| `banners` | 홈 히어로 슬라이더 배너 |
+| `dangwan_open_dates` | 단관 오픈 날짜 |
+| `game_results` | 경기 결과 (승/패/무) |
+| `audit_logs` | 활동 로그 |
+| `app_secrets` | 관리자 비밀번호 해시 (RLS로 완전히 잠김, RPC만 접근 가능) |
+
+수정/삭제가 필요한 테이블에는 각각 대응하는 `rpc_*` / `rpc_admin_*` 함수가 있으며, 클라이언트는 테이블을 직접 수정하지 않고 이 함수들만 호출합니다.
+
+<br/>
+
 ## ✨ 주요 기능
 
 <details open>
@@ -222,25 +239,6 @@ LGorism/
     └── main/java/com/back/
         └── LGorismApplication.java
 ```
-
-<br/>
-
-## 🗄️ 데이터베이스 구조 (요약)
-
-| 테이블 | 용도 |
-|--------|------|
-| `applications` | 단관 신청 |
-| `jikgwan` | 직관 인증 |
-| `jungmo` / `jungmo_applications` | 정모 / 정모 참가 신청 |
-| `transfers` / `transfer_reservations` | 양도글 / 양도 예약 |
-| `notices` | 공지사항 |
-| `banners` | 홈 히어로 슬라이더 배너 |
-| `dangwan_open_dates` | 단관 오픈 날짜 |
-| `game_results` | 경기 결과 (승/패/무) |
-| `audit_logs` | 활동 로그 |
-| `app_secrets` | 관리자 비밀번호 해시 (RLS로 완전히 잠김, RPC만 접근 가능) |
-
-수정/삭제가 필요한 테이블에는 각각 대응하는 `rpc_*` / `rpc_admin_*` 함수가 있으며, 클라이언트는 테이블을 직접 수정하지 않고 이 함수들만 호출합니다.
 
 <br/>
 
