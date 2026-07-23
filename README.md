@@ -68,66 +68,145 @@
 
 ## 🗂️ ERD
 
+### 단관 · 직관
+
 ```mermaid
 erDiagram
-    jungmo ||--o{ jungmo_applications : "has"
-    transfers ||--o{ transfer_reservations : "has"
-
     applications {
         uuid id PK
         text game_date
         text name
+        int count
+        text request
+        text password
+        boolean is_paid
+        timestamptz created_at
+        timestamptz updated_at
     }
+
     jikgwan {
         uuid id PK
         text game_date
         text nickname
+        text section
+        boolean is_towel_fairy
+        text towel_meeting_area
+        text towel_inning
+        text password
+        timestamptz created_at
     }
+```
+
+### 정모
+
+```mermaid
+erDiagram
+    jungmo ||--o{ jungmo_applications : "has"
+
     jungmo {
         uuid id PK
         text event_date
         text title
+        text description
+        text password
+        timestamptz created_at
     }
+
     jungmo_applications {
         uuid id PK
         uuid jungmo_id FK
         text nickname
+        int count
+        text note
+        text password
+        boolean is_paid
+        timestamptz created_at
     }
+```
+
+### 양도게시판
+
+```mermaid
+erDiagram
+    transfers ||--o{ transfer_reservations : "has"
+
     transfers {
         uuid id PK
         text game_date
         text seat_section
+        text seat_row
+        text seat_number
+        int quantity
+        int price
+        text note
+        text nickname
+        text password
+        boolean is_sold
+        text sold_to
+        boolean is_deleted
+        timestamptz created_at
     }
+
     transfer_reservations {
         uuid id PK
         uuid transfer_id FK
         text nickname
+        text password
+        timestamptz created_at
     }
+```
+
+### 콘텐츠 관리 (공지 · 배너 · 경기결과 · 단관오픈일)
+
+```mermaid
+erDiagram
     notices {
         uuid id PK
         text content
+        boolean is_active
+        timestamptz created_at
     }
+
     banners {
         bigint id PK
+        text image_base64
         text title
+        text description
+        boolean is_active
+        int sort_order
+        timestamptz created_at
     }
+
     dangwan_open_dates {
         text game_date PK
+        boolean is_open
     }
+
     game_results {
         text game_date PK
         text result
     }
-    audit_logs {
-        uuid id PK
-        text category
-    }
-    app_secrets {
-        text key PK
-    }
 ```
 
-> 전체 컬럼 목록은 아래 "데이터베이스 구조" 표를 참고하세요. 여기서는 테이블 간 관계 파악에 필요한 최소 컬럼만 표시했습니다.
+### 시스템 (로그 · 관리자 비밀번호)
+
+```mermaid
+erDiagram
+    audit_logs {
+        uuid id PK
+        text action
+        text category
+        text game_date
+        text actor_name
+        text details
+        timestamptz created_at
+    }
+
+    app_secrets {
+        text key PK
+        text value
+    }
+```
 
 <br/>
 
