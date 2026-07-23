@@ -16,6 +16,17 @@
 
 <br/>
 
+## 💡 제작 배경
+
+원래는 단체관람 인원을 단톡방 투표로 모으고, 투표 기한이 끝나면 놓친 사람들 신청을 댓글로 또 받는 방식으로 운영되고 있었습니다.
+
+- 투표 + 댓글로 나뉘어 들어오다 보니 **신청자를 놓치는 경우**가 생기고
+- 누가 입금했는지 **일일이 대화 내역을 다시 찾아 확인**해야 해서 번거로웠습니다.
+
+이 과정을 한눈에 보이게 정리하고 싶어서, 신청·입금 여부·직관 인증·정모까지 한 곳에서 관리할 수 있는 웹앱을 만들게 됐습니다.
+
+<br/>
+
 ## 🛠️ Tech Stack
 
 <div align="center">
@@ -44,6 +55,135 @@
 | **분석** | Google Analytics 4 (프로덕션 빌드에서만 로드) |
 
 > 백엔드 서버 없이 React SPA가 Supabase와 직접 통신하는 구조이며, 권한이 필요한 모든 쓰기 작업은 아래 [보안](#-보안) 섹션에서 설명하는 서버 사이드 RPC를 통해서만 이루어집니다.
+
+<br/>
+
+## 🏗️ 아키텍처
+
+<div align="center">
+  <img src="docs/images/architecture.png" width="750" alt="시스템 아키텍처" />
+</div>
+
+<br/>
+
+## 🗂️ ERD
+
+```mermaid
+erDiagram
+    jungmo ||--o{ jungmo_applications : "has"
+    transfers ||--o{ transfer_reservations : "has"
+
+    applications {
+        uuid id PK
+        text game_date
+        text name
+        int count
+        text request
+        text password
+        boolean is_paid
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    jikgwan {
+        uuid id PK
+        text game_date
+        text nickname
+        text section
+        boolean is_towel_fairy
+        text towel_meeting_area
+        text towel_inning
+        text password
+        timestamptz created_at
+    }
+
+    jungmo {
+        uuid id PK
+        text event_date
+        text title
+        text description
+        text password
+        timestamptz created_at
+    }
+
+    jungmo_applications {
+        uuid id PK
+        uuid jungmo_id FK
+        text nickname
+        int count
+        text note
+        text password
+        boolean is_paid
+        timestamptz created_at
+    }
+
+    transfers {
+        uuid id PK
+        text game_date
+        text seat_section
+        text seat_row
+        text seat_number
+        int quantity
+        int price
+        text note
+        text nickname
+        text password
+        boolean is_sold
+        text sold_to
+        boolean is_deleted
+        timestamptz created_at
+    }
+
+    transfer_reservations {
+        uuid id PK
+        uuid transfer_id FK
+        text nickname
+        text password
+        timestamptz created_at
+    }
+
+    notices {
+        uuid id PK
+        text content
+        boolean is_active
+        timestamptz created_at
+    }
+
+    banners {
+        bigint id PK
+        text image_base64
+        text title
+        text description
+        boolean is_active
+        int sort_order
+        timestamptz created_at
+    }
+
+    dangwan_open_dates {
+        text game_date PK
+        boolean is_open
+    }
+
+    game_results {
+        text game_date PK
+        text result
+    }
+
+    audit_logs {
+        uuid id PK
+        text action
+        text category
+        text game_date
+        text actor_name
+        text details
+        timestamptz created_at
+    }
+
+    app_secrets {
+        text key PK
+        text value
+    }
+```
 
 <br/>
 
