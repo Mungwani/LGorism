@@ -1,37 +1,32 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import slideBirthday from "../assets/hero/slide-birthday-dojanim.webp";
-import slideScoreboard from "../assets/hero/slide-scoreboard-welcome.jpg";
-import slideFans from "../assets/hero/slide-fans-cheer.jpg";
-import slideTowels from "../assets/hero/slide-towels.jpg";
-import slideTickets from "../assets/hero/slide-tickets.jpg";
+import { getActiveBanners } from "../utils/storage";
 import "./HeroSlider.css";
-
-const SLIDES = [
-  { image: slideBirthday, title: "", sub: "" },
-  { image: slideScoreboard, title: "전광판에 뜬 엘고리즘", sub: "오늘도 잠실, 엘고리즘" },
-  { image: slideFans, title: "다같이 응원하는 그 순간", sub: "전광판에 잡힌 엘고리즘" },
-  { image: slideTowels, title: "무적 LG, 끝까지 트윈스", sub: "엘고리즘 노란 물결" },
-  { image: slideTickets, title: "엘고리즘 첫 단관", sub: "승리요정 엘고리즘" },
-];
 
 const AUTO_INTERVAL = 4000;
 
 export default function HeroSlider() {
+  const [slides, setSlides] = useState([]);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const touchStartX = useRef(null);
 
-  const goTo = useCallback((i) => {
-    setIndex((i + SLIDES.length) % SLIDES.length);
+  useEffect(() => {
+    getActiveBanners()
+      .then((banners) => setSlides(banners.map((b) => ({ image: b.imageBase64, title: b.title, sub: b.description }))))
+      .catch(() => {});
   }, []);
 
+  const goTo = useCallback((i) => {
+    setIndex((i + slides.length) % slides.length);
+  }, [slides.length]);
+
   useEffect(() => {
-    if (paused) return;
+    if (paused || slides.length === 0) return;
     const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % SLIDES.length);
+      setIndex((prev) => (prev + 1) % slides.length);
     }, AUTO_INTERVAL);
     return () => clearInterval(timer);
-  }, [paused]);
+  }, [paused, slides.length]);
 
   function handleTouchStart(e) {
     touchStartX.current = e.touches[0].clientX;
@@ -47,7 +42,8 @@ export default function HeroSlider() {
     setPaused(false);
   }
 
-  const slide = SLIDES[index];
+  if (slides.length === 0) return null;
+  const slide = slides[index] || slides[0];
 
   return (
     <div
@@ -66,7 +62,7 @@ export default function HeroSlider() {
       </div>
 
       <div className="hero-dots">
-        {SLIDES.map((_, i) => (
+        {slides.map((_, i) => (
           <button
             key={i}
             className={`hero-dot ${i === index ? "active" : ""}`}

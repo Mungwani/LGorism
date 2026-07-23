@@ -497,6 +497,69 @@ export async function deleteNotice(id) {
   if (error) throw error
 }
 
+// ── 배너 CRUD ─────────────────────────────────────────────────
+
+function toBanner(row) {
+  return {
+    id:          row.id,
+    imageBase64: row.image_base64,
+    title:       row.title || '',
+    description: row.description || '',
+    isActive:    row.is_active,
+    createdAt:   row.created_at,
+  }
+}
+
+export async function getActiveBanners() {
+  const { data, error } = await supabase
+    .from('banners')
+    .select('*')
+    .eq('is_active', true)
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return (data || []).map(toBanner)
+}
+
+export async function getAllBanners() {
+  const { data, error } = await supabase
+    .from('banners')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data || []).map(toBanner)
+}
+
+export async function createBanner({ imageBase64, title, description }) {
+  const { data, error } = await supabase
+    .from('banners')
+    .insert({ image_base64: imageBase64, title, description })
+    .select()
+    .single()
+  if (error) throw error
+  return toBanner(data)
+}
+
+export async function updateBanner(id, { title, description }) {
+  const { error } = await supabase
+    .from('banners')
+    .update({ title, description })
+    .eq('id', id)
+  if (error) throw error
+}
+
+export async function toggleBannerActive(id, isActive) {
+  const { error } = await supabase
+    .from('banners')
+    .update({ is_active: isActive })
+    .eq('id', id)
+  if (error) throw error
+}
+
+export async function deleteBanner(id) {
+  const { error } = await supabase.from('banners').delete().eq('id', id)
+  if (error) throw error
+}
+
 // ── 경기 결과 CRUD ─────────────────────────────────────────────
 
 export async function getGameResults() {

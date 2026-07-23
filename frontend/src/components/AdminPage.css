@@ -171,6 +171,10 @@
 
 .admin-tab-btn {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   padding: 13px 4px;
   font-size: 0.82rem;
   font-weight: 700;
@@ -741,10 +745,17 @@
 }
 
 .dangwan-manage-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 0.76rem;
   font-weight: 700;
   padding: 4px 10px;
   border-radius: 20px;
+}
+
+.dangwan-manage-badge svg {
+  font-size: 0.6rem;
 }
 
 .dangwan-manage-badge.open {
@@ -956,6 +967,70 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* ── 배너 관리 ───────────────────────────────────────────────── */
+.upload-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: 2px dashed var(--gray-300);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.upload-zone:hover {
+  border-color: var(--red);
+  background: #fff5f7;
+}
+
+.upload-icon {
+  font-size: 2rem;
+  color: var(--gray-400);
+  display: flex;
+}
+
+.upload-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.upload-sub {
+  font-size: 0.75rem;
+  color: var(--gray-400);
+}
+
+.preview-img-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.preview-img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+.cancel-preview-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background: rgba(0,0,0,0.6);
+  color: var(--white);
+  border: none;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
 .notice-edit-actions {

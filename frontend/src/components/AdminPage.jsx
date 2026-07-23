@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, getAllDangwanDates, openDangwanDate, closeDangwanDate, getAllNotices, createNotice, updateNotice, toggleNoticeActive, deleteNotice, getGameResults, setGameResult, deleteGameResult, getAllJungmoApplicationsWithInfo, updateJungmoPaymentStatus } from '../utils/storage'
+import { FaImage, FaTrash, FaShieldAlt, FaClipboardList, FaCreditCard, FaTicketAlt, FaBullhorn, FaTrophy, FaCircle, FaUndo } from 'react-icons/fa'
+import { getAuditLogs, getAllApplications, updatePaymentStatus, logAudit, getDangwanOpenDates, getAllDangwanDates, openDangwanDate, closeDangwanDate, getAllNotices, createNotice, updateNotice, toggleNoticeActive, deleteNotice, getGameResults, setGameResult, deleteGameResult, getAllJungmoApplicationsWithInfo, updateJungmoPaymentStatus, getAllBanners, createBanner, updateBanner, toggleBannerActive, deleteBanner } from '../utils/storage'
+import { fileToWebpBase64 } from '../utils/image'
 import { games } from '../data/games'
 
 const today = new Date().toISOString().slice(0, 10)
@@ -54,6 +56,20 @@ export default function AdminPage({ onClose, onDangwanChange }) {
   // 경기 결과
   const [gameResults, setGameResults] = useState({})
   const [resultsLoading, setResultsLoading] = useState(false)
+
+  // 배너 관리
+  const [banners, setBanners] = useState([])
+  const [bannerLoading, setBannerLoading] = useState(false)
+  const [bannerSaving, setBannerSaving] = useState(false)
+  const [bannerTitle, setBannerTitle] = useState('')
+  const [bannerDescription, setBannerDescription] = useState('')
+  const [bannerPreview, setBannerPreview] = useState(null)
+  const [bannerFileError, setBannerFileError] = useState('')
+  const [deleteBannerTarget, setDeleteBannerTarget] = useState(null)
+  const [editingBannerId, setEditingBannerId] = useState(null)
+  const [editBannerTitle, setEditBannerTitle] = useState('')
+  const [editBannerDescription, setEditBannerDescription] = useState('')
+  const bannerFileInputRef = useRef(null)
 
   // 단관 관리
   const [dangwanOpen, setDangwanOpen] = useState(new Set())
@@ -164,6 +180,78 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     setDeleteNoticeTarget(null)
   }
 
+  async function loadBanners() {
+    setBannerLoading(true)
+    try {
+      const data = await getAllBanners()
+      setBanners(data)
+    } finally {
+      setBannerLoading(false)
+    }
+  }
+
+  async function handleBannerFileChange(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    if (file.size > 8 * 1024 * 1024) {
+      setBannerFileError('파일 크기는 8MB 이하만 가능해요.')
+      return
+    }
+    setBannerFileError('')
+    try {
+      const webp = await fileToWebpBase64(file)
+      setBannerPreview(webp)
+    } catch {
+      setBannerFileError('이미지를 불러오지 못했어요.')
+    }
+  }
+
+  function cancelBannerPreview() {
+    setBannerPreview(null)
+    if (bannerFileInputRef.current) bannerFileInputRef.current.value = ''
+  }
+
+  async function handleCreateBanner(e) {
+    e.preventDefault()
+    if (!bannerPreview) { setBannerFileError('이미지를 선택해주세요.'); return }
+    setBannerSaving(true)
+    try {
+      await createBanner({ imageBase64: bannerPreview, title: bannerTitle.trim(), description: bannerDescription.trim() })
+      setBannerTitle('')
+      setBannerDescription('')
+      cancelBannerPreview()
+      await loadBanners()
+    } finally {
+      setBannerSaving(false)
+    }
+  }
+
+  async function handleToggleBanner(id, isActive) {
+    await toggleBannerActive(id, isActive)
+    setBanners(prev => prev.map(b => b.id === id ? { ...b, isActive } : b))
+  }
+
+  function startEditBanner(b) {
+    setEditingBannerId(b.id)
+    setEditBannerTitle(b.title)
+    setEditBannerDescription(b.description)
+  }
+
+  async function handleEditBannerSubmit(e, id) {
+    e.preventDefault()
+    const title = editBannerTitle.trim()
+    const description = editBannerDescription.trim()
+    await updateBanner(id, { title, description })
+    setBanners(prev => prev.map(b => b.id === id ? { ...b, title, description } : b))
+    setEditingBannerId(null)
+  }
+
+  async function confirmDeleteBanner() {
+    await deleteBanner(deleteBannerTarget)
+    setBanners(prev => prev.filter(b => b.id !== deleteBannerTarget))
+    setDeleteBannerTarget(null)
+  }
+
   useEffect(() => {
     if (!authed) return
     if (tab === 'log') loadLogs()
@@ -171,6 +259,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     if (tab === 'dangwan') loadDangwan()
     if (tab === 'notice') loadNotices()
     if (tab === 'result') { loadResults(); loadDangwan() }
+    if (tab === 'banner') loadBanners()
   }, [tab, authed])
 
   useEffect(() => {
@@ -381,7 +470,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
       <div className="admin-overlay">
         <div className="admin-login-card">
           <button className="admin-x-btn" onClick={onClose}>✕</button>
-          <div className="admin-login-icon">🛡</div>
+          <div className="admin-login-icon"><FaShieldAlt /></div>
           <h2 className="admin-login-title">관리자 페이지</h2>
           <p className="admin-login-sub">관리자 비밀번호를 입력해주세요</p>
           <form className="admin-login-form" onSubmit={handleLogin}>
@@ -405,25 +494,28 @@ export default function AdminPage({ onClose, onDangwanChange }) {
     <div className="admin-overlay">
       <div className="admin-page" ref={adminPageRef}>
         <div className="admin-header">
-          <h2 className="admin-title">🛡 관리자</h2>
+          <h2 className="admin-title"><FaShieldAlt /> 관리자</h2>
           <button className="admin-x-btn" onClick={onClose}>✕</button>
         </div>
 
         <div className="admin-tab-nav">
           <button className={`admin-tab-btn ${tab === 'log' ? 'active' : ''}`} onClick={() => setTab('log')}>
-            📋 로그
+            <FaClipboardList /> 로그
           </button>
           <button className={`admin-tab-btn ${tab === 'pay' ? 'active' : ''}`} onClick={() => setTab('pay')}>
-            💳 입금
+            <FaCreditCard /> 입금
           </button>
           <button className={`admin-tab-btn ${tab === 'dangwan' ? 'active' : ''}`} onClick={() => setTab('dangwan')}>
-            🎟 단관
+            <FaTicketAlt /> 단관
           </button>
           <button className={`admin-tab-btn ${tab === 'notice' ? 'active' : ''}`} onClick={() => setTab('notice')}>
-            📢 공지
+            <FaBullhorn /> 공지
           </button>
           <button className={`admin-tab-btn ${tab === 'result' ? 'active' : ''}`} onClick={() => setTab('result')}>
-            🏆 결과
+            <FaTrophy /> 결과
+          </button>
+          <button className={`admin-tab-btn ${tab === 'banner' ? 'active' : ''}`} onClick={() => setTab('banner')}>
+            <FaImage /> 배너
           </button>
         </div>
 
@@ -436,7 +528,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
                   className={`log-filter-chip ${logFilter === f ? 'active ' + f : ''}`}
                   onClick={() => setLogFilter(f)}
                 >
-                  {f === 'all' ? '전체' : f === 'pay' ? '💳 입금' : CATEGORY_LABELS[f]}
+                  {f === 'all' ? '전체' : f === 'pay' ? <><FaCreditCard /> 입금</> : CATEGORY_LABELS[f]}
                 </button>
               ))}
               <button className="log-refresh-btn" onClick={loadLogs} title="새로고침">↻</button>
@@ -580,7 +672,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
                     >
                       <span className="dangwan-manage-date">{game_date}</span>
                       <span className={`dangwan-manage-badge ${is_open ? 'open' : 'closed'}`}>
-                        {is_open ? '🟢 열림' : '🔴 마감'}
+                        {is_open ? <><FaCircle /> 열림</> : <><FaCircle /> 마감</>}
                       </span>
                     </div>
                   ))}
@@ -689,13 +781,128 @@ export default function AdminPage({ onClose, onDangwanChange }) {
             )}
           </div>
         )}
+
+        {tab === 'banner' && (
+          <div className="admin-body">
+            <form className="notice-create-form" onSubmit={handleCreateBanner}>
+              {bannerPreview ? (
+                <div className="preview-img-wrap">
+                  <img src={bannerPreview} alt="미리보기" className="preview-img" />
+                  <button type="button" className="cancel-preview-btn" onClick={cancelBannerPreview}>✕</button>
+                </div>
+              ) : (
+                <label className="upload-zone" htmlFor="banner-file-input">
+                  <span className="upload-icon"><FaImage /></span>
+                  <span className="upload-text">배너 이미지 선택</span>
+                  <span className="upload-sub">JPG, PNG · 최대 8MB (WebP로 자동 변환)</span>
+                  <input
+                    id="banner-file-input"
+                    ref={bannerFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleBannerFileChange}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+              )}
+              {bannerFileError && <p className="admin-pw-error">{bannerFileError}</p>}
+
+              <input
+                type="text"
+                className="notice-textarea"
+                placeholder="제목 (선택)"
+                value={bannerTitle}
+                onChange={e => setBannerTitle(e.target.value)}
+                maxLength={40}
+              />
+              <textarea
+                className="notice-textarea"
+                placeholder="설명 (선택)"
+                value={bannerDescription}
+                onChange={e => setBannerDescription(e.target.value)}
+                rows={2}
+                maxLength={80}
+              />
+              <button type="submit" className="notice-submit-btn" disabled={bannerSaving || !bannerPreview}>
+                {bannerSaving ? '등록 중...' : '배너 등록'}
+              </button>
+            </form>
+
+            {bannerLoading ? (
+              <div className="admin-state">불러오는 중...</div>
+            ) : banners.length === 0 ? (
+              <div className="admin-state">등록된 배너가 없어요</div>
+            ) : (
+              <div className="notice-list">
+                {banners.map(b => (
+                  <div key={b.id} className={`notice-admin-item ${b.isActive ? 'active' : 'inactive'}`}>
+                    {!b.isActive && <span className="notice-paused-badge">게시 중단</span>}
+                    <img src={b.imageBase64} alt={b.title || '배너'} className="preview-img" style={{ marginBottom: 8 }} />
+                    {editingBannerId === b.id ? (
+                      <form onSubmit={e => handleEditBannerSubmit(e, b.id)} className="notice-edit-form">
+                        <input
+                          type="text"
+                          className="notice-textarea"
+                          placeholder="제목 (선택)"
+                          value={editBannerTitle}
+                          onChange={e => setEditBannerTitle(e.target.value)}
+                          maxLength={40}
+                          autoFocus
+                        />
+                        <textarea
+                          className="notice-textarea"
+                          placeholder="설명 (선택)"
+                          value={editBannerDescription}
+                          onChange={e => setEditBannerDescription(e.target.value)}
+                          rows={2}
+                          maxLength={80}
+                        />
+                        <div className="notice-edit-actions">
+                          <button type="button" className="notice-action-btn cancel" onClick={() => setEditingBannerId(null)}>취소</button>
+                          <button type="submit" className="notice-action-btn save">저장</button>
+                        </div>
+                      </form>
+                    ) : (
+                      <>
+                        {(b.title || b.description) && (
+                          <p className="notice-admin-content">
+                            {b.title && <strong>{b.title}</strong>}
+                            {b.title && b.description && ' — '}
+                            {b.description}
+                          </p>
+                        )}
+                        <div className="notice-admin-footer">
+                          <span className="notice-admin-time">{formatLogTime(b.createdAt)}</span>
+                          <div className="notice-admin-actions">
+                            <button
+                              className="notice-action-btn edit"
+                              onClick={() => startEditBanner(b)}
+                            >수정</button>
+                            <button
+                              className={`notice-action-btn ${b.isActive ? 'pause' : 'resume'}`}
+                              onClick={() => handleToggleBanner(b.id, !b.isActive)}
+                            >{b.isActive ? '게시 멈춤' : '다시 게시'}</button>
+                            <button
+                              className="notice-action-btn delete"
+                              onClick={() => setDeleteBannerTarget(b.id)}
+                            >삭제</button>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 단관 열기/닫기 확인 모달 */}
       {dangwanConfirm && (
         <div className="admin-confirm-overlay" onClick={() => setDangwanConfirm(null)}>
           <div className="admin-confirm-modal" onClick={e => e.stopPropagation()}>
-            <div className="confirm-icon">{dangwanConfirm.willOpen ? '🟢' : '🔴'}</div>
+            <div className={`confirm-icon ${dangwanConfirm.willOpen ? 'status-paid' : 'status-unpaid'}`}><FaCircle /></div>
             <h4 className="confirm-title">단관 {dangwanConfirm.willOpen ? '열기' : '닫기'}</h4>
             <p className="confirm-desc">
               <strong>{dangwanConfirm.date}</strong><br />
@@ -720,7 +927,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
       {confirmTarget && (
         <div className="admin-confirm-overlay" onClick={() => setConfirmTarget(null)}>
           <div className="admin-confirm-modal" onClick={e => e.stopPropagation()}>
-            <div className="confirm-icon">{confirmTarget.item.isPaid ? '↩️' : '💳'}</div>
+            <div className="confirm-icon">{confirmTarget.item.isPaid ? <FaUndo /> : <FaCreditCard />}</div>
             <h4 className="confirm-title">입금 상태 변경</h4>
             <p className="confirm-desc">
               <strong>{confirmTarget.item.name}</strong>님을<br />
@@ -748,7 +955,7 @@ export default function AdminPage({ onClose, onDangwanChange }) {
       {jungmoConfirmTarget && (
         <div className="admin-confirm-overlay" onClick={() => setJungmoConfirmTarget(null)}>
           <div className="admin-confirm-modal" onClick={e => e.stopPropagation()}>
-            <div className="confirm-icon">{jungmoConfirmTarget.item.isPaid ? '↩️' : '💳'}</div>
+            <div className="confirm-icon">{jungmoConfirmTarget.item.isPaid ? <FaUndo /> : <FaCreditCard />}</div>
             <h4 className="confirm-title">입금 상태 변경</h4>
             <p className="confirm-desc">
               <strong>{jungmoConfirmTarget.item.nickname}</strong>님을<br />
@@ -773,12 +980,26 @@ export default function AdminPage({ onClose, onDangwanChange }) {
       {deleteNoticeTarget && (
         <div className="admin-confirm-overlay" onClick={() => setDeleteNoticeTarget(null)}>
           <div className="admin-confirm-modal" onClick={e => e.stopPropagation()}>
-            <div className="confirm-icon">🗑️</div>
+            <div className="confirm-icon"><FaTrash /></div>
             <h4 className="confirm-title">공지 삭제</h4>
             <p className="confirm-desc">이 공지를 삭제하시겠어요?<br />삭제하면 복구할 수 없어요.</p>
             <div className="confirm-actions">
               <button className="confirm-btn cancel" onClick={() => setDeleteNoticeTarget(null)}>취소</button>
               <button className="confirm-btn ok revert" onClick={confirmDeleteNotice}>삭제</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteBannerTarget && (
+        <div className="admin-confirm-overlay" onClick={() => setDeleteBannerTarget(null)}>
+          <div className="admin-confirm-modal" onClick={e => e.stopPropagation()}>
+            <div className="confirm-icon"><FaTrash /></div>
+            <h4 className="confirm-title">배너 삭제</h4>
+            <p className="confirm-desc">이 배너를 삭제하시겠어요?<br />삭제하면 복구할 수 없어요.</p>
+            <div className="confirm-actions">
+              <button className="confirm-btn cancel" onClick={() => setDeleteBannerTarget(null)}>취소</button>
+              <button className="confirm-btn ok revert" onClick={confirmDeleteBanner}>삭제</button>
             </div>
           </div>
         </div>
