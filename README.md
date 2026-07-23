@@ -68,144 +68,48 @@
 
 ## 🗂️ ERD
 
-### 단관 · 직관
+> Mermaid의 `erDiagram`은 레이아웃을 직접 지정할 수 없어서 테이블이 많으면 가로로 길게 퍼지는 문제가 있어, 아래는 `flowchart`로 그려서 영역별로 세로로 쌓이도록 배치한 다이어그램입니다 (다이어그램은 하나, 안에서 그룹만 나뉨).
 
 ```mermaid
-erDiagram
-    applications {
-        uuid id PK
-        text game_date
-        text name
-        int count
-        text request
-        text password
-        boolean is_paid
-        timestamptz created_at
-        timestamptz updated_at
-    }
+flowchart TD
+    subgraph g1["단관 · 직관"]
+        direction LR
+        applications["applications (단관 신청)<br/>─────────<br/>id PK<br/>game_date<br/>name<br/>count<br/>request<br/>password<br/>is_paid<br/>created_at<br/>updated_at"]
+        jikgwan["jikgwan (직관 인증)<br/>─────────<br/>id PK<br/>game_date<br/>nickname<br/>section<br/>is_towel_fairy<br/>towel_meeting_area<br/>towel_inning<br/>password<br/>created_at"]
+    end
 
-    jikgwan {
-        uuid id PK
-        text game_date
-        text nickname
-        text section
-        boolean is_towel_fairy
-        text towel_meeting_area
-        text towel_inning
-        text password
-        timestamptz created_at
-    }
-```
+    subgraph g2["정모"]
+        direction LR
+        jungmo["jungmo (정모)<br/>─────────<br/>id PK<br/>event_date<br/>title<br/>description<br/>password<br/>created_at"]
+        jungmo_applications["jungmo_applications (정모 참가신청)<br/>─────────<br/>id PK<br/>jungmo_id FK<br/>nickname<br/>count<br/>note<br/>password<br/>is_paid<br/>created_at"]
+        jungmo -->|1:N| jungmo_applications
+    end
 
-### 정모
+    subgraph g3["양도게시판"]
+        direction LR
+        transfers["transfers (양도글)<br/>─────────<br/>id PK<br/>game_date<br/>seat_section<br/>seat_row<br/>seat_number<br/>quantity<br/>price<br/>note<br/>nickname<br/>password<br/>is_sold<br/>sold_to<br/>is_deleted<br/>created_at"]
+        transfer_reservations["transfer_reservations (양도 예약)<br/>─────────<br/>id PK<br/>transfer_id FK<br/>nickname<br/>password<br/>created_at"]
+        transfers -->|1:N| transfer_reservations
+    end
 
-```mermaid
-erDiagram
-    jungmo ||--o{ jungmo_applications : "has"
+    subgraph g4["콘텐츠 관리"]
+        direction LR
+        notices["notices (공지)<br/>─────────<br/>id PK<br/>content<br/>is_active<br/>created_at"]
+        banners["banners (배너)<br/>─────────<br/>id PK<br/>image_base64<br/>title<br/>description<br/>is_active<br/>sort_order<br/>created_at"]
+        dangwan_open_dates["dangwan_open_dates (단관오픈일)<br/>─────────<br/>game_date PK<br/>is_open"]
+        game_results["game_results (경기결과)<br/>─────────<br/>game_date PK<br/>result"]
+    end
 
-    jungmo {
-        uuid id PK
-        text event_date
-        text title
-        text description
-        text password
-        timestamptz created_at
-    }
+    subgraph g5["시스템"]
+        direction LR
+        audit_logs["audit_logs (활동로그)<br/>─────────<br/>id PK<br/>action<br/>category<br/>game_date<br/>actor_name<br/>details<br/>created_at"]
+        app_secrets["app_secrets (관리자 비밀번호)<br/>─────────<br/>key PK<br/>value"]
+    end
 
-    jungmo_applications {
-        uuid id PK
-        uuid jungmo_id FK
-        text nickname
-        int count
-        text note
-        text password
-        boolean is_paid
-        timestamptz created_at
-    }
-```
-
-### 양도게시판
-
-```mermaid
-erDiagram
-    transfers ||--o{ transfer_reservations : "has"
-
-    transfers {
-        uuid id PK
-        text game_date
-        text seat_section
-        text seat_row
-        text seat_number
-        int quantity
-        int price
-        text note
-        text nickname
-        text password
-        boolean is_sold
-        text sold_to
-        boolean is_deleted
-        timestamptz created_at
-    }
-
-    transfer_reservations {
-        uuid id PK
-        uuid transfer_id FK
-        text nickname
-        text password
-        timestamptz created_at
-    }
-```
-
-### 콘텐츠 관리 (공지 · 배너 · 경기결과 · 단관오픈일)
-
-```mermaid
-erDiagram
-    notices {
-        uuid id PK
-        text content
-        boolean is_active
-        timestamptz created_at
-    }
-
-    banners {
-        bigint id PK
-        text image_base64
-        text title
-        text description
-        boolean is_active
-        int sort_order
-        timestamptz created_at
-    }
-
-    dangwan_open_dates {
-        text game_date PK
-        boolean is_open
-    }
-
-    game_results {
-        text game_date PK
-        text result
-    }
-```
-
-### 시스템 (로그 · 관리자 비밀번호)
-
-```mermaid
-erDiagram
-    audit_logs {
-        uuid id PK
-        text action
-        text category
-        text game_date
-        text actor_name
-        text details
-        timestamptz created_at
-    }
-
-    app_secrets {
-        text key PK
-        text value
-    }
+    jikgwan ~~~ jungmo
+    jungmo_applications ~~~ transfers
+    transfer_reservations ~~~ notices
+    game_results ~~~ audit_logs
 ```
 
 <br/>
