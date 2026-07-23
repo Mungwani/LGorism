@@ -1,4 +1,4 @@
-import { FaClipboardList, FaUsers, FaTicketAlt } from "react-icons/fa";
+import { FaClipboardList, FaUsers, FaTicketAlt, FaLandmark } from "react-icons/fa";
 import HeroSlider from "./HeroSlider";
 import NoticeBanner from "./NoticeBanner";
 import WinRate from "./WinRate";
@@ -55,7 +55,7 @@ export default function HomeView({ allDangwanDates, onNavigate, onGoToJikgwan })
           <>
             <GameCard game={todayGame} date={today} />
             <button className="home-jikgwan-cta" onClick={onGoToJikgwan}>
-              🏟 오늘 직관 가요!
+              <FaLandmark /> 오늘 직관 가요!
             </button>
           </>
         ) : (

@@ -1,3 +1,4 @@
+import { FaBed, FaHome, FaPlane, FaCalendarAlt, FaClock, FaMapMarkerAlt } from "react-icons/fa";
 import "./GameCard.css";
 
 /**
@@ -18,7 +19,7 @@ export default function GameCard({ game, date }) {
   if (!game) {
     return (
       <div className="game-card empty-card">
-        <span className="no-game-icon">😴</span>
+        <span className="no-game-icon"><FaBed /></span>
         <p className="empty-text">{formatKorDate(date)}</p>
         <p className="empty-sub">경기가 없는 날입니다</p>
       </div>
@@ -30,7 +31,7 @@ export default function GameCard({ game, date }) {
       {/* 홈/원정 배지 */}
       <div className="game-badges">
         <span className={`badge ${game.isHome ? "home" : "away"}`}>
-          {game.isHome ? "🏠 홈" : "✈️ 원정"}
+          {game.isHome ? <><FaHome className="badge-icon" /> 홈</> : <><FaPlane className="badge-icon" /> 원정</>}
         </span>
       </div>
 
@@ -44,15 +45,15 @@ export default function GameCard({ game, date }) {
 
         <div className="game-meta">
           <div className="meta-item">
-            <span className="meta-icon">📅</span>
+            <span className="meta-icon"><FaCalendarAlt /></span>
             <span>{formatKorDate(date)} ({getDayOfWeek(date)})</span>
           </div>
           <div className="meta-item">
-            <span className="meta-icon">🕐</span>
+            <span className="meta-icon"><FaClock /></span>
             <span>{game.time}</span>
           </div>
           <div className="meta-item">
-            <span className="meta-icon">📍</span>
+            <span className="meta-icon"><FaMapMarkerAlt /></span>
             <span>{game.stadium}</span>
           </div>
         </div>
