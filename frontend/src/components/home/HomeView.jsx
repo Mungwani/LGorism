@@ -19,7 +19,7 @@ function formatShortDate(dateStr) {
   return `${parseInt(m)}월 ${parseInt(d)}일`;
 }
 
-export default function HomeView({ allDangwanDates, onNavigate, onGoToJikgwan }) {
+export default function HomeView({ allDangwanDates, dangwanDatesLoading, onNavigate, onGoToJikgwan }) {
   const todayGame = getGameByDate(today);
   const nextGame = !todayGame
     ? games.find((g) => g.date > today && !g.isClosed)
@@ -31,7 +31,7 @@ export default function HomeView({ allDangwanDates, onNavigate, onGoToJikgwan })
 
       <NoticeBanner />
 
-      <WinRate dangwanDates={allDangwanDates} />
+      <WinRate dangwanDates={allDangwanDates} loading={dangwanDatesLoading} />
 
       <div className="home-actions">
         {ACTIONS.map((a) => {

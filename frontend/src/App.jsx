@@ -66,6 +66,7 @@ export default function App() {
   const [toast, setToast] = useState(null);
   const [dangwanOpenDates, setDangwanOpenDates] = useState(new Set());
   const [allDangwanDates, setAllDangwanDates] = useState(new Set());
+  const [dangwanDatesLoading, setDangwanDatesLoading] = useState(true);
 
   // 관리자 페이지
   const [showAdmin, setShowAdmin] = useState(false);
@@ -179,7 +180,8 @@ export default function App() {
     getDangwanOpenDates().then(setDangwanOpenDates).catch(() => {});
     getAllDangwanDates()
       .then(rows => setAllDangwanDates(new Set(rows.map(r => r.game_date))))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setDangwanDatesLoading(false));
   }, []);
 
   useEffect(() => {
@@ -400,7 +402,7 @@ export default function App() {
       <main className="app-main">
         {/* ── 홈 ───────────────────────────────────────────── */}
         {mainView === "home" && (
-          <HomeView allDangwanDates={allDangwanDates} onNavigate={handleNavChange} onGoToJikgwan={handleGoToTodayJikgwan} />
+          <HomeView allDangwanDates={allDangwanDates} dangwanDatesLoading={dangwanDatesLoading} onNavigate={handleNavChange} onGoToJikgwan={handleGoToTodayJikgwan} />
         )}
 
         {/* ── 캘린더 ───────────────────────────────────────── */}

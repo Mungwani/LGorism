@@ -6,6 +6,7 @@ const AUTO_INTERVAL = 4000;
 
 export default function HeroSlider() {
   const [slides, setSlides] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const touchStartX = useRef(null);
@@ -13,7 +14,8 @@ export default function HeroSlider() {
   useEffect(() => {
     getActiveBanners()
       .then((banners) => setSlides(banners.map((b) => ({ image: b.imageBase64, title: b.title, sub: b.description }))))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const goTo = useCallback((i) => {
@@ -42,6 +44,7 @@ export default function HeroSlider() {
     setPaused(false);
   }
 
+  if (loading) return <div className="hero-slider"><div className="hero-slide hero-slide-skeleton" /></div>;
   if (slides.length === 0) return null;
   const slide = slides[index] || slides[0];
 

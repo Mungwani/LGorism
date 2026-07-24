@@ -92,6 +92,20 @@
   text-align: right;
 }
 
+.winrate-skeleton {
+  height: 132px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  background: linear-gradient(100deg, var(--gray-200) 30%, var(--gray-100) 50%, var(--gray-200) 70%);
+  background-size: 200% 100%;
+  animation: winrate-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes winrate-skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 .winrate-empty {
   font-size: 0.78rem;
   color: var(--gray-400);

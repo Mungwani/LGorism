@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { getGameResults } from '../../utils/storage'
 import './WinRate.css'
 
-export default function WinRate({ dangwanDates }) {
+export default function WinRate({ dangwanDates, loading }) {
   const [results, setResults] = useState([])
 
   useEffect(() => {
@@ -19,6 +19,7 @@ export default function WinRate({ dangwanDates }) {
   const total  = datesWithResult.length
   const rate   = total > 0 ? Math.round((wins / total) * 100) : null
 
+  if (loading) return <div className="winrate-skeleton" />
   if (openDates.length === 0) return null
 
   return (

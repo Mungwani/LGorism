@@ -5,12 +5,15 @@ import './NoticeBanner.css'
 export default function NoticeBanner() {
   const [notices, setNotices] = useState([])
   const [dismissed, setDismissed] = useState(new Set())
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getActiveNotices().then(setNotices).catch(() => {})
+    getActiveNotices().then(setNotices).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
   const visible = notices.filter(n => !dismissed.has(n.id))
+
+  if (loading) return <div className="notice-banner-wrap"><div className="notice-banner-skeleton" /></div>
   if (visible.length === 0) return null
 
   function dismiss(id) {

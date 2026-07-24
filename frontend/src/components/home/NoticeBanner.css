@@ -55,6 +55,19 @@
   transition: background 0.15s, color 0.15s;
 }
 
+.notice-banner-skeleton {
+  height: 54px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(100deg, var(--gray-200) 30%, var(--gray-100) 50%, var(--gray-200) 70%);
+  background-size: 200% 100%;
+  animation: notice-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes notice-skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 .notice-dismiss:hover {
   background: rgba(255,255,255,0.3);
   color: var(--white);
