@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { formatDateKo } from "../utils/kakao";
+import { formatDateKo } from "../../utils/kakao";
 import "./AllJungmoList.css";
 
 export default function AllJungmoList({ jungmoList, participantCounts = {}, onSelectJungmo, onCreateJungmo }) {

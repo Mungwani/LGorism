@@ -231,24 +231,14 @@ LGorism/
 │   └── src/
 │       ├── main.jsx                   # 진입점
 │       ├── App.jsx                    # 루트 컴포넌트 + 전체 상태 관리
-│       ├── components/
-│       │   ├── HomeView.jsx           # 홈 화면
-│       │   ├── HeroSlider.jsx         # 히어로 배너 슬라이더 (DB 기반)
-│       │   ├── NoticeBanner.jsx       # 공지 배너
-│       │   ├── WinRate.jsx            # 단체관람 승률
-│       │   ├── Calendar.jsx           # 경기 일정 달력 (뱃지 포함)
-│       │   ├── GameCard.jsx           # 선택된 날짜의 경기 정보 카드
-│       │   ├── ApplicationForm.jsx    # 단관 신청 폼 (신규·수정 겸용)
-│       │   ├── ApplicationList.jsx    # 단관 신청 목록
-│       │   ├── DangwanDateList.jsx    # 단관 오픈 날짜 목록 (필터 뷰)
-│       │   ├── JikgwanPanel.jsx       # 직관 등록 + 목록
-│       │   ├── JungmoPanel.jsx        # 정모 생성 + 참가 신청
-│       │   ├── JungmoSettlement.jsx   # 정모 정산 계산기
-│       │   ├── AllJungmoList.jsx      # 전체 정모 목록 (필터 뷰)
-│       │   ├── TransferBoard.jsx      # 양도게시판 목록 + 등록 폼
-│       │   ├── TransferCard.jsx       # 양도글 카드 (예약·완료처리·삭제)
-│       │   ├── AdminPage.jsx          # 관리자 페이지
-│       │   └── BottomNav.jsx          # 하단 탭 네비게이션
+│       ├── components/                # 도메인별 폴더 구조
+│       │   ├── home/                  # HomeView · HeroSlider · NoticeBanner · WinRate
+│       │   ├── dangwan/                # ApplicationForm · ApplicationList · DangwanDateList
+│       │   ├── jikgwan/                # JikgwanPanel
+│       │   ├── jungmo/                 # JungmoPanel · JungmoSettlement · AllJungmoList
+│       │   ├── transfer/               # TransferBoard · TransferCard
+│       │   ├── admin/                  # AdminPage
+│       │   └── common/                 # Calendar · GameCard · BottomNav (여러 화면 공용)
 │       ├── data/
 │       │   └── games.js               # 2026 시즌 경기 일정 정적 데이터
 │       └── utils/

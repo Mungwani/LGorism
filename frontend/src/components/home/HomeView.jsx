@@ -2,8 +2,8 @@ import { FaClipboardList, FaUsers, FaTicketAlt, FaLandmark } from "react-icons/f
 import HeroSlider from "./HeroSlider";
 import NoticeBanner from "./NoticeBanner";
 import WinRate from "./WinRate";
-import GameCard from "./GameCard";
-import { games, getGameByDate } from "../data/games";
+import GameCard from "../common/GameCard";
+import { games, getGameByDate } from "../../data/games";
 import "./HomeView.css";
 
 const today = new Date().toISOString().slice(0, 10);

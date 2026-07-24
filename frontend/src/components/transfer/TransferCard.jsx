@@ -7,10 +7,10 @@ import {
   toggleTransferSold,
   deleteTransfer,
   logAudit,
-} from "../utils/storage";
-import { formatDateKo } from "../utils/kakao";
-import { getGameByDate } from "../data/games";
-import { GA } from "../utils/analytics";
+} from "../../utils/storage";
+import { formatDateKo } from "../../utils/kakao";
+import { getGameByDate } from "../../data/games";
+import { GA } from "../../utils/analytics";
 import "./TransferCard.css";
 
 const today = new Date().toISOString().slice(0, 10);

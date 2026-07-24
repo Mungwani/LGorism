@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { getJungmoApplications, addJungmoApplication, updateJungmoApplication, deleteJungmoApplication, logAudit } from "../utils/storage";
-import { shareContent, formatDateKo } from "../utils/kakao";
+import { getJungmoApplications, addJungmoApplication, updateJungmoApplication, deleteJungmoApplication, logAudit } from "../../utils/storage";
+import { shareContent, formatDateKo } from "../../utils/kakao";
 import JungmoSettlementModal from "./JungmoSettlement";
 import "./JungmoPanel.css";
 

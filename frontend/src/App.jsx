@@ -1,16 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
-import Calendar from "./components/Calendar";
-import GameCard from "./components/GameCard";
-import ApplicationForm from "./components/ApplicationForm";
-import ApplicationList from "./components/ApplicationList";
-import JikgwanPanel from "./components/JikgwanPanel";
-import JungmoPanel from "./components/JungmoPanel";
-import AllJungmoList from "./components/AllJungmoList";
-import DangwanDateList from "./components/DangwanDateList";
-import AdminPage from "./components/AdminPage";
-import HomeView from "./components/HomeView";
-import BottomNav from "./components/BottomNav";
-import TransferBoard from "./components/TransferBoard";
+import Calendar from "./components/common/Calendar";
+import GameCard from "./components/common/GameCard";
+import ApplicationForm from "./components/dangwan/ApplicationForm";
+import ApplicationList from "./components/dangwan/ApplicationList";
+import JikgwanPanel from "./components/jikgwan/JikgwanPanel";
+import JungmoPanel from "./components/jungmo/JungmoPanel";
+import AllJungmoList from "./components/jungmo/AllJungmoList";
+import DangwanDateList from "./components/dangwan/DangwanDateList";
+import AdminPage from "./components/admin/AdminPage";
+import HomeView from "./components/home/HomeView";
+import BottomNav from "./components/common/BottomNav";
+import TransferBoard from "./components/transfer/TransferBoard";
 import { getGameByDate, gameDateSet } from "./data/games";
 import {
   getApplications,

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getActiveNotices } from '../utils/storage'
+import { getActiveNotices } from '../../utils/storage'
 import './NoticeBanner.css'
 
 export default function NoticeBanner() {

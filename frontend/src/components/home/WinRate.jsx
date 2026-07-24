@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getGameResults } from '../utils/storage'
+import { getGameResults } from '../../utils/storage'
 import './WinRate.css'
 
 export default function WinRate({ dangwanDates }) {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { shareContent, formatDateKo } from "../utils/kakao";
+import { shareContent, formatDateKo } from "../../utils/kakao";
 import "./ApplicationList.css";
 
 export default function ApplicationList({

@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { FaBinoculars } from "react-icons/fa";
-import { getTransfers, createTransfer, logAudit } from "../utils/storage";
-import { games } from "../data/games";
-import { GA } from "../utils/analytics";
+import { getTransfers, createTransfer, logAudit } from "../../utils/storage";
+import { games } from "../../data/games";
+import { GA } from "../../utils/analytics";
 import TransferCard from "./TransferCard";
 import "./TransferBoard.css";
 

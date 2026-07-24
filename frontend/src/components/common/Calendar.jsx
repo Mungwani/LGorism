@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { gameDateSet, allGameDateSet } from "../data/games";
+import { gameDateSet, allGameDateSet } from "../../data/games";
 import "./Calendar.css";
 
 const DAYS = ["일", "월", "화", "수", "목", "금", "토"];

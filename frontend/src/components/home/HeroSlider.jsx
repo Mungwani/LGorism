@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getActiveBanners } from "../utils/storage";
+import { getActiveBanners } from "../../utils/storage";
 import "./HeroSlider.css";
 
 const AUTO_INTERVAL = 4000;
