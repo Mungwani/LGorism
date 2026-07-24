@@ -289,3 +289,5 @@ main  ← 바로 커밋 (1인 개발, 기능 단위로 작게 커밋)
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:1E1E1E,100:C8102E&height=120&section=footer" width="100%" />
 
 </div>
+
+<!-- Vercel 배포 연결 테스트: 2026-07-24 09:53 -->
