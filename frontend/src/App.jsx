@@ -508,7 +508,7 @@ export default function App() {
               <div className="guide-card">
                 <span className="guide-icon">☝️</span>
                 <p className="guide-text">날짜를 눌러보세요!</p>
-                <p className="guide-sub">경기 관람, 직관 인증, 정모까지 한 곳에서!</p>
+                <p className="guide-sub">경기 관람, 직관 참여, 정모까지 한 곳에서!</p>
               </div>
             )}
           </>
