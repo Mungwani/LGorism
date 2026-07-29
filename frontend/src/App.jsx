@@ -57,10 +57,12 @@ export default function App() {
   const [dangwanSummary, setDangwanSummary] = useState({});
   const [jikgwanSummary, setJikgwanSummary] = useState({});
   const [jungmoSummary, setJungmoSummary] = useState({});
+  const [dangwanSummaryLoading, setDangwanSummaryLoading] = useState(true);
 
   // 정모 전체 리스트 (정모 탭 목록)
   const [allJungmoList, setAllJungmoList] = useState([]);
   const [jungmoParticipantCounts, setJungmoParticipantCounts] = useState({});
+  const [allJungmoListLoading, setAllJungmoListLoading] = useState(true);
 
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
@@ -162,6 +164,7 @@ export default function App() {
   }, [selectedDate]);
 
   const refreshSummary = useCallback(async () => {
+    setDangwanSummaryLoading(true);
     try {
       const [dangwan, jikgwan, jungmo] = await Promise.all([
         getApplicationSummary(),
@@ -171,7 +174,10 @@ export default function App() {
       setDangwanSummary(dangwan);
       setJikgwanSummary(jikgwan);
       setJungmoSummary(jungmo);
-    } catch (_) {}
+    } catch (_) {
+    } finally {
+      setDangwanSummaryLoading(false);
+    }
   }, []);
 
   useEffect(() => { refreshSummary(); }, [refreshSummary]);
@@ -186,12 +192,14 @@ export default function App() {
 
   useEffect(() => {
     if (mainView !== "jungmo") return;
+    setAllJungmoListLoading(true);
     Promise.all([getAllJungmo(), getJungmoParticipantCounts()])
       .then(([list, counts]) => {
         setAllJungmoList(list);
         setJungmoParticipantCounts(counts);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setAllJungmoListLoading(false));
   }, [mainView]);
 
   function handleDangwanDateSelect(dateStr) {
@@ -524,6 +532,7 @@ export default function App() {
                 dangwanSummary={dangwanSummary}
                 dangwanOpenDates={dangwanOpenDates}
                 onSelectDate={handleDangwanDateSelect}
+                loading={dangwanSummaryLoading}
               />
             ) : (
               <>
@@ -567,6 +576,7 @@ export default function App() {
                 participantCounts={jungmoParticipantCounts}
                 onSelectJungmo={handleJungmoSelect}
                 onCreateJungmo={handleCreateJungmo}
+                loading={allJungmoListLoading}
               />
             ) : (
               <>

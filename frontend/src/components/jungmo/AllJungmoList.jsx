@@ -2,7 +2,7 @@ import { useState } from "react";
 import { formatDateKo } from "../../utils/kakao";
 import "./AllJungmoList.css";
 
-export default function AllJungmoList({ jungmoList, participantCounts = {}, onSelectJungmo, onCreateJungmo }) {
+export default function AllJungmoList({ jungmoList, participantCounts = {}, onSelectJungmo, onCreateJungmo, loading }) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [eventDate, setEventDate] = useState("");
   const [title, setTitle] = useState("");
@@ -103,7 +103,12 @@ export default function AllJungmoList({ jungmoList, participantCounts = {}, onSe
         </form>
       )}
 
-      {jungmoList.length === 0 ? (
+      {loading ? (
+        <div className="loading-card">
+          <span className="loading-spinner" />
+          <p>불러오는 중...</p>
+        </div>
+      ) : jungmoList.length === 0 ? (
         <div className="ajl-empty">
           <span>🎮</span>
           <p>예정된 정모가 없어요</p>

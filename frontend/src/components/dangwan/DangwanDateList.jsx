@@ -1,9 +1,18 @@
 import "./DangwanDateList.css";
 
-export default function DangwanDateList({ dangwanSummary, dangwanOpenDates, onSelectDate }) {
+export default function DangwanDateList({ dangwanSummary, dangwanOpenDates, onSelectDate, loading }) {
   const dates = Object.entries(dangwanSummary)
     .filter(([date, info]) => info.totalPeople > 0 && dangwanOpenDates.has(date))
     .sort(([a], [b]) => a.localeCompare(b));
+
+  if (loading) {
+    return (
+      <div className="loading-card">
+        <span className="loading-spinner" />
+        <p>불러오는 중...</p>
+      </div>
+    );
+  }
 
   if (dates.length === 0) {
     return (
