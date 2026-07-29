@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { FaBinoculars } from "react-icons/fa";
 import { getTransfers, createTransfer, logAudit } from "../../utils/storage";
+import { isTransferExpired } from "../../utils/transfer";
 import { games } from "../../data/games";
 import { GA } from "../../utils/analytics";
 import TransferCard from "./TransferCard";
@@ -48,10 +49,10 @@ export default function TransferBoard({ onToast }) {
 
   const visibleTransfers = useMemo(() => {
     let list = transfers.filter((t) => {
-      const isExpired = !t.isSold && t.gameDate < today;
+      const expired = isTransferExpired(t);
       return statusFilter === "sold"
-        ? (t.isSold || isExpired)
-        : (!t.isSold && t.gameDate >= today);
+        ? (t.isSold || expired)
+        : (!t.isSold && !expired);
     });
     if (statusFilter === "open" && selectedGameDates.size > 0) {
       list = list.filter((t) => selectedGameDates.has(t.gameDate));

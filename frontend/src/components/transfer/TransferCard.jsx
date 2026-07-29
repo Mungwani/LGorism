@@ -8,12 +8,11 @@ import {
   deleteTransfer,
   logAudit,
 } from "../../utils/storage";
+import { isTransferExpired } from "../../utils/transfer";
 import { formatDateKo } from "../../utils/kakao";
 import { getGameByDate } from "../../data/games";
 import { GA } from "../../utils/analytics";
 import "./TransferCard.css";
-
-const today = new Date().toISOString().slice(0, 10);
 
 export default function TransferCard({ transfer, onChanged, onToast }) {
   const [expanded, setExpanded] = useState(false);
@@ -40,7 +39,7 @@ export default function TransferCard({ transfer, onChanged, onToast }) {
   const game = getGameByDate(transfer.gameDate);
   const unitPrice = Number(transfer.price) || 0;
   const totalPrice = unitPrice * (Number(transfer.quantity) || 1);
-  const isExpired = !transfer.isSold && transfer.gameDate < today;
+  const isExpired = isTransferExpired(transfer);
 
   async function loadReservations() {
     setLoadingReservations(true);
