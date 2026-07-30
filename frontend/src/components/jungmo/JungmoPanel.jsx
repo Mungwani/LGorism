@@ -4,7 +4,7 @@ import { shareContent, formatDateKo } from "../../utils/kakao";
 import JungmoSettlementModal from "./JungmoSettlement";
 import "./JungmoPanel.css";
 
-function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
+function JungmoItem({ jungmo, onDelete, onUpdate, onToggleClosed, defaultExpanded }) {
   const [expanded, setExpanded] = useState(!!defaultExpanded);
   const [applications, setApplications] = useState([]);
   const [loadingApps, setLoadingApps] = useState(false);
@@ -38,6 +38,12 @@ function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [jungmoDeletePw, setJungmoDeletePw] = useState("");
   const [jungmoDeleteError, setJungmoDeleteError] = useState("");
+
+  // 마감/마감취소 모달
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const [closePw, setClosePw] = useState("");
+  const [closePwError, setClosePwError] = useState("");
+  const [closing, setClosing] = useState(false);
 
   // 정모 내용(제목/설명) 수정 모달
   const [showSettlement, setShowSettlement] = useState(false);
@@ -136,6 +142,23 @@ function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
     setShowDeleteModal(false);
   }
 
+  async function handleCloseConfirm() {
+    if (!closePw.trim()) { setClosePwError("비밀번호를 입력해주세요."); return; }
+    setClosing(true);
+    try {
+      const ok = await onToggleClosed(jungmo.id, closePw, !jungmo.isClosed);
+      if (!ok) {
+        setClosePwError("비밀번호가 틀렸어요");
+        return;
+      }
+      setShowCloseModal(false);
+      setClosePw("");
+      setClosePwError("");
+    } finally {
+      setClosing(false);
+    }
+  }
+
   function openEditJungmoModal() {
     setShowEditJungmoModal(true);
     setEditJungmoStep("pw");
@@ -179,6 +202,9 @@ function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
         </div>
         <div className="jungmo-item-right">
           <div className="jungmo-item-right-top">
+            {jungmo.isClosed && (
+              <span className="jungmo-closed-badge">마감</span>
+            )}
             {totalApplicants > 0 && (
               <span className="jungmo-app-badge">{totalApplicants}명</span>
             )}
@@ -247,7 +273,9 @@ function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
                 <p className="no-apps-text">아직 신청자가 없어요</p>
               )}
 
-              {!showApplyForm ? (
+              {jungmo.isClosed ? (
+                <p className="jungmo-closed-text">🔒 마감된 정모예요</p>
+              ) : !showApplyForm ? (
                 <button
                   className="jungmo-apply-btn"
                   onClick={() => setShowApplyForm(true)}
@@ -339,6 +367,12 @@ function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
                   onClick={openEditJungmoModal}
                 >
                   정모 수정
+                </button>
+                <button
+                  className="jungmo-edit-jungmo-btn"
+                  onClick={() => { setShowCloseModal(true); setClosePw(""); setClosePwError(""); }}
+                >
+                  {jungmo.isClosed ? "마감 취소" : "마감하기"}
                 </button>
                 <button
                   className="jungmo-delete-btn"
@@ -477,6 +511,40 @@ function JungmoItem({ jungmo, onDelete, onUpdate, defaultExpanded }) {
         </div>
       )}
 
+      {showCloseModal && (
+        <div className="jungmo-modal-overlay" onClick={() => setShowCloseModal(false)}>
+          <div className="jungmo-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-icon">{jungmo.isClosed ? "🔓" : "🔒"}</div>
+            <h4 className="modal-title">{jungmo.isClosed ? "마감 취소" : "정모 마감"}</h4>
+            <p className="modal-desc">
+              <strong>{jungmo.title}</strong>
+              <br />
+              {jungmo.isClosed
+                ? "다시 신청을 받을 수 있게 열어둘까요?"
+                : "지금부터 신규 참여 신청을 받지 않아요. 이미 신청한 인원은 그대로 유지돼요."}
+              <br />
+              관리 비밀번호를 입력해주세요
+            </p>
+            <input
+              className="pw-input"
+              type="password"
+              placeholder="비밀번호 입력"
+              value={closePw}
+              onChange={(e) => { setClosePw(e.target.value); setClosePwError(""); }}
+              onKeyDown={(e) => e.key === "Enter" && handleCloseConfirm()}
+              autoFocus
+            />
+            {closePwError && <p className="pw-error">{closePwError}</p>}
+            <div className="modal-actions">
+              <button className="modal-btn cancel" onClick={() => setShowCloseModal(false)}>취소</button>
+              <button className="modal-btn confirm blue" onClick={handleCloseConfirm} disabled={closing}>
+                {closing ? "처리 중..." : jungmo.isClosed ? "마감 취소하기" : "마감하기"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showDeleteModal && (
         <div
           className="jungmo-modal-overlay"
@@ -533,6 +601,7 @@ export default function JungmoPanel({
   onCreateJungmo,
   onDeleteJungmo,
   onUpdateJungmo,
+  onToggleClosed,
   focusId,
   hideCreate,
 }) {
@@ -595,6 +664,7 @@ export default function JungmoPanel({
               jungmo={jungmo}
               onDelete={onDeleteJungmo}
               onUpdate={onUpdateJungmo}
+              onToggleClosed={onToggleClosed}
               defaultExpanded={!!focusId}
             />
           ))}

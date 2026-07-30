@@ -16,7 +16,7 @@ import { supabase } from './supabase'
 // password 컬럼은 select 권한에서 빠져있어서, 반드시 아래 컬럼 목록으로만 select 해야 함 ('*' 사용 불가)
 const APPLICATION_COLS = 'id, game_date, name, count, request, created_at, updated_at, is_paid'
 const JIKGWAN_COLS = 'id, game_date, nickname, section, is_towel_fairy, created_at, towel_meeting_area, towel_inning'
-const JUNGMO_COLS = 'id, event_date, title, description, created_at'
+const JUNGMO_COLS = 'id, event_date, title, description, created_at, is_closed'
 const JUNGMO_APPLICATION_COLS = 'id, jungmo_id, nickname, note, created_at, count, is_paid'
 const TRANSFER_COLS = 'id, game_date, seat_section, seat_row, seat_number, quantity, price, note, nickname, is_sold, created_at, sold_to, is_deleted'
 const TRANSFER_RESERVATION_COLS = 'id, transfer_id, nickname, created_at'
@@ -221,6 +221,7 @@ function toJungmo(row) {
     description: row.description || '',
     eventDate:   row.event_date,
     createdAt:   row.created_at,
+    isClosed:    row.is_closed || false,
   }
 }
 
@@ -254,6 +255,15 @@ export async function updateJungmo(id, password, { title, description }) {
 
 export async function deleteJungmo(id, password) {
   const { data, error } = await supabase.rpc('rpc_delete_jungmo', { p_id: id, p_password: password })
+  if (error) throw error
+  return data === true
+}
+
+/** 정모 마감/마감취소 — 개설자 비밀번호 또는 관리자 비밀번호 둘 다 허용 (서버 RPC에서 검증) */
+export async function updateJungmoClosedStatus(id, password, isClosed) {
+  const { data, error } = await supabase.rpc('rpc_set_jungmo_closed', {
+    p_id: id, p_password: password, p_is_closed: isClosed,
+  })
   if (error) throw error
   return data === true
 }
@@ -424,6 +434,18 @@ export async function getAllJungmo() {
     .select(JUNGMO_COLS)
     .gte('event_date', today)
     .order('event_date', { ascending: true })
+  if (error) throw error
+  return (data || []).map(toJungmo)
+}
+
+/** 이미 지난 정모 (최신순) */
+export async function getPastJungmo() {
+  const today = new Date().toISOString().slice(0, 10)
+  const { data, error } = await supabase
+    .from('jungmo')
+    .select(JUNGMO_COLS)
+    .lt('event_date', today)
+    .order('event_date', { ascending: false })
   if (error) throw error
   return (data || []).map(toJungmo)
 }

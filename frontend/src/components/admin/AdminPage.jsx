@@ -21,6 +21,8 @@ const ACTION_LABELS = {
   update: '수정',
   delete: '삭제',
   pay:    '입금',
+  close:  '마감',
+  reopen: '마감취소',
 }
 
 export default function AdminPage({ onClose, onDangwanChange }) {

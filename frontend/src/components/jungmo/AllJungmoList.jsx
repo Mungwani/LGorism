@@ -1,8 +1,35 @@
 import { useState } from "react";
+import { FaChevronDown, FaUserFriends } from "react-icons/fa";
 import { formatDateKo } from "../../utils/kakao";
 import "./AllJungmoList.css";
 
-export default function AllJungmoList({ jungmoList, participantCounts = {}, onSelectJungmo, onCreateJungmo, loading }) {
+const PAST_PAGE_SIZE = 3;
+
+function JungmoCard({ jungmo, count, onSelectJungmo }) {
+  return (
+    <button className="ajl-card" onClick={() => onSelectJungmo(jungmo)}>
+      <div className="ajl-card-top">
+        <span className="ajl-card-date">{formatDateKo(jungmo.eventDate)}</span>
+        <div className="ajl-card-badges">
+          {jungmo.isClosed && <span className="ajl-closed-badge">마감</span>}
+          {count > 0 && (
+            <span className="ajl-count-badge">
+              <span className="ajl-count-icon"><FaUserFriends /></span>
+              {count}명 참여
+            </span>
+          )}
+        </div>
+      </div>
+      <h4 className="ajl-card-title">{jungmo.title}</h4>
+      {jungmo.description && (
+        <p className="ajl-card-desc">{jungmo.description}</p>
+      )}
+      <span className="ajl-card-cta">자세히 보기 →</span>
+    </button>
+  );
+}
+
+export default function AllJungmoList({ jungmoList, pastJungmoList = [], participantCounts = {}, onSelectJungmo, onCreateJungmo, loading }) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [eventDate, setEventDate] = useState("");
   const [title, setTitle] = useState("");
@@ -10,6 +37,11 @@ export default function AllJungmoList({ jungmoList, participantCounts = {}, onSe
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [showPast, setShowPast] = useState(false);
+  const [pastPage, setPastPage] = useState(1);
+
+  const pastTotalPages = Math.max(1, Math.ceil(pastJungmoList.length / PAST_PAGE_SIZE));
+  const pagedPastJungmo = pastJungmoList.slice((pastPage - 1) * PAST_PAGE_SIZE, pastPage * PAST_PAGE_SIZE);
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -114,26 +146,58 @@ export default function AllJungmoList({ jungmoList, participantCounts = {}, onSe
           <p>예정된 정모가 없어요</p>
         </div>
       ) : (
-        jungmoList.map((jungmo) => {
-          const count = participantCounts[jungmo.id] || 0;
-          return (
-            <button
-              key={jungmo.id}
-              className="ajl-card"
-              onClick={() => onSelectJungmo(jungmo)}
-            >
-              <div className="ajl-card-top">
-                <span className="ajl-card-date">{formatDateKo(jungmo.eventDate)}</span>
-                {count > 0 && <span className="ajl-card-count">👥 {count}명 참여</span>}
+        jungmoList.map((jungmo) => (
+          <JungmoCard
+            key={jungmo.id}
+            jungmo={jungmo}
+            count={participantCounts[jungmo.id] || 0}
+            onSelectJungmo={onSelectJungmo}
+          />
+        ))
+      )}
+
+      {!loading && pastJungmoList.length > 0 && (
+        <div className="ajl-past-section">
+          <button
+            className="ajl-past-toggle"
+            onClick={() => { setShowPast((v) => !v); setPastPage(1); }}
+          >
+            <span className="ajl-past-toggle-line" />
+            <span className="ajl-past-toggle-label">지난 정모</span>
+            <FaChevronDown className={`ajl-past-chevron ${showPast ? "open" : ""}`} />
+          </button>
+
+          {showPast && (
+            <>
+              <div className="ajl-past-list">
+                {pagedPastJungmo.map((jungmo) => (
+                  <JungmoCard
+                    key={jungmo.id}
+                    jungmo={jungmo}
+                    count={participantCounts[jungmo.id] || 0}
+                    onSelectJungmo={onSelectJungmo}
+                  />
+                ))}
               </div>
-              <h4 className="ajl-card-title">{jungmo.title}</h4>
-              {jungmo.description && (
-                <p className="ajl-card-desc">{jungmo.description}</p>
+
+              {pastTotalPages > 1 && (
+                <div className="ajl-pagination">
+                  <button
+                    className="ajl-page-btn"
+                    disabled={pastPage === 1}
+                    onClick={() => setPastPage((p) => p - 1)}
+                  >◀ 이전</button>
+                  <span className="ajl-page-indicator">{pastPage} / {pastTotalPages}</span>
+                  <button
+                    className="ajl-page-btn"
+                    disabled={pastPage === pastTotalPages}
+                    onClick={() => setPastPage((p) => p + 1)}
+                  >다음 ▶</button>
+                </div>
               )}
-              <span className="ajl-card-cta">자세히 보기 →</span>
-            </button>
-          );
-        })
+            </>
+          )}
+        </div>
       )}
     </div>
   );

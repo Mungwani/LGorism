@@ -30,7 +30,9 @@ import {
   deleteJungmo,
   getJungmoSummary,
   getAllJungmo,
+  getPastJungmo,
   getJungmoParticipantCounts,
+  updateJungmoClosedStatus,
   logAudit,
   getDangwanOpenDates,
   getAllDangwanDates,
@@ -61,6 +63,7 @@ export default function App() {
 
   // 정모 전체 리스트 (정모 탭 목록)
   const [allJungmoList, setAllJungmoList] = useState([]);
+  const [pastJungmoList, setPastJungmoList] = useState([]);
   const [jungmoParticipantCounts, setJungmoParticipantCounts] = useState({});
   const [allJungmoListLoading, setAllJungmoListLoading] = useState(true);
 
@@ -193,9 +196,10 @@ export default function App() {
   useEffect(() => {
     if (mainView !== "jungmo") return;
     setAllJungmoListLoading(true);
-    Promise.all([getAllJungmo(), getJungmoParticipantCounts()])
-      .then(([list, counts]) => {
+    Promise.all([getAllJungmo(), getPastJungmo(), getJungmoParticipantCounts()])
+      .then(([list, pastList, counts]) => {
         setAllJungmoList(list);
+        setPastJungmoList(pastList);
         setJungmoParticipantCounts(counts);
       })
       .catch(() => {})
@@ -346,8 +350,9 @@ export default function App() {
         const updated = await getJungmoList(selectedDate);
         setJungmoList(updated);
       }
-      const list = await getAllJungmo();
+      const [list, pastList] = await Promise.all([getAllJungmo(), getPastJungmo()]);
       setAllJungmoList(list);
+      setPastJungmoList(pastList);
       showToast("✅ 정모 내용을 수정했어요!");
       return true;
     } catch {
@@ -356,9 +361,30 @@ export default function App() {
     }
   }
 
+  async function handleToggleJungmoClosed(id, password, isClosed) {
+    try {
+      const target = jungmoList.find(j => j.id === id) || allJungmoList.find(j => j.id === id) || pastJungmoList.find(j => j.id === id);
+      const ok = await updateJungmoClosedStatus(id, password, isClosed);
+      if (!ok) return false;
+      logAudit(isClosed ? 'close' : 'reopen', 'jungmo', selectedDate, target?.title || '알 수 없음', null);
+      if (selectedDate) {
+        const updated = await getJungmoList(selectedDate);
+        setJungmoList(updated);
+      }
+      const [list, pastList] = await Promise.all([getAllJungmo(), getPastJungmo()]);
+      setAllJungmoList(list);
+      setPastJungmoList(pastList);
+      showToast(isClosed ? "🔒 정모를 마감했어요." : "🔓 마감을 취소했어요.");
+      return true;
+    } catch {
+      showToast("❌ 처리에 실패했어요.");
+      return false;
+    }
+  }
+
   async function handleDeleteJungmo(id, password) {
     try {
-      const target = jungmoList.find(j => j.id === id) || allJungmoList.find(j => j.id === id);
+      const target = jungmoList.find(j => j.id === id) || allJungmoList.find(j => j.id === id) || pastJungmoList.find(j => j.id === id);
       const ok = await deleteJungmo(id, password);
       if (!ok) return false;
       logAudit('delete', 'jungmo', selectedDate, target?.title || '알 수 없음', null);
@@ -367,8 +393,9 @@ export default function App() {
         const updated = await getJungmoList(selectedDate);
         setJungmoList(updated);
       }
-      const [list, counts] = await Promise.all([getAllJungmo(), getJungmoParticipantCounts()]);
+      const [list, pastList, counts] = await Promise.all([getAllJungmo(), getPastJungmo(), getJungmoParticipantCounts()]);
       setAllJungmoList(list);
+      setPastJungmoList(pastList);
       setJungmoParticipantCounts(counts);
       await refreshSummary();
       if (jungmoFocusId === id) {
@@ -506,6 +533,7 @@ export default function App() {
                           onCreateJungmo={handleCreateJungmo}
                           onDeleteJungmo={handleDeleteJungmo}
                           onUpdateJungmo={handleUpdateJungmo}
+                          onToggleClosed={handleToggleJungmoClosed}
                         />
                       )}
                     </>
@@ -573,6 +601,7 @@ export default function App() {
             {!selectedDate ? (
               <AllJungmoList
                 jungmoList={allJungmoList}
+                pastJungmoList={pastJungmoList}
                 participantCounts={jungmoParticipantCounts}
                 onSelectJungmo={handleJungmoSelect}
                 onCreateJungmo={handleCreateJungmo}
@@ -592,6 +621,7 @@ export default function App() {
                     onCreateJungmo={handleCreateJungmo}
                     onDeleteJungmo={handleDeleteJungmo}
                     onUpdateJungmo={handleUpdateJungmo}
+                    onToggleClosed={handleToggleJungmoClosed}
                   />
                 </div>
               </>
